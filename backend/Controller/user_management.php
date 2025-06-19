@@ -57,10 +57,11 @@
             }
 
             if (empty($user['machine_token'])) {
-                $update = $this->conn->prepare("UPDATE {$this->user_table} SET machine_token = :token WHERE id = :id");
+                $update = $this->conn->prepare("UPDATE {$this->user_table} SET machine_token = :token, user_status = :status WHERE id = :id");
                 $update->execute([
                     ':token' => $machine_token,
-                    ':id' => $user['id']
+                    ':id' => $user['id'],
+                    ':status' => 'Active'
                 ]);
             }
 
@@ -85,22 +86,37 @@
             ];
         }
 
-        public function logout() {
-            // Start the session to ensure it's active
-            if (session_status() == PHP_SESSION_NONE) {
+        public function logout($userid, $userstatus) {
+
+            try{
+                $stmt = $this->conn->prepare("Update {$this->user_table} set machine_token = null , user_status = :user_status wher id = :id");
+                $stmt->execute([
+                    ':user_status' =>  $userstatus,
+                    ':id' => $userid
+                ]);
+
+                // Start the session to ensure it's active
+                if (session_status() == PHP_SESSION_NONE) {
+                    session_start();
+                }
+
+                // Destroy session
                 session_start();
+                session_unset();
+                session_destroy();
+
+                return [
+                    'success' => true,
+                    'message' => 'Logout successfully.'
+                ];
+
+            }catch(Exception $e){
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage() 
+                ];
             }
-
-            // Clear all session variables
-            $_SESSION = [];
-
-            // Destroy the session
-            session_destroy();
-
-            return [
-                'success' => true,
-                'message' => 'Logout successfully.'
-            ];
+            
         }
 
 

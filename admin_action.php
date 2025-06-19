@@ -175,9 +175,11 @@
         ]);
     }
 
+    
     if (!empty($_POST['action']) && $_POST['action'] == 'Logout' ) {
-        
-        $result = $usermanagement->logout();
+        $userid = $_SESSION['user']['id'] ?? null;
+        $userstatus = $_SESSION['user']['user_status'] ?? null;
+        $result = $usermanagement->logout($userid, $userstatus);
 
         echo json_encode([
             'status' => true,
