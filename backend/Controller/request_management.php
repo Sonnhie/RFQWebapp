@@ -64,30 +64,48 @@
 
         // Function to create a new request
         public function CreateNewRequest($data){
-           // $control_number = $this->createRFQNumber();
+           if (empty($data)) {
+                return [
+                    'success' => false,
+                    'message' => 'Empty or null data.'
+                ];
+           }
            try{
+                $this->conn->beginTransaction();
 
-           }catch(Exception $e)
-            
-            $query = "INSERT INTO " . $this->request_table . " 
-                    (control_number, item_name, item_description, item_purpose, item_quantity, item_uom, item_status, item_remarks, item_requestor, item_section) 
-                    VALUES (:control_number, :item_name, :item_description, :item_purpose, :item_quantity, :item_uom, :item_status, :item_remarks, :item_requestor, :item_section)";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':control_number', $data['control_number']);
-            $stmt->bindParam(':item_name', $data['item_name']);
-            $stmt->bindParam(':item_description', $data['item_description']);
-            $stmt->bindParam(':item_purpose', $data['item_purpose']);
-            $stmt->bindParam(':item_quantity', $data['item_quantity']);
-            $stmt->bindParam(':item_uom', $data['item_unit']);
-            $stmt->bindParam(':item_status', $data['requestor_status']);
-            $stmt->bindParam(':item_remarks', $data['item_remarks']);
-            $stmt->bindParam(':item_requestor', $data['requestor_name']);
-            $stmt->bindParam(':item_section', $data['requestor_section']);
-            if ($stmt->execute()) {
-                return true;
-            } else {
-                return false;
-            }
+                $query = "INSERT INTO " . $this->request_table . " 
+                        (control_number, item_name, item_description, item_purpose, item_quantity, item_uom, item_status, item_remarks, item_requestor, item_section) 
+                        VALUES (:control_number, :item_name, :item_description, :item_purpose, :item_quantity, :item_uom, :item_status, :item_remarks, :item_requestor, :item_section)";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':control_number', $data['control_number']);
+                $stmt->bindParam(':item_name', $data['item_name']);
+                $stmt->bindParam(':item_description', $data['item_description']);
+                $stmt->bindParam(':item_purpose', $data['item_purpose']);
+                $stmt->bindParam(':item_quantity', $data['item_quantity']);
+                $stmt->bindParam(':item_uom', $data['item_unit']);
+                $stmt->bindParam(':item_status', $data['requestor_status']);
+                $stmt->bindParam(':item_remarks', $data['item_remarks']);
+                $stmt->bindParam(':item_requestor', $data['requestor_name']);
+                $stmt->bindParam(':item_section', $data['requestor_section']);
+                
+                if (!$stmt->execute()) {
+                    throw new Exception('Creation failed');
+                }
+
+                $this->conn->commit();
+                return [
+                    'success' => true,
+                    'message' => 'Request created successfully.'
+                ];
+
+           }catch(Exception $e){
+                $this->conn->rollback();
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+           }
+
         }
 
         public function CreateComparison($data){

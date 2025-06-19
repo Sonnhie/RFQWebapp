@@ -6,13 +6,11 @@
     include_once './backend/Controller/user_management.php';
     include_once './backend/Controller/dashboard_management.php';
     include_once './backend/Controller/request_management.php';
-    // include_once './backend/Controller/emailnotification_management.php';
     include_once './backend/Model/usermodel.php';
 
     $user_management = new UserManagement($db);
     $request_management = new RequestManagement($db);
     $dashboard_management = new DashboardManagement($db);
-    // $email_management = new EmailManagement($db);
 
     // Login Action
     if (!empty($_POST['action']) && $_POST['action'] === 'login') {
@@ -20,8 +18,9 @@
 
         $username = isset($_POST['username']) ? $_POST['username'] : null;
         $password = isset($_POST['password']) ? $_POST['password'] : null;
+        $machine_token = isset($_POST['machine_token']) ? $_POST['machine_token'] : null;
 
-        $result = $user_management->authenticate($username, $password);
+        $result = $user_management->authenticate($username, $password, $machine_token);
 
         echo json_encode([
             'status'  => $result['success'] ? 'success' : 'error',
@@ -37,81 +36,83 @@
         $success_count = 0;
         $error_count = 0;
 
-        //Variables
-        $item_name = isset($_POST['item_name']) ? $_POST['item_name'] : null;
-        $item_description = isset($_POST['item_description']) ? $_POST['item_description'] : null;
-        $item_quantity = isset($_POST['item_quantity']) ? $_POST['item_quantity'] : null;
-        $item_unit = isset($_POST['item_unit']) ? $_POST['item_unit'] : null;
-        $item_purpose = isset($_POST['item_purpose']) ? $_POST['item_purpose'] : null;
-        $requestor_section = isset($_POST['requestor_section']) ? $_POST['requestor_section'] : null;
-        $requestor_name = isset($_POST['requestor_name']) ? $_POST['requestor_name'] : null;
+        // Variables
+        $item_name = $_POST['item_name'] ?? null;
+        $item_description = $_POST['item_description'] ?? null;
+        $item_quantity = $_POST['item_quantity'] ?? null;
+        $item_unit = $_POST['item_unit'] ?? null;
+        $item_purpose = $_POST['item_purpose'] ?? null;
+        $requestor_section = $_POST['requestor_section'] ?? null;
+        $requestor_name = $_POST['requestor_name'] ?? null;
+        $item_remarks = $_POST['remarks'] ?? null;
         $requestor_status = 'Pending';
-        $item_attachment = isset($_FILES['item-attachment']) ? $_FILES['item-attachment'] : null;
-        $item_remarks = isset($_POST['remarks']) ? $_POST['remarks'] : null;
+        $item_attachment = $_FILES['item-attachment'] ?? null;
+
+        // Validate
+        if (empty($item_name)) {
+            echo json_encode(['status' => 'error', 'message' => 'Item name is required']);
+            exit;
+        }
+
+        if (empty($_FILES['item-attachment']['tmp_name']) || count($_FILES['item-attachment']['tmp_name']) === 0) {
+            echo json_encode(['status' => 'error', 'message' => 'File upload is required']);
+            exit;
+        }
+
+        $fileContents = [];
+        foreach ($_FILES['item-attachment']['tmp_name'] as $key => $tmpName) {
+            if ($_FILES['item-attachment']['error'][$key] === UPLOAD_ERR_OK) {
+                $fileContents[$key] = file_get_contents($tmpName);
+            } else {
+                $fileContents[$key] = null;
+            }
+        }
+
         $control_number = $request_management->createRFQNumber();
 
-        if (!isset($_POST['item_name']) || empty($_POST['item_name'])) {
-                echo json_encode(['status' => 'error', 'message' => 'Item name is required']);
-                exit;
-            }else{
+        // Create initial logs
+        $request_management->CreateRequestLogs([
+            'control_number' => $control_number,
+            'requestor_status' => $requestor_status,
+            'item_remarks' => 'Created Request'
+        ]);
 
-                $fileContents = []; // This will store content of each file by index
+        // Loop through items
+        foreach ($item_name as $key => $name) {
+            $data = [
+                'control_number' => $control_number,
+                'item_name' => $name ?? null,
+                'item_description' => $item_description[$key] ?? null,
+                'item_quantity' => $item_quantity[$key] ?? null,
+                'item_unit' => $item_unit[$key] ?? null,
+                'item_purpose' => $item_purpose[$key] ?? null,
+                'requestor_section' => $requestor_section ?? null,
+                'requestor_status' => $requestor_status,
+                'item_remarks' => $item_remarks,
+                'requestor_name' => $requestor_name,
+                'item_attachment' => $fileContents[$key] ?? null
+            ];
 
-                if (!empty($_FILES['item-attachment']['tmp_name']) && count($_FILES['item-attachment']['tmp_name']) > 0) {
-                    foreach ($_FILES['item-attachment']['tmp_name'] as $key => $tmpName) {
-                        if ($_FILES['item-attachment']['error'][$key] === UPLOAD_ERR_OK) {
-                            $fileContents[$key] = file_get_contents($tmpName);
-                        } else {
-                            $fileContents[$key] = null; // Handle missing file gracefully
-                        }
-                    }
-                } else {
-                    echo json_encode(['status' => 'error', 'message' => 'File upload is required']);
-                    exit;
-                }
- 
-                $dataLogs = [
-                    'control_number' => $control_number,
-                    'requestor_status' => $requestor_status,
-                    'item_remarks' => 'Created Request'
-                ];
+            $request_management->UploadAttachment($data);
+            $response = $request_management->CreateNewRequest($data);
 
-                $request_management->CreateRequestLogs($dataLogs);
-                // $items = [];
+            if (isset($response['success']) && $response['success']) {
+                $success_count++;
+            } else {
+                $error_count++;
+            }
 
-                foreach ($item_name as $key => $item_names) {
-                    $data = [
-                        'control_number' => $control_number,
-                        'item_name' => $item_names ?? null,
-                        'item_description' => $item_description[$key] ?? null,
-                        'item_quantity' => $item_quantity[$key] ?? null,
-                        'item_unit' => $item_unit[$key] ?? null,
-                        'item_purpose' => $item_purpose[$key] ?? null,
-                        'requestor_section' => $requestor_section ?? null,
-                        'requestor_status' => $requestor_status ?? null,
-                        'item_remarks' => $item_remarks ?? null,
-                        'requestor_name' => $requestor_name ?? null,
-                        'item_attachment' => $fileContents[$key] ?? null
-                    ];
-                    
-                    $fileupload = $request_management->UploadAttachment($data);
-                    $response = $request_management->CreateNewRequest($data);
-                
-                    if ($response) {
-                        $success_count++;
-                    } else {
-                        $error_count++;
-                    }
-                }
-                
-        }
-       if ($success_count > 0) {
-            echo json_encode(['status' => 'success', 'message' => 'Request created successfully']);
-        } 
-        if ($error_count > 0) {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to create request']);
+            $responses[] = $response['message'] ?? 'Unknown result';
         }
 
+        // Send back summary response
+        if ($success_count > 0 && $error_count === 0) {
+            echo json_encode(['status' => 'success', 'message' => "All $success_count items submitted successfully."]);
+        } elseif ($success_count > 0 && $error_count > 0) {
+            echo json_encode(['status' => 'partial', 'message' => "$success_count succeeded, $error_count failed.", 'details' => $responses]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => "Failed to submit all items.", 'details' => $responses]);
+        }
     }
 
     //Fetch Items
@@ -132,7 +133,6 @@
     
         // Optional: Fetch total count for pagination
         $totalResult = $request_management->countAllRequests($section, $from, $to, $status, $query);
-    //    $totalCount = count($result);
     
         $data = [];
     

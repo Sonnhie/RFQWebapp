@@ -6,6 +6,7 @@ $(document).ready(function () {
         const username = $('#username').val();
         const password = $('#password').val();
         const action = 'login'; // Action to be performed
+        const machine_token = localStorage.getItem('machine_token');
         
         // Perform AJAX request to login
         $.ajax({
@@ -14,7 +15,8 @@ $(document).ready(function () {
             data: {
                 action: action,
                 username: username,
-                password: password
+                password: password,
+                machine_token: machine_token
             },
             dataType: 'json',
             success: function(response){
@@ -62,7 +64,8 @@ $(document).ready(function () {
         const confirmedpass = $('#confirm_pass').val();
         const action = 'change_pass';
         const id = $(this).data('id');
-        console.log(newpass, confirmedpass, id);
+
+        // console.log(newpass, confirmedpass, id);
 
         if (newpass !== confirmedpass) {
             Swal.fire({

@@ -18,10 +18,10 @@
             $this->conn = $db;
         }
 
-        public function authenticate(string $username, string $password): array
+        public function authenticate(string $username, string $password, $machine_token)
         {
             $sql = "
-                SELECT u.id, u.username, u.password, u.name, u.department, r.access_level
+                SELECT u.id, u.username, u.password, u.name, u.department, u.machine_token, u.user_status, r.access_level
                 FROM   {$this->user_table} AS u
                 JOIN   {$this->role_table} AS r ON u.role = r.role   -- adjust PK/FK if needed
                 WHERE  u.username = :username
@@ -48,7 +48,23 @@
                 ];
             }
 
-            /* ---------- 3.  login success ---------- */
+            /* ---------- 4.   ---------- */
+            if ($user['machine_token'] && $user['machine_token'] !== $machine_token) {
+                return ([
+                    'success' => false,
+                    'message' => 'This account is already logged in from another machine.'
+                ]);                    
+            }
+
+            if (empty($user['machine_token'])) {
+                $update = $this->conn->prepare("UPDATE {$this->user_table} SET machine_token = :token WHERE id = :id");
+                $update->execute([
+                    ':token' => $machine_token,
+                    ':id' => $user['id']
+                ]);
+            }
+
+            /* ---------- 5.  login success ---------- */
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
@@ -59,7 +75,8 @@
                 'password'     => $user['password'],
                 'access_level' => $user['access_level'],
                 'department'   => $user['department'],
-                'name'         => $user['name']
+                'name'         => $user['name'],
+                'user_status'  => $user['user_status']
             ];
 
             return [
