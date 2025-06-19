@@ -6,109 +6,123 @@
     error_reporting(E_ALL);
     
 ?>
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">RFQ Management</h2>
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Welcome, 
+            <?php
+                if ($_SESSION['user']['access_level'] == 'Admin') {
+                    echo 'Administrator';
+                } else {
+                    echo 'Client';
+                }
+            ?>
+        </h5>
+        <div class="d-flex align-items-center">
+            <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
+            <span class="ms-2 fw-semibold">
+                <?php
+                    echo htmlspecialchars($_SESSION['user']['name']);
+                ?>
+            </span>
         </div>
+    </div>
+</div>
 
-        <div class="card shadow-sm mb-4 border-0">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">RFQ Management</h2>
+</div>
 
-            <div class="card-body p-3 bg-light">
-                <div class="row g-3 align-items-end">
-                    <!-- Status Filter -->
-                    <div class="col-md-3 col-6">
-                        <label for="statusFilter" class="form-label small fw-bold text-muted mb-1">STATUS</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="bi bi-filter-circle text-primary"></i>
-                            </span>
-                            <select class="form-select border-start-0" id="statusFilter">
-                                <option value="" selected>All Statuses</option>
-                                <option value="Pending" class="text-warning">Pending</option>
-                                <option value="Approved" class="text-success">Approved</option>
-                                <option value="Rejected" class="text-danger">Rejected</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Date Range Filter - Enhanced -->
-                    <div class="col-md-3 col-6">
-                        <label for="fromDateFilter" class="form-label small fw-bold text-muted mb-1">From</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="bi bi-calendar3 text-primary"></i>
-                            </span>
-                            <input type="date" class="form-control" id="fromDateFilter" name="from_date">
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 col-6">
-                        <label for="toDateFilter" class="form-label small fw-bold text-muted mb-1">To</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="bi bi-calendar3 text-primary"></i>
-                            </span>
-                            <input type="date" class="form-control" id="toDateFilter" name="to_date">
-                        </div>
-                    </div>
-
-                    <!-- Search Input -->
-                    <div class="col-md-6 col-9">
-                        <label for="searchInput" class="form-label small fw-bold text-muted mb-1">SEARCH</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="searchInput" placeholder="RFQ #, Title...">
-                            <button class="btn btn-primary" type="button" id="searchButton">
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Action Buttons Row -->
-                <div class="row mt-3">
-                    <div class="col-12 d-flex justify-content-end">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-danger btn-sm me-3">
-                                <i class="bi bi-x-circle me-1"></i> Clear Filters
-                            </button>
-                        </div>
-                    </div>
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body p-3 bg-light">
+        <div class="row g-3 align-items-end">
+            <!-- Status Filter -->
+            <div class="col-md-3 col-6">
+                <label for="statusFilter" class="form-label small fw-bold text-muted mb-1">STATUS</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-filter-circle text-primary"></i>
+                    </span>
+                    <select class="form-select border-start-0" id="statusFilter">
+                        <option value="" selected>All Statuses</option>
+                        <option value="Pending" class="text-warning">Pending</option>
+                        <option value="Approved" class="text-success">Approved</option>
+                        <option value="Rejected" class="text-danger">Rejected</option>
+                    </select>
                 </div>
             </div>
-
-        </div>
-
-        <!-- RFQ Table -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table rfq-table table-hover">
-                        <thead>
-                            <tr>
-                                <th>RFQ #</th>
-                                <th>Status</th>
-                                <th>Remarks</th>
-                                <th>Date Requested</th>
-                                <th>Section</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requestTableBody" data-section="<?php echo $_SESSION['user']['department']; ?>">
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="10" class="text-center">
-                                    <nav aria-label="Page navigation">
-                                        <ul class="pagination" id="pagination">
-
-                                        </ul>
-                                    </nav>
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
+            <!-- Date Range Filter - Enhanced -->
+            <div class="col-md-3 col-6">
+                <label for="fromDateFilter" class="form-label small fw-bold text-muted mb-1">From</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-calendar3 text-primary"></i>
+                    </span>
+                    <input type="date" class="form-control" id="fromDateFilter" name="from_date">
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <label for="toDateFilter" class="form-label small fw-bold text-muted mb-1">To</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-calendar3 text-primary"></i>
+                    </span>
+                    <input type="date" class="form-control" id="toDateFilter" name="to_date">
+                </div>
+            </div>
+            <!-- Search Input -->
+            <div class="col-md-6 col-9">
+                <label for="searchInput" class="form-label small fw-bold text-muted mb-1">SEARCH</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="RFQ #, Title...">
+                    <button class="btn btn-primary" type="button" id="searchButton">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>       
+        <!-- Action Buttons Row -->
+        <div class="row mt-3">
+            <div class="col-12 d-flex justify-content-end">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-danger btn-sm me-3">
+                        <i class="bi bi-x-circle me-1"></i> Clear Filters
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- RFQ Table -->
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table rfq-table table-hover">
+                <thead>
+                    <tr>
+                        <th>RFQ #</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                        <th>Date Requested</th>
+                        <th>Section</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requestTableBody" data-section="<?php echo $_SESSION['user']['department']; ?>"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="10" class="text-center">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination" id="pagination"></ul>
+                            </nav>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
 
         <!-- Attachments Modal -->
         <div class="modal fade rfq-modal" id="attachmentRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="attachmentRfqModall" aria-hidden="true">
@@ -190,12 +204,12 @@
                     <table class="table rfq-table table-bordered table-hover" id="comparisonTable">
                     <thead>
                         <tr>
-                        <th>Item</th>
-                        <th>Supplier</th>
-                        <th>Price</th>
-                        <th>Discount</th>
-                        <th>Total Price</th>
-                        <th>Remarks</th>
+                            <th>Item</th>
+                            <th>Supplier</th>
+                            <th>Price</th>
+                            <th>Discount</th>
+                            <th>Total Price</th>
+                            <th>Remarks</th>
                         </tr>
                     </thead>
                     <tbody id="comparisonModalTableBody">

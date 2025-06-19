@@ -43,13 +43,13 @@
           loadPage(page);
         }, 1000);
         
-        console.log('this is working');
+        // console.log('this is working');
     });
 
     //Logout button click event
     $('#logoutBtn').on('click', function(e) {
         e.preventDefault(); // Prevent default form submission
-        
+        const action = 'logout';
         Swal.fire({
             title: 'Are you sure you want to logout?',
             icon: 'question',
@@ -58,15 +58,27 @@
             cancelButtonText: 'Cancel'
           }).then((result) => {
             if (result.isConfirmed) {
-              
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Logout Successful',
-                  showConfirmButton: false,
-                  timer: 1500
-                }).then(() => {
-                  window.location.href = 'login.php'; // Redirect after alert
-                });
+              $.ajax({
+                url: './admin_action.php',
+                type: 'POST',
+                data: {action: action},
+                dataType: 'json',
+                success: function(response){
+                  if (response.status == 'success') {
+                      Swal.fire({
+                        icon: 'success',
+                        title: 'Logout Successful',
+                        showConfirmButton: false,
+                        timer: 1500
+                      }).then(() => {
+                        window.location.href = response.route; // Redirect after alert
+                      });                    
+                  }
+                },
+                error: function(xhr, status, error){
+                    console.log('Error: ' ,status, error, xhr);
+                }
+              })
             }
           });
     });
@@ -77,5 +89,4 @@
       loadPage(page);
     };
     
-
   });

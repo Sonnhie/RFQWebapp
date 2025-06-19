@@ -14,19 +14,19 @@
     $dashboard_management = new DashboardManagement($db);
     // $email_management = new EmailManagement($db);
 
-    //Login Action
-    if (!empty($_POST['action']) && $_POST['action'] == 'login') {
+    // Login Action
+    if (!empty($_POST['action']) && $_POST['action'] === 'login') {
         header('Content-Type: application/json');
 
         $username = isset($_POST['username']) ? $_POST['username'] : null;
         $password = isset($_POST['password']) ? $_POST['password'] : null;
 
         $result = $user_management->authenticate($username, $password);
-        if ($result) {
-            echo json_encode(['status' => 'success', 'message' => 'Login successful']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid username or password']);
-        }   
+
+        echo json_encode([
+            'status'  => $result['success'] ? 'success' : 'error',
+            'message' => $result['message']
+        ]);
     }
 
     //Create New Request
@@ -73,7 +73,7 @@
                 $dataLogs = [
                     'control_number' => $control_number,
                     'requestor_status' => $requestor_status,
-                    'item_remarks' => $item_remarks
+                    'item_remarks' => 'Created Request'
                 ];
 
                 $request_management->CreateRequestLogs($dataLogs);
@@ -132,7 +132,7 @@
     
         // Optional: Fetch total count for pagination
         $totalResult = $request_management->countAllRequests($section, $from, $to, $status, $query);
-       // $totalCount = count($totalResult);
+    //    $totalCount = count($result);
     
         $data = [];
     
@@ -184,7 +184,7 @@
     
         // Optional: Fetch total count for pagination
         $totalResult = $request_management->countAllRequestsByControlNumber($section, $from, $to, $status, $query);
-       // $totalCount = count($totalResult);
+        // $totalCount = count($result);
     
         $data = [];
     
@@ -792,5 +792,243 @@
         } else {
             echo json_encode(['status' => 'error', 'message' => 'User not found']);
         }
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'getsuggestion') {
+        header('Content-Type: application/json');
+        $query = isset($_POST['query']) ? $_POST['query'] : null;
+
+        $result = $request_management->FetchControlNumber($query);
+
+        echo json_encode([
+            'status' => $result['success'] ? 'success' : 'error',
+            'message' => $result['message'],
+            'data' => $result['data']
+        ]);
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'LoadItems') {
+        header('Content-Type: application/json');
+        $control_number = isset($_POST['control_number']) ? $_POST['control_number'] : null;
+
+        $result = $request_management->fetchRequestById($control_number);
+
+        if ($result) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data fetch successfully.',
+                'data' => $result
+            ]);
+        }else{
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Failed to retreive data.',
+            ]);
+        }
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'save_delivery') {
+
+        $control_number = isset($_POST['control_number']) ? $_POST['control_number'] : null;
+        $item_name = isset($_POST['item_name']) ? $_POST['item_name'] : null;
+        $item_description = isset($_POST['item_description']) ? $_POST['item_description'] : null;
+        $item_quantity = isset($_POST['item_quantity']) ? $_POST['item_quantity'] : null;
+        $supplier = isset($_POST['supplier_name']) ? $_POST['supplier_name'] : null;
+        $total_amount = isset($_POST['amount']) ? $_POST['amount'] : null;
+        $delivery_date = isset($_POST['delivery_date']) ? $_POST['delivery_date'] : null;
+        $status = 'Pending';
+        $remarks = '';
+
+        $data = [];
+        $success_count = 0;
+        $error_count = 0;
+
+        foreach($item_name as $key => $item_names){
+            $data = [
+                'control_number' => $control_number,
+                'item_name' => $item_names,
+                'item_description' => $item_description[$key] ?? null,
+                'item_quantity' => $item_quantity[$key] ?? null,
+                'supplier_name' => $supplier[$key] ?? null,
+                'item_amount' => $total_amount[$key] ?? null,
+                'delivery_date' => $delivery_date[$key] ?? null,
+                'item_status' => $status ?? null,
+                'item_remarks' => $remarks[$key] ?? null
+            ];
+
+            $result = $request_management->InsertDeliveryDetails($data);
+
+            if ($result['success']) {
+                $success_count++;
+            }else{
+                $error_count++;
+            }
+        }
+
+        $dataLogs = [
+                    'control_number' => $control_number,
+                    'requestor_status' => 'Completed',
+                    'item_remarks' => 'For Delivery.'
+                ];
+
+        $request_management->CreateRequestLogs($dataLogs);
+
+        if ($success_count > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => $result['message']
+            ]);
+        }else{
+            echo json_encode([
+                'status' => 'error',
+                'message' => $result['message']
+            ]);
+        }
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'LoadTable') {
+        header('Content-Type: application/json');
+        $search_query = isset($_POST['search_query']) ? $_POST['search_query'] : null;
+        $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
+        $perpage = 10;
+
+        $result = $request_management->FetchDeliveryData($search_query, $page, $perpage);
+        $resultcount = $request_management->CountDeliveryData($search_query);
+        // $resultcount = count($result);
+        $data = [];
+
+        if (!empty($result)) {
+            foreach($result as $row){
+                $data [] = [
+                    'id' => $row['id'],
+                    'control_number' => $row['control_number'],
+                    'item_name' => $row['item_name'],
+                    'item_quantity' => $row['item_quantity'],
+                    'supplier_name' => $row['supplier_name'],
+                    'item_amount' => $row['item_amount'],
+                    'item_status' => $row['item_status'],
+                    'item_remarks' => $row['item_remarks'],
+                    'delivery_date' => $row['delivery_date'],
+                    'received_date' => $row['received_date']
+                ];
+            }
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Data successfully fetch.',
+                'data' => $data,
+                'total' => $resultcount,
+                'currentPage' => $page,
+                'perPage' => $perpage
+            ]);
+
+        }else{
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Failed to retrieve data.'
+            ]);
+        }
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'received') {
+        header('Content-Type: application/json');
+
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $control_number = isset($_POST['control_number']) ? $_POST['control_number'] : null;
+        $date = date('Y-m-d H:i:s');
+        $status = 'Completed';
+
+        $result = $request_management->DeliveryReceivedUpdate($id, $date, $status);
+
+        // $dataLogs = [
+        //             'control_number' => $control_number,
+        //             'requestor_status' => 'Completed',
+        //             'item_remarks' => 'Delivered.'
+        //         ];
+
+        // $request_management->CreateRequestLogs($dataLogs);
+
+            echo json_encode([
+                'status' => $result['success'] ? 'success' : 'error',
+                'message' => $result['message']
+            ]);
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'delete') {
+        header('Content-Type: application/json');
+
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        // $date = date('Y-m-d H:i:s');
+        // $status = 'Completed';
+
+        $result = $request_management->DeleteDeliveryItem($id);
+
+
+        echo json_encode([
+                'status' => $result['success'] ? 'success' : 'error',
+                'message' => $result['message']
+            ]);
+
+    }
+
+    if (!empty($_POST['action'] && $_POST['action'] == 'editdelivery')) {
+        header('Content-Type: application/json');
+
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $supplier_name = isset($_POST['supplier_name']) ? $_POST['supplier_name'] : null;
+        $item_amount = isset($_POST['item_amount']) ? $_POST['item_amount'] : null;
+        $delivery_date = isset($_POST['delivery_date']) ? $_POST['delivery_date'] : null;
+
+
+        $data = [];
+
+        $data = [
+            'id' => $id,
+            'supplier_name' => $supplier_name,
+            'item_amount' => $item_amount,
+            'delivery_date' => $delivery_date
+        ];
+
+        $result = $request_management->UpdateDeliveryDetails($data);
+
+        echo json_encode([
+                'status' => $result['success'] ? 'success' : 'error',
+                'message' => $result['message'] . $data['delivery_date']
+        ]);
+
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'addremarks') {
+        header('Content-Type: application/json');
+
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $remarks = isset($_POST['remarks']) ? $_POST['remarks'] : null;
+
+        $data = [];
+
+        $data = [
+            'id' => $id,
+            'item_remarks' => $remarks
+        ];
+
+        $result = $request_management->AddRemarks($data);
+
+        echo json_encode([
+            'status' => $result['success'] ? 'success' : 'error',
+            'message' => $result['message']
+        ]);
+    }
+
+    if(!empty($_POST['action']) && $_POST['action'] == 'gettimeline'){
+        header('Content-Type: application/json');
+
+        $id = isset($_POST['control_number']) ? $_POST['control_number'] : null;
+
+        $response = $request_management->GetTimeline($id);
+
+        echo json_encode([
+            'status' => $response['success'] ? 'success' : 'error',
+            'message' => $response['message'],
+            'logs' => $response['logs']
+        ]);
     }
 ?>  

@@ -5,6 +5,27 @@
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
 ?>
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Welcome, 
+            <?php
+                if ($_SESSION['user']['access_level'] == 'Admin') {
+                    echo 'Administrator';
+                } else {
+                    echo 'Client';
+                }
+            ?>
+        </h5>
+        <div class="d-flex align-items-center">
+            <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
+            <span class="ms-2 fw-semibold">
+                <?php
+                    echo htmlspecialchars($_SESSION['user']['name']);
+                ?>
+            </span>
+        </div>
+    </div>
+</div>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">RFQ Management</h2>
         </div>
@@ -113,7 +134,7 @@
         <div class="modal fade rfq-modal" id="attachmentRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="attachmentRfqModall" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-success text-white">
                         <h5 class="modal-title" id="attachmentRfqModal">
                             <i class="bi bi-images me-2"></i> Attachment Viewer
                         </h5>
@@ -140,7 +161,7 @@
         <div class="modal fade rfq-modal" id="itemsRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="itemsRfqModal" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-success text-white">
                         <h5 class="modal-title" id="itemsRfqModal">
                             <i class="bi bi-card-checklist me-2"></i> Item List
                         </h5>
@@ -179,7 +200,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <form id="emailForm">
-                        <div class="modal-header">
+                        <div class="modal-header bg-success text-white">
                             <h5 class="modal-title">Email Supplier</h5>
                         </div>
                         <div class="modal-body">
@@ -235,14 +256,15 @@
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <form id="comparisonForm">
-                        <div class="modal-header">
+                        <div class="modal-header bg-success text-white">
                             <h5 class="modal-title" id="comparisonModalLabel">Supplier Comparison for Items</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="row">
-                                <h5 id="controlnumber">....</h4>
-                                <h5 id="section"></h4>
+                                <div class="input-group">
+                                    
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="mb-3" id="itemDiv"></div>
@@ -261,13 +283,13 @@
         <div class="modal fade" id="comparisonTableModal" tabindex="-1" aria-labelledby="comparisonTableModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="comparisonTableModalLabel">Comparison Table</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                 <div class="table-responsive">
-                    <table class="table rfq-table table-hover" id="comparisonTable">
+                    <table class="table rfq-table table-bordered table-hover" id="comparisonTable">
                     <thead>
                         <tr>
                         <th>Item</th>

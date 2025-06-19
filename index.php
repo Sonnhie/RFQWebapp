@@ -15,7 +15,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Procurement RFQ System</title>
-    
+    <link rel="icon" type="image/x-icon" href="./assets/img/upward.png">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
@@ -46,10 +47,12 @@
 
 </head>
 <body>
+
     <!-- Mobile Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle">
         <i class="bi bi-list"></i>
     </button>
+
     <!-- Sidebar Navigation -->
      <?php
         // Admin sidebar navigation 
@@ -78,7 +81,7 @@
         } 
         //Verifier-Approver sidebar navigation
         else if ($_SESSION['user']['access_level'] == 'Verifier-Approver') {
-            include_once './components/sidebar_section_approver.php';
+            include_once './components/sidebar_procurement.php';
         }
      ?>
      
@@ -91,6 +94,4 @@
     <!-- Custom JS for Sidebar--> 
     <script src="./includes/js/sidebar.js"></script>
     
-    <!-- Custom JS for Common Functions-->
-    <!-- <script src="./includes/js/common.js"></script> -->
   

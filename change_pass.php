@@ -6,7 +6,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="./assets/img/upward.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
     <link rel="stylesheet" href="./includes/css/login.css">
        <!--JQuery-->
@@ -14,26 +13,25 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
      <!-- SweetAlert2 for Alerts -->
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <title>Login Page</title>
+    <title>Change Password Page</title>
 </head>
 <body>
     <div class="login-box">
         <div class="login-logo">
-            <i class="bi bi-file-earmark-text"></i>
-            <h3>RFQ System Login</h3>
+            <i class="bi bi-lock-fill"></i>
+            <h3>Change Password</h3>
         </div>
-        
-        <form action="#" method="POST" id="loginForm">
+        <form action="#" method="POST" id="changepasswordForm" data-id="<?php echo $_SESSION['user']['id'];?>">
             <div class="input-icon">
-                <i class="bi bi-person"></i>
-                <input type="text" class="form-control" placeholder="Username" id="username" required>
+                <i class="bi bi-lock-fill"></i>
+                <input type="password" class="form-control" placeholder="Enter new password" id="new_pass" required>
             </div>
             
             <div class="input-icon">
-                <i class="bi bi-lock"></i>
-                <input type="password" class="form-control" placeholder="Password" id="password" required>
+                <i class="bi bi-lock-fill"></i>
+                <input type="password" class="form-control" placeholder="Confirm new password" id="confirm_pass" required>
             </div>
-            <button type="submit" class="btn-login">Login</button>
+            <button type="submit" class="btn-login">Change Password</button>
         </form>
     </div>
     

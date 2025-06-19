@@ -5,7 +5,7 @@ $(document).ready(function () {
     //$('#toDateFilter').attr('max', today).val(today);
 
     // Initialize the table
-    populateTable();
+    populateTable(page);
     //paginateTable();
     // Add new item row
     $('#addItemButton').on('click', function () {
@@ -45,11 +45,10 @@ $(document).ready(function () {
     // Submit new request
     $('#create_request').submit(function (e) {
         e.preventDefault();
-
         const formData = new FormData($('#create_request')[0]);
         formData.append('action', 'create_request');
         formData.append('remarks', 'For Section head approval');
-
+        console.log(formData);
         //debugFormData(formData);
 
         // Ajax request to submit the form data

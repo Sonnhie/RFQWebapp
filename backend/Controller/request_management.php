@@ -23,10 +23,10 @@
     class RequestManagement{
         private $request_table = 'request_table';
         private $attachment_table = 'attachment_table';
-        private $requeststatus_table = 'requeststatus_table';
         private $email_table = 'email_table';
         private $requestLogs_table = 'request_logs_table';
         private $comparison_table = 'comparison_table';
+        private $delivery_table = 'delivery_table';
         private $conn;
 
         public function __construct($db){
@@ -65,6 +65,9 @@
         // Function to create a new request
         public function CreateNewRequest($data){
            // $control_number = $this->createRFQNumber();
+           try{
+
+           }catch(Exception $e)
             
             $query = "INSERT INTO " . $this->request_table . " 
                     (control_number, item_name, item_description, item_purpose, item_quantity, item_uom, item_status, item_remarks, item_requestor, item_section) 
@@ -87,7 +90,7 @@
             }
         }
 
-      public function CreateComparison($data){
+        public function CreateComparison($data){
             // Check if control number + item + supplier already exists
             $checkQuery = "SELECT COUNT(*) FROM {$this->comparison_table} 
                         WHERE control_number = :control_number AND item_name = :item_name AND supplier_name = :supplier_name";
@@ -119,7 +122,6 @@
             // Record already exists
             return false;
         }
-
 
         public function fetchComparisonByControlNumber($control_number) {
             $query = "SELECT * FROM " . $this->comparison_table . " 
@@ -181,101 +183,84 @@
             }
         }
 
-        // Function to fetch all requests with pagination and filters
-        public function fetchAllRequests($requestor_section, $from = null, $to = null, $status = null, $searchQuery = null, $page = 1, $perPage = 10) {
-            $query = "SELECT * FROM " . $this->request_table;
+        private function buildFilterConditions($requestor_section, $from, $to, $status, $searchQuery, &$params) {
             $conditions = [];
-            $params = [];
-        
-            // Section filter (if not Procurement)
-            $conditions[] = " item_section = :item_section";
-            $params[':item_section'] = $requestor_section;
-        
-        
-            // Date range filter
-            if (!empty($from) && !empty($to)) {
-                $conditions[] = "created_at BETWEEN :from AND :to";
-                $params[':from'] = $from;
-                $params[':to'] = $to;
-            }
-        
-            // Status filter
-            if (!empty($status)) {
-                $conditions[] = "item_status = :item_status";
-                $params[':item_status'] = $status;
-            }
-        
-            // Search filter
-            if (!empty($searchQuery)) {
-                $conditions[] = "(item_name LIKE :searchQuery OR item_description LIKE :searchQuery)";
-                $params[':searchQuery'] = '%' . $searchQuery . '%';
-            }
-        
-            // Apply WHERE clause
-            if (!empty($conditions)) {
-                $query .= " WHERE " . implode(' AND ', $conditions);
-            }
-        
-            // Order by newest first
-            $query .= " ORDER BY created_at DESC";
-        
-            // Pagination using LIMIT and OFFSET
-            $offset = ($page - 1) * $perPage;
-            $query .= " LIMIT :limit OFFSET :offset";
-        
-            // Prepare and bind
-            $stmt = $this->conn->prepare($query);
-        
-            // Bind dynamic parameters
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
-            }
-        
-            // Bind LIMIT and OFFSET (must be integers)
-            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-        
-            $stmt->execute();
-        
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-        
-        // Function to count all requests
-        public function countAllRequests($requestor_section, $from = null, $to = null, $status = null, $searchQuery = null) {
-            $query = "SELECT COUNT(*) as total FROM " . $this->request_table;
-            $conditions = [];
-            $params = [];
-        
-            if ($requestor_section !== "Procurement") {
+
+            if (!empty($requestor_section)) {
                 $conditions[] = "item_section = :item_section";
                 $params[':item_section'] = $requestor_section;
             }
-        
+
             if (!empty($from) && !empty($to)) {
                 $conditions[] = "created_at BETWEEN :from AND :to";
                 $params[':from'] = $from;
                 $params[':to'] = $to;
             }
-        
+
             if (!empty($status)) {
                 $conditions[] = "item_status = :item_status";
                 $params[':item_status'] = $status;
             }
-        
+
             if (!empty($searchQuery)) {
                 $conditions[] = "(item_name LIKE :searchQuery OR item_description LIKE :searchQuery)";
                 $params[':searchQuery'] = '%' . $searchQuery . '%';
             }
-        
+
+            return $conditions;
+        }
+
+        public function fetchAllRequests($requestor_section, $from = null, $to = null, $status = null, $searchQuery = null, $page = 1, $perPage = 10) {
+            $params = [];
+            $conditions = $this->buildFilterConditions($requestor_section, $from, $to, $status, $searchQuery, $params);
+
+            // Build SELECT query
+            $query = "SELECT * FROM {$this->request_table}";
+
             if (!empty($conditions)) {
                 $query .= " WHERE " . implode(' AND ', $conditions);
             }
-        
+
+            // Group by control_number
+            $query .= " GROUP BY control_number";
+
+            // Order by latest
+            $query .= " ORDER BY MAX(created_at) DESC";
+
+            // Pagination
+            $offset = ($page - 1) * $perPage;
+            $query .= " LIMIT :limit OFFSET :offset";
+
             $stmt = $this->conn->prepare($query);
+
+            // Bind values
             foreach ($params as $key => $value) {
                 $stmt->bindValue($key, $value);
             }
-        
+            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        public function countAllRequests($requestor_section, $from = null, $to = null, $status = null, $searchQuery = null) {
+            $params = [];
+            $conditions = $this->buildFilterConditions($requestor_section, $from, $to, $status, $searchQuery, $params);
+
+            // Instead of COUNT(*), use COUNT(DISTINCT control_number)
+            $query = "SELECT COUNT(DISTINCT control_number) as total FROM {$this->request_table}";
+
+            if (!empty($conditions)) {
+                $query .= " WHERE " . implode(' AND ', $conditions);
+            }
+
+            $stmt = $this->conn->prepare($query);
+
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result['total'] ?? 0;
@@ -703,5 +688,297 @@
                 return false;
             }
         }
+
+        //Function to auto-sugggest
+        public function FetchControlNumber($input){
+            try{
+                $query = "SELECT distinct control_number from  {$this->request_table} where control_number like :input limit 10";
+                $stmt = $this->conn->prepare($query);
+                $searchQuery = '%' . $input . '%';
+                $stmt->bindParam(":input", $searchQuery, PDO::PARAM_STR);
+
+                if ($stmt->execute()) {
+                    $data = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    return [
+                        'success' => true,
+                        'data' => $data,
+                        'message' => 'Data fetch successfully.'
+                    ];
+                }else{
+                    return [
+                        'success' => false,
+                        'message' => 'Error in fetching data.'
+                    ];
+                }
+            }catch(PDOException $e){
+                return [
+                    'success' => false,
+                    'message' => 'Internal Server Error: ' . $e->getMessage()
+                ];
+            }
+            
+        }
+
+        //Insert delivery details
+        public function InsertDeliveryDetails($data){
+
+            try{
+                $query = "insert into {$this->delivery_table} (control_number, item_name, item_description, item_quantity, supplier_name, item_amount, delivery_date, item_status) 
+                        values (:control_number, :item_name, :item_description, :item_quantity, :supplier_name, :item_amount, :delivery_date, :item_status)";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':control_number', $data['control_number'], PDO::PARAM_STR);
+                $stmt->bindParam(':item_name', $data['item_name'], PDO::PARAM_STR);
+                $stmt->bindParam(':item_description', $data['item_description'], PDO::PARAM_STR);
+                $stmt->bindParam(':item_quantity', $data['item_quantity'], PDO::PARAM_INT);
+                $stmt->bindParam(':supplier_name', $data['supplier_name'], PDO::PARAM_STR);
+                $stmt->bindParam(':item_amount', $data['item_amount']);
+                $stmt->bindValue(':delivery_date', $data['delivery_date']);
+                $stmt->bindParam(':item_status', $data['item_status'], PDO::PARAM_STR);
+                // $stmt->bindParam(':item_remarks', $data['item_remarks'], PDO::PARAM_STR);
+                
+                if($stmt->execute()){
+                    return [
+                        'success' => true,
+                        'message' => 'Delivery details has been successfuly saved.' . $data['delivery_date']
+                    ];
+                }else{
+                    return [
+                        'success' => false,
+                        'message' => 'Data failed to insert.'
+                    ];
+                }
+            }catch(PDOException $e){
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+            }
+
+        }
+
+        public function FetchDeliveryData($searchquery, $page = null ,$perpage = null){
+            $query = "select * from {$this->delivery_table} ";
+            $params = [];
+
+            if (!empty($searchquery)) {
+                $query .= " where control_number like :searchquery";
+                $params[':searchquery'] = '%' . $searchquery . '%';
+            }
+
+            $query .= " order by control_number ASC";
+
+            // Pagination using LIMIT and OFFSET
+            $offset = ($page - 1) * $perpage;
+            $query .= " LIMIT :limit OFFSET :offset";
+
+            // Prepare and bind
+            $stmt = $this->conn->prepare($query);
+            
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+            //Bind LIMIT and OFFSET (must be integers)
+            $stmt->bindValue(':limit', (int)$perpage, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+        
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        public function CountDeliveryData($searchquery = null){
+            $query = "select count(*) as total from {$this->delivery_table} ";
+            // $conditions = [];
+            $params = [];
+
+            if (!empty($searchquery)) {
+                $query .= " where control_number like :searchquery";
+                $params[':searchquery'] = '%' . $searchquery . '%';
+            }
+
+            $stmt = $this->conn->prepare($query);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['total'] ?? 0;
+        }
+
+        public function DeliveryReceivedUpdate($id, $date, $status){
+
+            if (empty($id) || empty($date) || empty($status)) {
+                return [
+                    'success' => false,
+                    'message' => 'Empty or null parameters.'
+                ];
+                exit;
+            }
+
+            try{
+                $query = "update {$this->delivery_table} set received_date = :received_date, item_status = :status where id = :id";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindValue(':received_date', $date, PDO::PARAM_STR);
+                $stmt->bindParam(':status' , $status, PDO::PARAM_STR);
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                
+                if ($stmt->execute()) {
+                    return [
+                        'success' => true,
+                        'message' => 'Item has been received.'
+                    ];
+                }else{
+                    return [
+                        'success' => false,
+                        'message' => 'Error receiving item.'
+                    ];
+                }
+            }catch(PDOException $e){
+                return [
+                    'success' => false,
+                    'message' => 'Internal Server Error: ' . $e->getMessage()
+                ];
+            }
+
+        }
+
+        public function DeleteDeliveryItem($id){
+
+            try{
+                $this->conn->beginTransaction();
+
+                $query = "delete from {$this->delivery_table} where id = :id";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+                if (!$stmt->execute()) {
+                    throw new Exception("Delete failed!.");              
+                }
+
+                $this->conn->commit();
+
+                return [    
+                        'success' => true,
+                        'message' => 'Successfully deleted.'
+                    ];
+            }catch(Exception $e){
+
+                $this->conn->rollback();
+
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+            }
+        }
+
+        public function UpdateDeliveryDetails($data){
+            if (empty($data)) {
+                return [
+                    'success' => false,
+                    'message' => 'Empty or null data.'
+                ];
+                exit;
+            }
+
+            try{
+                $this->conn->beginTransaction();
+                $query = "update {$this->delivery_table} set supplier_name = :supplier_name, item_amount = :item_amount, delivery_date = :delivery_date 
+                            where id = :id";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':supplier_name', $data['supplier_name'], PDO::PARAM_STR);
+                $stmt->bindParam(':item_amount', $data['item_amount']);
+                $stmt->bindValue(':delivery_date', $data['delivery_date'], PDO::PARAM_STR);
+                $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
+                
+                if (!$stmt->execute()) {
+                    throw new Exception('Update failed');
+                }
+
+                $this->conn->commit();
+                return [
+                    'success' => true,
+                    'message' => 'Delivery detail successfully updated.'
+                ];
+            }catch(Exception $e){
+                $this->conn->rollback();
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+            }
+        }
+
+        public function AddRemarks($data){
+            if(empty($data)){
+                return [
+                    'success' => false,
+                    'message' => 'Empty or null remarks.'
+                ];
+                exit;
+            }
+
+            try{
+                $this->conn->beginTransaction();
+                $query = "update {$this->delivery_table} set item_remarks = :item_remarks where id = :id";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
+                $stmt->bindParam(':item_remarks', $data['item_remarks'], PDO::PARAM_STR);
+
+                if (!$stmt->execute()) {
+                    throw new Exception('Adding remarks failed');
+                }
+
+                $this->conn->commit();
+                return [
+                    'success' => true,
+                    'message' => 'Remarks successfully updated.'
+                ];
+            }catch(Exception $e){
+                $this->conn->rollback();
+                return [
+                    'success' => true,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+            }
+        }
+
+        public function GetTimeline($control_number){
+
+            if (empty($control_number)) {
+                return [
+                    'success' => false,
+                    'message' => 'Empty or null control number'
+                ];
+                exit;
+            }
+
+            try{
+                $query = "select status, remarks, DATE(update_at) as date, TIME(update_at) as time 
+                          from {$this->requestLogs_table} where control_number = :control_number ORDER BY update_at ASC";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':control_number' , $control_number, PDO::PARAM_STR);
+
+                if (!$stmt->execute()) {
+                    throw new Exception('Failed to execute query.');
+                }
+
+                $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                return [
+                    'success' => true,
+                    'message' => 'Logs successfully fetch.',
+                    'logs' => $logs
+                ];
+                
+            }catch(Exception $e){
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+            }
+
+        }
+
     }
 ?>

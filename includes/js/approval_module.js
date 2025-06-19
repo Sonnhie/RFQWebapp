@@ -46,10 +46,7 @@ $(document).ready(function () {
             data: { action: 'get_itemsbycontrolnumber', section: section, filters: filters, page: page },
             dataType: 'json',
             success: function (response) {
-                $tbody.empty(); // Clear loading spinner
-
-                //console.log('Response from server:', response);
-                //console.log(response.total, response.perPage);
+                $tbody.empty(); 
                 if (response.status === 'success') {
                     response.data.forEach(item => {
 
@@ -73,29 +70,36 @@ $(document).ready(function () {
 
                         let approvedButton = '', declinedButton = '', emailButton = '', createcompasisonButton = '', viewcomparisonButton = '';
 
-                        if (!isQuotationOrRejected) {
-                            approvedButton = `<button class="btn btn-sm btn-success rounded-4 me-3" data-id=${item.control_number} data-section=${item.item_section} id="approve_btn">
+                        if (item.item_remarks === 'For Procurement Verification') {
+                            approvedButton = `<button class="btn btn-sm btn-success rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="approve_btn">
                                 <i class="bi bi-check2-circle"></i> Verify
                             </button>`;
 
-                            declinedButton = `<button class="btn btn-sm btn-danger rounded-4 me-3" data-id=${item.control_number} data-section=${item.item_section} id="hold_btn">
+                            declinedButton = `<button class="btn btn-sm btn-danger rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="hold_btn">
                                 <i class="bi bi-slash-circle"></i> Hold
                             </button>`;
                         }
 
-                        if (!isHold) {
-                            emailButton = `<button class="btn btn-sm btn-secondary rounded-4 me-3" data-bs-toggle="modal" data-bs-target="#emailsupplier" data-section=${item.item_section} data-id=${item.control_number} id="email_btn">
+                        if (item.requestor_status === 'Hold') {
+                            approvedButton = `<button class="btn btn-sm btn-success rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="approve_btn">
+                                <i class="bi bi-check2-circle"></i> Verify
+                            </button>`;
+                        }
+
+                        if (item.item_remarks === 'For Quotation') {
+                            emailButton = `<button class="btn btn-sm btn-secondary rounded-4 me-3" data-bs-toggle="modal" data-bs-target="#emailsupplier" data-section="${item.item_section}" data-id="${item.control_number}" id="email_btn">
                                 <i class="bi bi-envelope"></i> Email Supplier
                             </button>`;
 
-                            createcompasisonButton = `<button class="btn btn-sm rounded-4 btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#comparisonModal" data-section=${item.item_section} data-id=${item.control_number} id="create_comparison_btn">
+                            createcompasisonButton = `<button class="btn btn-sm rounded-4 btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#comparisonModal" data-section="${item.item_section}" data-id="${item.control_number}" id="create_comparison_btn">
                                 <i class="bi bi-file-earmark-text"></i> Create Comparison
                             </button>`;
 
-                            viewcomparisonButton = `<button class="btn btn-sm rounded-4 btn-outline-secondary me-3" data-bs-toggle="modal" data-bs-target="#comparisonTableModal" data-section=${item.item_section} data-id=${item.control_number} id="view_comparison_btn">
+                            viewcomparisonButton = `<button class="btn btn-sm rounded-4 btn-outline-secondary me-3" data-bs-toggle="modal" data-bs-target="#comparisonTableModal" data-section="${item.item_section}" data-id="${item.control_number}" id="view_comparison_btn">
                                 <i class="bi bi-eye"></i> View Comparison
                             </button>`;
                         }
+
                         const buttonGroup = `
                             ${itemsButton}
                             ${approvedButton}
@@ -136,7 +140,7 @@ $(document).ready(function () {
             },
             error: function (xhr, status, error) {
                 $tbody.empty(); // Clear loading spinner
-                console.error('AJAX error:', status, error);
+                console.error('AJAX error:', status, error, xhr);
                 const $tbody = $('#requestTableBody');
                 $tbody.empty(); // Clear existing rows
                 const $row = $(`
@@ -349,12 +353,12 @@ $(document).ready(function () {
        populateTable();
     });
 
-
+    //Filter by date
     $('#fromDateFilter, #toDateFilter').on('change', function () {
         populateTable();
     });
     
-
+    //Filter by search input
     $('#searchInput').on('input', function() {
         populateTable();
     });
@@ -529,7 +533,7 @@ $(document).ready(function () {
          // If you set this dynamically
         };
 
-        console.log('Form Data:', formData);
+        // console.log('Form Data:', formData);
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to send email?",
@@ -864,12 +868,10 @@ $(document).ready(function () {
         e.preventDefault();
         const controlNumber = $('#comparisonModal').data('id'); // Get control number from the modal
         const section = $('#comparisonModal').data('section'); // Get section from the modal
-        // const quantity = $('#itemtable').data('quantity'); // Get quantity from the modal
-        // const itemName = $('#itemtable').data('itemname'); // Get item name from the modal
         const formData = $(this).serialize() + `&action=create_comparison&control_number=${controlNumber}&section=${section}`;
         
-        console.log('Form Data:', formData); // Debugging line to check form data
-        console.log($(this).serializeArray()); // Debugging line to check serialized form data
+        // console.log('Form Data:', formData); // Debugging line to check form data
+        // console.log($(this).serializeArray()); // Debugging line to check serialized form data
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to create comparison?",

@@ -1,13 +1,8 @@
 $(document).ready(function () {
     const page = 1;
-   // const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-   // $('#fromDateFilter').attr('max', today).val(today);
-    //$('#toDateFilter').attr('max', today).val(today);
 
     // Initialize the table
     populateTable();
-    //paginateTable();
- 
 
     // Populate the table
     function populateTable(page = 1) {
@@ -62,6 +57,7 @@ $(document).ready(function () {
                         };
 
                         const isHold = (item.requestor_status === 'Hold');
+                        const isApproved = (item.requestor_status === 'Approved');
 
                         const statusBadge = `<span class="status-badge ${statusClasses[item.requestor_status] || ''}">${item.requestor_status}</span>`;
 
@@ -78,6 +74,10 @@ $(document).ready(function () {
                                 <i class="bi bi-eye"></i> View Comparison
                             </button>`;
                         }
+
+
+
+                        
                         const buttonGroup = `
                             ${itemsButton}
                             ${viewcomparisonButton}
@@ -218,6 +218,7 @@ $(document).ready(function () {
         });
     };
 
+    //Populate comparison
     function populateComparisonModalTable(controlNumber) {
         const $comparisonTableBody = $('#comparisonModalTableBody');
         $comparisonTableBody.empty();
@@ -547,7 +548,7 @@ $(document).ready(function () {
         const controlNumber = $(this).data('id');
         const section = $(this).data('section');
         const status = 'Hold';
-        
+        $('#comparisonTableModal').modal('hide'); // Hide the modal before showing Swal
         Swal.fire({
             title: 'Hold Comparison',
             text: "You want to hold this Comparison Sheet? Please provide remarks.",
@@ -559,6 +560,7 @@ $(document).ready(function () {
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
+            backdrop: false,
             confirmButtonText: 'Yes, hold it!',
             preConfirm: (remarks) => {
                 if (!remarks) {
@@ -591,6 +593,7 @@ $(document).ready(function () {
                                 'success'
                             );
                             populateTable();
+                             $('#comparisonTableModal').modal('show'); // Hide the modal before showing Swal
                         } else {
                             Swal.fire(
                                 'Error!',

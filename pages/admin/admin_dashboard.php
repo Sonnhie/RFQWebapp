@@ -1,6 +1,3 @@
-<?php
-    session_start();
-?>
 <div class="card shadow-sm border-0 mb-5">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Welcome, 
@@ -22,3 +19,7 @@
         </div>
     </div>
 </div>
+<div class="dashboard-header">
+            <h1 class="h3 mb-0">Admin Dashboard</h1>
+            <p class="text-muted">admin dashboard</p>
+        </div>

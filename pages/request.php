@@ -6,6 +6,27 @@
     error_reporting(E_ALL);
     
 ?>
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Welcome, 
+            <?php
+                if ($_SESSION['user']['access_level'] == 'Admin') {
+                    echo 'Administrator';
+                } else {
+                    echo 'Client';
+                }
+            ?>
+        </h5>
+        <div class="d-flex align-items-center">
+            <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
+            <span class="ms-2 fw-semibold">
+                <?php
+                    echo htmlspecialchars($_SESSION['user']['name']);
+                ?>
+            </span>
+        </div>
+    </div>
+</div>
 <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Request for Quotations</h2>
             <button class="btn btn-primary btn-new-rfq" data-bs-toggle="modal" data-bs-target="#newRfqModal">
@@ -122,7 +143,7 @@
         <div class="modal fade rfq-modal" id="newRfqModal" tabindex="-1" aria-labelledby="newRfqModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-success text-white">
                         <h5 class="modal-title" id="newRfqModalLabel">
                             <i class="bi bi-file-earmark-plus me-2"></i> Create New RFQ
                         </h5>
@@ -171,12 +192,39 @@
                                                 <td><input type="number" class="form-control form-control-sm"  name="item_quantity[]" placeholder="Qty" required></td>
                                                 <td>
                                                     <select class="form-select form-select-sm" name="item_unit[]">
+                                                        <option value="">Select Unit</option>
                                                         <option value="Piece">Piece</option>
                                                         <option value="Box">Box</option>
                                                         <option value="Meter">Meter</option>
                                                         <option value="Set">Set</option>
                                                         <option value="Gallon">Gallon</option>
                                                         <option value="Sack">Sack</option>
+                                                        <option value="Pack">Pack</option>
+                                                        <option value="Roll">Roll</option>
+                                                        <option value="Liter">Liter</option>
+                                                        <option value="Milliliter">Milliliter</option>
+                                                        <option value="Kilogram">Kilogram</option>
+                                                        <option value="Gram">Gram</option>
+                                                        <option value="Pound">Pound</option>
+                                                        <option value="Ounce">Ounce</option>
+                                                        <option value="Can">Can</option>
+                                                        <option value="Bottle">Bottle</option>
+                                                        <option value="Bag">Bag</option>
+                                                        <option value="Carton">Carton</option>
+                                                        <option value="Dozen">Dozen</option>
+                                                        <option value="Pair">Pair</option>
+                                                        <option value="Feet">Feet</option>
+                                                        <option value="Inch">Inch</option>
+                                                        <option value="Yard">Yard</option>
+                                                        <option value="Sheet">Sheet</option>
+                                                        <option value="Tube">Tube</option>
+                                                        <option value="Bundle">Bundle</option>
+                                                        <option value="Ream">Ream</option>
+                                                        <option value="Tablet">Tablet</option>
+                                                        <option value="Strip">Strip</option>
+                                                        <option value="Kit">Kit</option>
+                                                        <option value="Case">Case</option>
+                                                        <option value="Tray">Tray</option>
                                                     </select>
                                                 </td>
                                                 <td><input class="form-control" type="file" id="attachment" name="item-attachment[]" required></td>
@@ -213,7 +261,7 @@
         <div class="modal fade rfq-modal" id="editRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="editRfqModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-success text-white">
                         <h5 class="modal-title" id="editrfqModalLabel">
                             <i class="bi bi-file-earmark-plus me-2"></i> Edit RFQ
                         </h5>
@@ -277,7 +325,7 @@
         <div class="modal fade rfq-modal" id="attachmentRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="attachmentRfqModall" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-success text-white">
                         <h5 class="modal-title" id="attachmentRfqModal">
                             <i class="bi bi-images me-2"></i> Attachment Viewer
                         </h5>

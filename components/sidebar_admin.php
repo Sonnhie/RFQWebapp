@@ -16,40 +16,9 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="request">
-                        <i class="bi bi-file-earmark-text me-2" style="color: var(--icon-color);"></i>
-                        RFQs
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="for_approval">
-                        <i class="bi bi-building me-2" style="color: var(--icon-color);"></i>
-                        RFQ Management
-                    </a>
-                </li>
-                <?php
-                    if ($_SESSION['user']['access_level'] == 'Verifier-Approver') {
-                ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="#" data-page="for_sectionapproval">
-                            <i class="bi bi-building me-2" style="color: var(--icon-color);"></i>
-                            RFQ Approval
-                        </a>
-                    </li
-                <?php
-                    }
-                ?>
-                
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="history">
-                        <i class="bi bi-list-check me-2" style="color: var(--icon-color);"></i>
-                        RFQs History
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="verifier/delivery">
-                        <i  class="bi bi-truck me-2" style="color: var(--icon-color);"></i>
-                        Delivery Management
+                    <a class="nav-link text-white" href="#" data-page="admin/user_management">
+                        <i class="bi bi-person-fill-gear me-2" style="color: var(--icon-color);"></i>
+                        User Management
                     </a>
                 </li>
                 <li class="nav-item">

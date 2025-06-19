@@ -6,6 +6,28 @@
     error_reporting(E_ALL);
     
 ?>
+
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Welcome, 
+            <?php
+                if ($_SESSION['user']['access_level'] == 'Admin') {
+                    echo 'Administrator';
+                } else {
+                    echo 'Client';
+                }
+            ?>
+        </h5>
+        <div class="d-flex align-items-center">
+            <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
+            <span class="ms-2 fw-semibold">
+                <?php
+                    echo htmlspecialchars($_SESSION['user']['name']);
+                ?>
+            </span>
+        </div>
+    </div>
+</div>
 <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Request Check List</h2>
 </div>
@@ -115,7 +137,7 @@
         <div class="modal fade rfq-modal" id="attachmentRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="attachmentRfqModall" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-success text-white">
                         <h5 class="modal-title" id="attachmentRfqModal">
                             <i class="bi bi-images me-2"></i> Attachment Viewer
                         </h5>
@@ -142,7 +164,7 @@
          <div class="modal fade rfq-modal" id="itemsRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="itemsRfqModal" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-success text-white">
                         <h5 class="modal-title" id="itemsRfqModal">
                             <i class="bi bi-card-checklist me-2"></i> Item List
                         </h5>
