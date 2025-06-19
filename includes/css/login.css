@@ -1,0 +1,97 @@
+:root {
+    --primary-bg: #2d3748;
+    --accent-color: #4299e1;
+    --icon-color: #1266ac; /* New teal color for icons */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: 
+        linear-gradient(rgba(45, 55, 72, 0.85), 
+        rgba(45, 55, 72, 0.9)),
+        url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 450px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.login-logo i {
+    font-size: 2.5rem;
+    color: var(--accent-color); /* Now using the blue accent color */
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 12px 15px 12px 45px; /* Added left padding for icons */
+    margin-bottom: 20px;
+    border-radius: 6px;
+    width: 100%;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(66, 153, 225, 0.25);
+    color: white;
+    outline: none;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-color);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-login:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+}
+
+.input-icon {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-icon i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--icon-color); /* Using the new teal color */
+    font-size: 1.2rem;
+    z-index: 2;
+}

@@ -1,0 +1,167 @@
+:root {
+    --sidebar-width: 250px;
+    --primary-bg: #2d3748;
+    --primary-color: #e2e8f0;
+    --active-bg: #4a5568;
+    --accent-color: #4299e1;
+    --icon-color: #81e6d9;
+    --sidebar-border: #4a5568;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7fafc;
+    overflow-x: hidden;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background: var(--primary-bg);
+    color: var(--primary-color);
+    height: 100vh;
+    width: var(--sidebar-width);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    border-right: 1px solid var(--sidebar-border);
+    transition: all 0.3s;
+}
+   /* Active state works on all devices */
+   .sidebar-menu .nav-link.active {
+    background: var(--active-bg);
+    color: white;
+    font-weight: 600;
+}
+
+  /* Desktop hover effects */
+  @media (hover: hover) and (pointer: fine) {
+    .sidebar-menu .nav-link:hover {
+        background: var(--active-bg);
+        color: white;
+        transform: translateX(5px);
+    }
+    
+    .rfq-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+}
+ /* Sidebar Links - Hover Fix */
+ .sidebar-menu .nav-link {
+    color: var(--primary-color);
+    padding: 0.75rem 1rem;
+    margin: 0.15rem 0;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+/* Mobile Toggle Button */
+.sidebar-toggle {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+    background: var(--primary-bg);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    display: none;
+}
+
+/* Collapsed State */
+.sidebar-collapsed {
+    transform: translateX(-100%);
+}
+
+.sidebar-collapsed + .main-content {
+    margin-left: 0;
+}
+
+/* Main Content Area */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 25px;
+    min-height: 100vh;
+    background-color: #f7fafc;
+    transition: all 0.3s;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+    transition: all 0.2s;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-top: 20px;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-approved {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge-hold {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar-collapsed {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .sidebar-toggle {
+        display: block;
+    }
+    
+    /* Touch feedback for mobile */
+    .sidebar-menu .nav-link:active {
+        background: var(--active-bg);
+        color: white;
+    }
+    
+    .rfq-card:active {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+}
