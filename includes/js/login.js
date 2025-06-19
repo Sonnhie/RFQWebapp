@@ -1,4 +1,25 @@
 $(document).ready(function () {
+
+    //Generate machine token
+    function getMachineToken() {
+        let token;
+        if (!localStorage.getItem('machine_token')) {
+            if (window.crypto && typeof crypto.randomUUID === 'function') {
+                token = crypto.randomUUID();
+            } else {
+                // Fallback UUID generator
+                token = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+            localStorage.setItem('machine_token', token);
+        } else {
+            token = localStorage.getItem('machine_token');
+        }
+        return token;
+    }
+
     //Handle Login Form Submission
     $('#loginForm').on('submit', function (e) {
         e.preventDefault(); // Prevent default form submission
@@ -6,7 +27,7 @@ $(document).ready(function () {
         const username = $('#username').val();
         const password = $('#password').val();
         const action = 'login'; // Action to be performed
-        const machine_token = localStorage.getItem('machine_token');
+        const machine_token = getMachineToken();;
         
         // Perform AJAX request to login
         $.ajax({
@@ -58,7 +79,7 @@ $(document).ready(function () {
         })
     });
 
-
+    //Change password
     $('#changepasswordForm').submit(function(e){
         e.preventDefault();
         const newpass = $('#new_pass').val();

@@ -175,7 +175,6 @@
         ]);
     }
 
-    
     if (!empty($_POST['action']) && $_POST['action'] == 'logout' ) {
         header('Content-Type: application/json');
         $userid = $_SESSION['user']['id'] ?? null;
