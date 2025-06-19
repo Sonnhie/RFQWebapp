@@ -176,14 +176,15 @@
     }
 
     
-    if (!empty($_POST['action']) && $_POST['action'] == 'Logout' ) {
+    if (!empty($_POST['action']) && $_POST['action'] == 'logout' ) {
+        header('Content-Type: application/json');
         $userid = $_SESSION['user']['id'] ?? null;
-        $userstatus = $_SESSION['user']['user_status'] ?? null;
+        $userstatus = 'Offline';
         $result = $usermanagement->logout($userid, $userstatus);
 
         echo json_encode([
-            'status' => true,
-            'route' => 'login.php'
+            'status' => $result['success'] ? 'success' : 'error',
+            'message' => $result['message']
         ]);
     }
 ?>

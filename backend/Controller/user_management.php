@@ -20,76 +20,97 @@
 
         public function authenticate(string $username, string $password, $machine_token)
         {
-            $sql = "
-                SELECT u.id, u.username, u.password, u.name, u.department, u.machine_token, u.user_status, r.access_level
-                FROM   {$this->user_table} AS u
-                JOIN   {$this->role_table} AS r ON u.role = r.role   -- adjust PK/FK if needed
-                WHERE  u.username = :username
-                LIMIT  1";
-            
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-            $stmt->execute();
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            /* ---------- 1.  user not found ---------- */
-            if (!$user) {
+            if (empty($username) && empty($password) && empty($machine_token)) {
                 return [
                     'success' => false,
-                    'message' => 'User does not exist in the database.'
+                    'message' => 'Empty values.'
                 ];
             }
 
-            /* ---------- 2.  wrong password ---------- */
-            if (!password_verify($password, $user['password'])) {
+            try{
+                $sql = "
+                    SELECT u.id, u.username, u.password, u.name, u.department, u.machine_token, u.user_status, r.access_level
+                    FROM   {$this->user_table} AS u
+                    JOIN   {$this->role_table} AS r ON u.role = r.role   -- adjust PK/FK if needed
+                    WHERE  u.username = :username
+                    LIMIT  1";
+                
+                $stmt = $this->conn->prepare($sql);
+                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                $stmt->execute();
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                /* ---------- 1.  user not found ---------- */
+                if (!$user) {
+                    return [
+                        'success' => false,
+                        'message' => 'User does not exist in the database.'
+                    ];
+                }
+
+                /* ---------- 2.  wrong password ---------- */
+                if (!password_verify($password, $user['password'])) {
+                    return [
+                        'success' => false,
+                        'message' => 'Password does not match the stored hash.'
+                    ];
+                }
+
+                /* ---------- 4.   ---------- */
+                if ($user['machine_token'] && $user['machine_token'] !== $machine_token) {
+                    return ([
+                        'success' => false,
+                        'message' => 'This account is already logged in from another machine.'
+                    ]);                    
+                }
+
+                if (empty($user['machine_token'])) {
+                    $update = $this->conn->prepare("UPDATE {$this->user_table} SET machine_token = :token, user_status = :status WHERE id = :id");
+                    $update->execute([
+                        ':token' => $machine_token,
+                        ':id' => $user['id'],
+                        ':status' => 'Active'
+                    ]);
+                }
+
+                /* ---------- 5.  login success ---------- */
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+
+                $_SESSION['user'] = [
+                    'id'           => $user['id'],
+                    'username'     => $user['username'],
+                    'password'     => $user['password'],
+                    'access_level' => $user['access_level'],
+                    'department'   => $user['department'],
+                    'name'         => $user['name'],
+                    'user_status'  => $user['user_status']
+                ];
+
+                return [
+                    'success' => true,
+                    'message' => 'Login successful.'
+                ];
+            }catch(Exception $e){
                 return [
                     'success' => false,
-                    'message' => 'Password does not match the stored hash.'
+                    'message' => 'Internal server error: ' . $e->getMessage()
                 ];
             }
-
-            /* ---------- 4.   ---------- */
-            if ($user['machine_token'] && $user['machine_token'] !== $machine_token) {
-                return ([
-                    'success' => false,
-                    'message' => 'This account is already logged in from another machine.'
-                ]);                    
-            }
-
-            if (empty($user['machine_token'])) {
-                $update = $this->conn->prepare("UPDATE {$this->user_table} SET machine_token = :token, user_status = :status WHERE id = :id");
-                $update->execute([
-                    ':token' => $machine_token,
-                    ':id' => $user['id'],
-                    ':status' => 'Active'
-                ]);
-            }
-
-            /* ---------- 5.  login success ---------- */
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-
-            $_SESSION['user'] = [
-                'id'           => $user['id'],
-                'username'     => $user['username'],
-                'password'     => $user['password'],
-                'access_level' => $user['access_level'],
-                'department'   => $user['department'],
-                'name'         => $user['name'],
-                'user_status'  => $user['user_status']
-            ];
-
-            return [
-                'success' => true,
-                'message' => 'Login successful.'
-            ];
         }
 
         public function logout($userid, $userstatus) {
 
+            if (empty($userid) && empty($userstatus)) {
+                return [
+                    'success' => false, 
+                    'message' => 'Empty values.'
+                ];
+                exit;
+            }
             try{
-                $stmt = $this->conn->prepare("Update {$this->user_table} set machine_token = null , user_status = :user_status wher id = :id");
+                $stmt = $this->conn->prepare("Update {$this->user_table} set machine_token = null , user_status = :user_status where id = :id");
                 $stmt->execute([
                     ':user_status' =>  $userstatus,
                     ':id' => $userid
@@ -101,13 +122,13 @@
                 }
 
                 // Destroy session
-                session_start();
                 session_unset();
                 session_destroy();
 
                 return [
                     'success' => true,
-                    'message' => 'Logout successfully.'
+                    'message' => 'Logout successfully.',
+                    'route' => 'login.php'
                 ];
 
             }catch(Exception $e){

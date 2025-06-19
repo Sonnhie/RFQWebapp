@@ -32,6 +32,7 @@ $(document).ready(function () {
                             window.location.href = 'change_pass.php';
                          }else{
                             window.location.href = 'index.php';
+                            console.log(machine_token);
                          }
                       });  
                 }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 18, 2025 at 10:45 AM
+-- Generation Time: Jun 19, 2025 at 05:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -276,6 +276,8 @@ CREATE TABLE `user_table` (
   `name` varchar(50) NOT NULL,
   `department` varchar(50) NOT NULL,
   `role` int(11) NOT NULL,
+  `machine_token` varchar(255) NOT NULL,
+  `user_status` varchar(255) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -283,18 +285,18 @@ CREATE TABLE `user_table` (
 -- Dumping data for table `user_table`
 --
 
-INSERT INTO `user_table` (`id`, `username`, `password`, `name`, `department`, `role`, `created_at`) VALUES
-(1, 'itstaff', '$2y$10$zInxD3t26B9mZgFBbo/2se7bLG9O0yYKVCN.EeTpw7d5./l8fbWoi', 'Sonny Del Rosario', 'IT', 2, '2025-05-08 02:29:06'),
-(2, 'procurement01', '$2y$10$3qkJmmRpFVAqDU/rGd96N.tRT2uVRZG3SJO7KkT7h1WEhxla3QEkW', 'Regine Guellena', 'Procurement', 3, '2025-05-08 02:29:06'),
-(3, 'itsupervisor01', '$2y$10$ws..Sk37UojA6VU94iKNmOSxai5f3kce5uS6tjI3heAv08IhJ9nVO', 'Djone Len Reyes', 'IT', 4, '2025-05-30 03:09:05'),
-(5, 'procurement02', '$2y$10$CBSF0w1AzQ8phnji4ycr2u6t.gn.Tgzj5BIpnHUXtij6qC9Bat4e2', 'Melanie Gancayco', 'Procurement', 6, '2025-06-05 07:23:10'),
-(10, 'admin', '$2y$10$ohiS6ktfWWssXl6SUxapUuJ4KFsdqytvXL0IEh31kMVpKc3Yq3Hdu', 'Sonny Del Rosario', 'IT', 1, '2025-06-10 09:26:43'),
-(12, 'injectio01', '$2y$10$mGacEJjbXxPpLbAJ4EXTaO01U5dq/nmmzGtbRceulur5HIQDJ8BgW', 'Danica Baraquio', 'Injection', 2, '2025-06-10 09:30:13'),
-(13, 'admin01', '$2y$10$T6A3VRQXvNhcRbGaN5291uIAxP1cSCDoJMy9gacxmQn3di5QaoLDG', 'Sonny Del Rosario', 'IT', 1, '2025-06-10 09:38:48'),
-(14, 'procurement03', '$2y$10$KsCYEDtrz0Gtl1K87ruY6.AmroNYWndcUV2KJZJw2IIfHknSR0lTm', 'Tadahiro Toriyama', 'Procurement', 3, '2025-06-10 10:51:38'),
-(15, 'procurement04', '$2y$10$SDG99lxnSWCGxZFsEx.Ml.WfAcG4G58hHgaAKbxdqNJ7wDtnqpPXu', 'Jainne Dela Rosa', 'Procurement', 2, '2025-06-10 10:52:48'),
-(16, 'oa12345', '$2y$10$H2QirAiL/i2HhqDEXmf4juR50KywHxHtAGUVZAvabfuUZn02Jp6tS', 'Richelyn Magno', '2nd Process - OA', 2, '2025-06-10 10:53:40'),
-(19, 'yazaki01', '$2y$10$7wy1HhSXVjAxTXVupLpmr.vkwM/mEiSOrDWtH8nQZy2FL.4IkHDge', 'Ruby Solis', '2nd Process - YAZAKI', 2, '2025-06-10 16:06:01');
+INSERT INTO `user_table` (`id`, `username`, `password`, `name`, `department`, `role`, `machine_token`, `user_status`, `created_at`) VALUES
+(1, 'itstaff', '$2y$10$zInxD3t26B9mZgFBbo/2se7bLG9O0yYKVCN.EeTpw7d5./l8fbWoi', 'Sonny Del Rosario', 'IT', 2, '', '', '2025-05-08 02:29:06'),
+(2, 'procurement01', '$2y$10$3qkJmmRpFVAqDU/rGd96N.tRT2uVRZG3SJO7KkT7h1WEhxla3QEkW', 'Regine Guellena', 'Procurement', 3, '', '', '2025-05-08 02:29:06'),
+(3, 'itsupervisor01', '$2y$10$ws..Sk37UojA6VU94iKNmOSxai5f3kce5uS6tjI3heAv08IhJ9nVO', 'Djone Len Reyes', 'IT', 4, '', '', '2025-05-30 03:09:05'),
+(5, 'procurement02', '$2y$10$CBSF0w1AzQ8phnji4ycr2u6t.gn.Tgzj5BIpnHUXtij6qC9Bat4e2', 'Melanie Gancayco', 'Procurement', 6, '', '', '2025-06-05 07:23:10'),
+(10, 'admin', '$2y$10$ohiS6ktfWWssXl6SUxapUuJ4KFsdqytvXL0IEh31kMVpKc3Yq3Hdu', 'Sonny Del Rosario', 'IT', 1, '', '', '2025-06-10 09:26:43'),
+(12, 'injectio01', '$2y$10$mGacEJjbXxPpLbAJ4EXTaO01U5dq/nmmzGtbRceulur5HIQDJ8BgW', 'Danica Baraquio', 'Injection', 2, '', '', '2025-06-10 09:30:13'),
+(13, 'admin01', '$2y$10$T6A3VRQXvNhcRbGaN5291uIAxP1cSCDoJMy9gacxmQn3di5QaoLDG', 'Sonny Del Rosario', 'IT', 1, '', '', '2025-06-10 09:38:48'),
+(14, 'procurement03', '$2y$10$KsCYEDtrz0Gtl1K87ruY6.AmroNYWndcUV2KJZJw2IIfHknSR0lTm', 'Tadahiro Toriyama', 'Procurement', 3, '', '', '2025-06-10 10:51:38'),
+(15, 'procurement04', '$2y$10$SDG99lxnSWCGxZFsEx.Ml.WfAcG4G58hHgaAKbxdqNJ7wDtnqpPXu', 'Jainne Dela Rosa', 'Procurement', 2, '', '', '2025-06-10 10:52:48'),
+(16, 'oa12345', '$2y$10$H2QirAiL/i2HhqDEXmf4juR50KywHxHtAGUVZAvabfuUZn02Jp6tS', 'Richelyn Magno', '2nd Process - OA', 2, '', '', '2025-06-10 10:53:40'),
+(19, 'yazaki01', '$2y$10$7wy1HhSXVjAxTXVupLpmr.vkwM/mEiSOrDWtH8nQZy2FL.4IkHDge', 'Ruby Solis', '2nd Process - YAZAKI', 2, '', '', '2025-06-10 16:06:01');
 
 --
 -- Indexes for dumped tables

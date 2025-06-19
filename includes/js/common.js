@@ -64,6 +64,7 @@
                 data: {action: action},
                 dataType: 'json',
                 success: function(response){
+                  console.log(response);
                   if (response.status == 'success') {
                       Swal.fire({
                         icon: 'success',
@@ -71,7 +72,7 @@
                         showConfirmButton: false,
                         timer: 1500
                       }).then(() => {
-                        window.location.href = response.route; // Redirect after alert
+                        window.location.href = 'login.php'; // Redirect after alert
                       });                    
                   }
                 },
