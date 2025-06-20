@@ -7,10 +7,13 @@
     include_once './backend/Controller/dashboard_management.php';
     include_once './backend/Controller/request_management.php';
     include_once './backend/Model/usermodel.php';
+    require_once __DIR__ . '/./backend/websocket/WebSocketNotifier.php';
 
+    use WebSocket\WebSocketNotifier;
     $user_management = new UserManagement($db);
     $request_management = new RequestManagement($db);
     $dashboard_management = new DashboardManagement($db);
+    $notifier = new WebSocketNotifier("ws://192.168.101.195:8080");
 
     // Login Action
     if (!empty($_POST['action']) && $_POST['action'] === 'login') {
@@ -107,6 +110,19 @@
 
         // Send back summary response
         if ($success_count > 0 && $error_count === 0) {
+            // Notify WebSocket clients about the new request
+            $notifier->send(
+                'broadcast',
+                [
+                    'control_number' => $control_number,
+                    'item_requestor' => $requestor_name,
+                    'item_section' => $requestor_section,
+                    'date' => date('Y-m-d H:i:s'),
+                    'message' => "New request created with Control Number: $control_number"
+                ],
+                'Procurement' // Target section for the notification
+            );
+
             echo json_encode(['status' => 'success', 'message' => "All $success_count items submitted successfully."]);
         } elseif ($success_count > 0 && $error_count > 0) {
             echo json_encode(['status' => 'partial', 'message' => "$success_count succeeded, $error_count failed.", 'details' => $responses]);

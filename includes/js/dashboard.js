@@ -1,4 +1,50 @@
 $(document).ready(function() {
+
+    // Add this block inside your $(document).ready()
+const userSection = $('.chart-container').data('section'); // or from session
+const userRole = $('.chart-container').data('role') || 'User'; // optionally
+
+const socket = new WebSocket("ws://192.168.101.195:8080");
+
+socket.onopen = () => {
+    socket.send(JSON.stringify({
+        event: "auth",
+        section: userSection,
+        role: userRole
+    }));
+};
+
+socket.onmessage = function (event) {
+    console.log("Raw event data:", event.data); // DEBUG
+
+    const message = JSON.parse(event.data);
+    console.log("Parsed message:", message); // DEBUG
+
+    if (message.event === 'broadcast') {
+        const data = message.data;
+        // showToast(`New RFQ Created: ${data.control_number}`);
+        addActivityToTimeline(
+            'bi-file-earmark-plus',
+            `New RFQ created: ${data.control_number}`,
+            'Just now',
+            'text-primary'
+        );
+        populateTable();
+        updateSummaryOverview(currentYear, userSection);
+    }
+};
+
+
+socket.onerror = function (error) {
+    console.error('WebSocket error:', error);
+};
+
+socket.onclose = function () {
+    console.warn('WebSocket closed. Attempting to reconnect...');
+    setTimeout(() => location.reload(), 3000); // or attempt reconnect manually
+};
+
+
     // Initialize RFQ Status Chart
     let rfqChart = null; // Removed duplicate declaration
     
@@ -370,7 +416,9 @@ $(document).ready(function() {
                     showConfirmButton: false,
                     timer: 1500
                     }).then(() => {
-                    window.location.reload();
+                        $('#newRfqModal').modal('hide');
+                        populateTable();
+                        updateSummaryOverview(currentYear, section);
                     });
                 } else {
                     Swal.fire({
@@ -427,4 +475,21 @@ $(document).ready(function() {
             }
         });
     }
+
+    function addActivityToTimeline(icon, text, time, color = 'text-muted') {
+        const timelineItem = `
+            <div class="list-group-item border-0">
+                <div class="d-flex">
+                    <i class="bi ${icon} ${color} me-2"></i>
+                    <small>${text}</small>
+                </div>
+                <small class="text-muted">${time}</small>
+            </div>
+        `;
+
+        // Prepend so newest is on top
+        $('#activityTimeline').prepend(timelineItem);
+    }
+
+
 });

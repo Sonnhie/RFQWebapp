@@ -8,15 +8,17 @@
     require __DIR__ . '/../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
     require __DIR__ . '/../../vendor/phpmailer/phpmailer/src/SMTP.php';
     require __DIR__ . '/../../vendor/phpmailer/phpmailer/src/Exception.php';
-    
+    // require_once __DIR__ . '/../websocket/WebSocketNotifier.php';
 
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
     use Dotenv\Dotenv;
+    use WebSocket\WebSocketNotifier;
 
+    // $notifier = new WebSocketNotifier("ws://localhost:8080");
     $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
     $dotenv->load();
-
+   
     $database = new DBConnection();
     $db = $database->getConnection();
 
@@ -27,9 +29,10 @@
         private $requestLogs_table = 'request_logs_table';
         private $comparison_table = 'comparison_table';
         private $delivery_table = 'delivery_table';
-        private $conn;
+        private $conn;  
+        private $notifier;
 
-        public function __construct($db){
+        public function __construct($db) {
             $this->conn = $db;
         }
 
@@ -93,6 +96,7 @@
                 }
 
                 $this->conn->commit();
+
                 return [
                     'success' => true,
                     'message' => 'Request created successfully.'

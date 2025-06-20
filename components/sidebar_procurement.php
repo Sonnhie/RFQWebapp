@@ -59,7 +59,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="notification">
+                    <a class="nav-link text-white" href="#" data-page="verifier/notification">
                         <i class="bi bi-bell me-2" style="color: var(--icon-color);"></i>
                         Notification
                     </a>

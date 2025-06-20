@@ -182,10 +182,10 @@ body {
 
 .timeline-icon {
     position: absolute;
-    top: 20;
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
-    background: #fff;
+    background: transparent;
     border-radius: 50%;
     padding: 0.5rem;
     font-size: 1.4rem;

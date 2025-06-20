@@ -155,30 +155,10 @@
                             </button>
                         </div>
                         
-                        <!-- <h5 class="card-title mt-4">Activity Timeline</h5>
+                        <h5 class="card-title mt-4">Activity Timeline</h5>
                         <div class="list-group" id="activityTimeline">
-                             <div class="list-group-item border-0">
-                                <div class="d-flex">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                    <small>RFQ-2023-057 approved</small>
-                                </div>
-                                <small class="text-muted">2 hours ago</small>
-                            </div>
-                            <div class="list-group-item border-0">
-                                <div class="d-flex">
-                                    <i class="bi bi-file-earmark-plus text-primary me-2"></i>
-                                    <small>New RFQ created</small>
-                                </div>
-                                <small class="text-muted">Yesterday</small>
-                            </div>
-                            <div class="list-group-item border-0">
-                                <div class="d-flex">
-                                    <i class="bi bi-x-circle-fill text-danger me-2"></i>
-                                    <small>RFQ-2023-056 rejected</small>
-                                </div>
-                                <small class="text-muted">2 days ago</small>
-                            </div> 
-                        </div> -->
+                            <!-- Activity items will be dynamically inserted here -->
+                        </div>
                     </div>
                 </div>
             </div>
