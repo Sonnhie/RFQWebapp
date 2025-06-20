@@ -35,7 +35,7 @@
                             <i class="bi bi-building me-2" style="color: var(--icon-color);"></i>
                             RFQ Approval
                         </a>
-                    </li
+                    </li>
                 <?php
                     }
                 ?>
@@ -55,13 +55,13 @@
                 <li class="nav-item">
                     <a class="nav-link text-white" href="#" data-page="reports">
                         <i class="bi bi-clipboard-data me-2" style="color: var(--icon-color);"></i>
-                        Reports
+                        Timeline
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="settings">
-                        <i class="bi bi-gear me-2" style="color: var(--icon-color);"></i>
-                        Settings
+                    <a class="nav-link text-white" href="#" data-page="notification">
+                        <i class="bi bi-bell me-2" style="color: var(--icon-color);"></i>
+                        Notification
                     </a>
                 </li>
                 <li class="nav-item mt-auto">
