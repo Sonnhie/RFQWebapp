@@ -30,7 +30,7 @@
         <div class="row mb-5">
             <div class="col-md-6 col-lg-4">
                 <form id="controlNumberForm" class="input-group mb-2">
-                    <input type="text" class="form-control" id="controlNumberInput" placeholder="Enter Control Number" aria-label="Control Number">
+                    <input type="text" class="form-control" id="controlNumberInput" placeholder="Enter Control Number" aria-label="Control Number" autocomplete="off">
                     <button class="btn btn-primary" type="submit">Search</button>
                 </form>
                 <div id="rfqSuggestionList" class="list-group position-absolute z-3 w-50 " style="max-height: 200px; overflow-y: auto;"></div>

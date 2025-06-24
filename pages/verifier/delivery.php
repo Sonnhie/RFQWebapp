@@ -37,7 +37,7 @@
          <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="col-md-3 col-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Enter control number">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Enter control number" autocomplete="off">
                     <button class="btn btn-primary" type="button" id="searchButton">
                         <i class="bi bi-search"></i> Search
                     </button>

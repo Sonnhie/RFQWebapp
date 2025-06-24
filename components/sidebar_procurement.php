@@ -1,5 +1,12 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$section = $_SESSION['user']['department'] ?? '';
+$role = $_SESSION['user']['access_level'] ?? '';
+?>
 
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" data-section="<?= htmlspecialchars($section) ?>" data-role="<?= htmlspecialchars($role) ?>">
         <div class="sidebar-header p-3">
             <a href="#" class="d-flex align-items-center text-white text-decoration-none">
                 <i class="bi bi-file-earmark-text fs-4 me-2" style="color: var(--accent-color);"></i>
@@ -59,9 +66,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="verifier/notification">
-                        <i class="bi bi-bell me-2" style="color: var(--icon-color);"></i>
-                        Notification
+                    <a class="nav-link text-white d-flex align-items-center justify-content-between" href="#" data-page="verifier/notification">
+                        <span>
+                            <i class="bi bi-bell me-2" style="color: var(--icon-color);"></i>
+                            Notification
+                        </span>
+                        <span class="badge bg-danger ms-2" id="notificationBadge" ></span>
                     </a>
                 </li>
                 <li class="nav-item mt-auto">

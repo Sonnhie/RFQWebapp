@@ -27,17 +27,18 @@
 <!--Main Content-->
 <div class="card shadow-sm border-0">
     <div class="card-body">
+        
         <h5 class="card-title">Notifications</h5>
         <p class="card-text">You will receive notifications here.</p>
-        <div id="notification-list" class="list-group">
+        <div id="notification-list" class="list-group" data-section="<?php echo htmlspecialchars($_SESSION['user']['department'])?>" data-role ="<?php echo htmlspecialchars($_SESSION['user']['access_level'])?>">
             <!-- Notifications will be dynamically loaded here -->
         </div>
     </div>
 </div>
-<div>
+<!-- <div>
     <button id="send-notification" class="btn btn-primary mt-3">Send Notification</button>
     <button id="clear-notifications" class="btn btn-secondary mt-3">Clear Notifications</button>
-</div>
+</div> -->
 
 
 <script src="./includes/js/notification.js"></script>

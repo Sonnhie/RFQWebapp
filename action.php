@@ -13,7 +13,7 @@
     $user_management = new UserManagement($db);
     $request_management = new RequestManagement($db);
     $dashboard_management = new DashboardManagement($db);
-    $notifier = new WebSocketNotifier("ws://192.168.101.195:8080");
+    $notifier = new WebSocketNotifier("ws://192.168.101.49:8080");
 
     // Login Action
     if (!empty($_POST['action']) && $_POST['action'] === 'login') {
@@ -110,9 +110,18 @@
 
         // Send back summary response
         if ($success_count > 0 && $error_count === 0) {
+            // Create a new request log entry for the successful submission
+            $notification = [
+                'control_number' => $control_number,
+                'message' => "New request created by " . $requestor_section . " with Control Number: " . $control_number,
+                'section' => $requestor_section,
+            ];
+
+            $result = $request_management->InsertNotificationMessage($notification);
+
             // Notify WebSocket clients about the new request
             $notifier->send(
-                'broadcast',
+                'new_request',
                 [
                     'control_number' => $control_number,
                     'item_requestor' => $requestor_name,
@@ -1046,5 +1055,27 @@
             'message' => $response['message'],
             'logs' => $response['logs']
         ]);
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'get_notification') {
+        header('Content-Type: application/json');
+
+        $section = isset($_POST['section']) ? $_POST['section'] : null;
+        
+        if (empty($section)) {
+            echo json_encode(['status' => 'error', 'message' => 'Section is required']);
+            exit;
+        }
+
+        $notifications = $request_management->getNotifications($section);
+
+        if ($notifications) {
+            echo json_encode([
+                'status' => 'success',
+                'data' => $notifications
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No notifications found']);
+        }
     }
 ?>  

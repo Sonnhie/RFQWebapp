@@ -29,6 +29,7 @@
         private $requestLogs_table = 'request_logs_table';
         private $comparison_table = 'comparison_table';
         private $delivery_table = 'delivery_table';
+        private $notification_table = "notification_table";
         private $conn;  
         private $notifier;
 
@@ -1002,5 +1003,68 @@
 
         }
 
+        public function InsertNotificationMessage($data){
+            if (empty($data)) {
+                return [
+                    'success' => false,
+                    'message' => 'Empty or null data.'
+                ];
+                exit;
+            }
+            
+            try{
+                $query = "INSERT INTO {$this->notification_table} (control_number, message, section) 
+                          VALUES (:control_number, :message, :section)";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':control_number', $data['control_number'], PDO::PARAM_STR);
+                $stmt->bindParam(':message', $data['message'], PDO::PARAM_STR);
+                $stmt->bindParam(':section', $data['section'], PDO::PARAM_STR);
+
+                if ($stmt->execute()) {
+                    return [
+                        'success' => true,
+                        'message' => 'Notification message successfully inserted.'
+                    ];
+                } else {
+                    return [
+                        'success' => false,
+                        'message' => 'Failed to insert notification message.'
+                    ];
+                }
+            }catch(Exception $e){
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+            }
+            
+        }
+
+        public function getNotifications($section){
+
+            try{
+                $query = "SELECT * FROM {$this->notification_table} where section <> :section ORDER BY created_at DESC limit 20";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':section', $section, PDO::PARAM_STR);
+
+                if (!$stmt->execute()) {
+                    throw new Exception('Failed to execute query.');
+                }
+
+                $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                return [
+                    'success' => true,
+                    'message' => 'Notifications successfully fetched.',
+                    'notifications' => $notifications
+                ];
+                
+            }catch(Exception $e){
+                return [
+                    'success' => false,
+                    'message' => 'Internal server error: ' . $e->getMessage()
+                ];
+            }
+        }
     }
 ?>

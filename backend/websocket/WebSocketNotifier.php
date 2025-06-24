@@ -7,7 +7,7 @@
    class WebSocketNotifier {
         private $wsUrl;
 
-        public function __construct($wsUrl = "ws://192.168.101.195:8080") {
+        public function __construct($wsUrl = "ws://192.168.101.49:8080") {
             $this->wsUrl = $wsUrl;
         }
 

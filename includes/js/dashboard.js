@@ -4,7 +4,7 @@ $(document).ready(function() {
 const userSection = $('.chart-container').data('section'); // or from session
 const userRole = $('.chart-container').data('role') || 'User'; // optionally
 
-const socket = new WebSocket("ws://192.168.101.195:8080");
+const socket = new WebSocket("ws://192.168.101.49:8080");
 
 socket.onopen = () => {
     socket.send(JSON.stringify({
@@ -182,42 +182,42 @@ socket.onclose = function () {
         // Generate report logic here
     });
     
-    // Sample activity feed update
-    function updateActivityFeed() {
-        const activities = [
-            {
-                icon: 'bi-check-circle-fill text-success',
-                text: 'RFQ-2023-058 submitted for approval',
-                time: 'Just now'
-            },
-            {
-                icon: 'bi-person-plus-fill text-info',
-                text: 'New vendor added: Office Supplies Co.',
-                time: '30 minutes ago'
-            },
-            {
-                icon: 'bi-file-earmark-text text-primary',
-                text: 'RFQ-2023-057 updated',
-                time: '1 hour ago'
-            }
-        ];
+    // // Sample activity feed update
+    // function updateActivityFeed() {
+    //     const activities = [
+    //         {
+    //             icon: 'bi-check-circle-fill text-success',
+    //             text: 'RFQ-2023-058 submitted for approval',
+    //             time: 'Just now'
+    //         },
+    //         {
+    //             icon: 'bi-person-plus-fill text-info',
+    //             text: 'New vendor added: Office Supplies Co.',
+    //             time: '30 minutes ago'
+    //         },
+    //         {
+    //             icon: 'bi-file-earmark-text text-primary',
+    //             text: 'RFQ-2023-057 updated',
+    //             time: '1 hour ago'
+    //         }
+    //     ];
         
-        // Prepend new activity
-        activities.forEach(activity => {
-            $('#activityTimeline').prepend(
-                $('<div class="list-group-item border-0">').append(
-                    $('<div class="d-flex overflow-scroll">').append(
-                        $('<i class="me-2">').addClass(activity.icon),
-                        $('<small>').text(activity.text)
-                    ),
-                    $('<small class="text-muted">').text(activity.time)
-                )
-            );
-        });
-    }
+    //     // Prepend new activity
+    //     activities.forEach(activity => {
+    //         $('#activityTimeline').prepend(
+    //             $('<div class="list-group-item border-0">').append(
+    //                 $('<div class="d-flex overflow-scroll">').append(
+    //                     $('<i class="me-2">').addClass(activity.icon),
+    //                     $('<small>').text(activity.text)
+    //                 ),
+    //                 $('<small class="text-muted">').text(activity.time)
+    //             )
+    //         );
+    //     });
+    // }
     
-    // Simulate periodic activity updates
-    setInterval(updateActivityFeed, 2400000);
+    // // Simulate periodic activity updates
+    // setInterval(updateActivityFeed, 2400000);
     
     // Card hover effects
     $('.dashboard-card').hover(
