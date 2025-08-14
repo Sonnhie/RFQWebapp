@@ -3,10 +3,13 @@ $(document).ready(function () {
    // const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
    // $('#fromDateFilter').attr('max', today).val(today);
     //$('#toDateFilter').attr('max', today).val(today);
-
+    const $name = $('#requestTableBody').data('name');
+    const $role = $('#requestTableBody').data('role');
+    console.log($name, $role);
     // Initialize the table
     populateTable();
     //paginateTable();
+
  
 
     // Populate the table
@@ -24,7 +27,8 @@ $(document).ready(function () {
             from: FromdateRange,
             to: TodateRange,
             status: status,
-            search: searchQuery
+            search: searchQuery,
+            role: $role
         };
 
         const $tbody = $('#requestTableBody');
@@ -41,18 +45,18 @@ $(document).ready(function () {
         $tbody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
-            data: { action: 'get_itemsbycontrolnumber', section: section, filters: filters, page: page },
+            data: { action: 'get_sectionapproval', section: section, filters: filters, page: page },
             dataType: 'json',
             success: function (response) {
                 $tbody.empty(); // Clear loading spinner
 
-                //console.log('Response from server:', response);
-                //console.log(response.total, response.perPage);
+                console.log('Response from server:', response);
+                console.log(response.total, response.perPage);
                 if (response.status === 'success') {
                     response.data.forEach(item => {
-                          const statusClasses = {
+                        const statusClasses = {
                             'Approved': 'badge-approved',
                             'Pending': 'badge-pending',
                             'Rejected': 'badge-rejected',
@@ -62,34 +66,30 @@ $(document).ready(function () {
                         const statusBadge = `<span class="status-badge ${statusClasses[item.requestor_status] || ''}">${item.requestor_status}</span>`;
 
                         const itemsButton = `<button class="btn btn-sm btn-primary me-3" data-bs-toggle="modal" data-bs-target="#itemsRfqModal" data-id=${item.control_number} id="itemview_btn">
-                                            <i class="bi bi-card-checklist"></i>
+                                            <i class="bi bi-card-checklist"></i> View Items
                                             </button>`;
-                        const approvedButton = `<button class="btn btn-sm btn-success me-3" data-id=${item.control_number} id="approve_btn">
-                                            <i class="bi bi-check2"></i>
+                        const approvedButton = `<button class="btn btn-sm btn-success me-3" data-id=${item.control_number} data-sectionrequest=${item.requestor_section} id="approve_btn">
+                                            <i class="bi bi-check2"></i> Approve
                                             </button>`;
-                        const declinedButton = `<button class="btn btn-sm btn-danger me-3" data-id=${item.control_number} id="decline_btn">
-                                            <i class="bi bi-x-circle"></i>
+                        const holdButton = `<button class="btn btn-sm btn-danger me-3" data-id=${item.control_number} data-sectionrequest=${item.requestor_section} id="decline_btn">
+                                            <i class="bi bi-slash-circle"></i> Hold
                                             </button>`;
-                        // const emailButton = `<button class="btn btn-sm btn-secondary me-3" data-id=${item.control_number} id="email_btn">
-                        //                     <i class="bi bi-envelope"></i>
-                        //                     </button>`;
 
                         const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
                                 <td>${statusBadge}</td>
                                 <td>${item.item_remarks}</td>
+                                <td>${item.requestor_section}</td>
                                 <td>${item.created_at}</td>
                                 <td>
                                     ${itemsButton}
                                     ${approvedButton}
-                                    ${declinedButton}
+                                    ${holdButton}
                                 </td>
                             </tr>
                         `);
-                        if (item.item_remarks == 'For Section head approval' && item.requestor_status == 'Pending') {
-                            $tbody.append($row);
-                        }
+                        $tbody.append($row);
                         
                     });
                     const totalPages = Math.ceil(response.total / response.perPage);
@@ -158,7 +158,7 @@ $(document).ready(function () {
         $itemsTableBody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_single_items', control_number: controlNumber },
             dataType: 'json',
@@ -222,20 +222,42 @@ $(document).ready(function () {
         const itemId = $(this).data('id');
         console.log('this is clicked');
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_item_details', id: itemId },
             dataType: 'json',
             success: function(response){
-                console.log('Response from server:', response);
-                if (response.status === 'success') {
-                    const base64 = response.data.file_content;
-                    const mimeType = response.data.file_type;
-        
-                    $('#attachment_viewer').attr('src', `data:${mimeType};base64,${base64}`);
+            if (response.status === 'success') {
+                const base64 = response.data.file_content;
+                const mimeType = response.data.file_type;
+                const fileName = response.data.file_name || 'downloaded_file';
+
+                // Define image types
+                const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+                if (imageTypes.includes(mimeType)) {
+                    // Show image in the viewer
+                    $('#attachment_viewer')
+                        .attr('src', `data:${mimeType};base64,${base64}`)
+                        .show();
+                    
+                    // Hide download link if previously shown
+                    $('#download_link').hide();
                 } else {
-                    alert(response.message);
+                    // Hide image viewer
+                    $('#attachment_viewer').hide();
+
+                    // Create download link
+                    const blobUrl = `data:${mimeType};base64,${base64}`;
+                    $('#download_link')
+                        .attr('href', blobUrl)
+                        .attr('download', fileName)
+                        .text(`File is not an image type (${mimeType}). Click here to download the file`)
+                        .show();
                 }
+            } else {
+                alert(response.message);
+            }
             },
             error: function(xhr, status, error){
                 console.error('AJAX error:', status, error);
@@ -282,6 +304,9 @@ $(document).ready(function () {
         const controlNumber = $(this).data('id');
         const remarks = 'For Procurement Verification';
         const status = 'Pending';
+        const section = $('#requestTableBody').data('section');
+        const mainaddress = $(this).data('sectionrequest');
+        console.log('sender: ', section, 'receiver: ',mainaddress);
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to approve this request?",
@@ -292,10 +317,27 @@ $(document).ready(function () {
             confirmButtonText: 'Yes, approve it!'
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we create the comparison.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 $.ajax({
-                    url: './action.php',
+                    url: '././backend/Route/requestRouteAction.php',
                     type: 'POST',
-                    data: { action: 'sectionapprove_request', control_number: controlNumber, remarks: remarks, status: status },
+                    data: { 
+                        action: 'update_request', 
+                        control_number: controlNumber, 
+                        remarks: remarks, 
+                        status: status, 
+                        section: section,
+                        main: mainaddress
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.status === 'success') {
@@ -328,27 +370,56 @@ $(document).ready(function () {
 
     $('#requestTableBody').on('click', '#decline_btn', function() {
         const controlNumber = $(this).data('id');
-        const remarks = 'Declined by Section Head';
-        const status = 'Rejected';
+        const mainaddress = $(this).data('sectionrequest');
+        const section = $('#requestTableBody').data('section');
+        // const remarks = 'Hold by Section Head';
+        const status = 'Hold';
         Swal.fire({
             title: 'Are you sure?',
-            text: "You want to decline this request?",
+            text: "You want to hold this request?",
             icon: 'warning',
+            input: 'text',
+            inputLabel: 'Remarks',
+            inputPlaceholder: 'Enter remarks here...',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, decline it!'
+            confirmButtonText: 'Yes, hold it!',
+            preConfirm: (remarks) => {
+                if (!remarks) {
+                    Swal.ValidationMessage('Remarks Required');
+                    return false;
+                }
+                return remarks;
+            }
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we create the comparison.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                const remarksinput = result.value;
                 $.ajax({
-                    url: './action.php',
+                    url: '././backend/Route/requestRouteAction.php',
                     type: 'POST',
-                    data: { action: 'sectiondecline_request', control_number: controlNumber, remarks: remarks, status: status },
+                    data: { 
+                        action: 'update_request', 
+                        control_number: controlNumber, 
+                        remarks: remarksinput, 
+                        status: status,
+                        section: section,
+                        main: mainaddress                    
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.status === 'success') {
                             Swal.fire(
-                                'Declined!',
+                                'Hold!',
                                 response.message,
                                 'success'
                             );

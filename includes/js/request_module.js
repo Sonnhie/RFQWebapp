@@ -1,8 +1,5 @@
 $(document).ready(function () {
     const page = 1;
-   // const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-   // $('#fromDateFilter').attr('max', today).val(today);
-    //$('#toDateFilter').attr('max', today).val(today);
 
     // Initialize the table
     populateTable(page);
@@ -51,9 +48,19 @@ $(document).ready(function () {
         console.log(formData);
         //debugFormData(formData);
 
+        // const attachment = $('input[name="item-attachment[]"]')[0];
+        // if (attachment.size > 40 * 1024 * 1024) { // Check if the file size exceeds 10MB
+        //     Swal.fire({
+        //         icon: 'error',
+        //         title: 'File Size Error',
+        //         text: 'The attachment exceeds the maximum allowed size of 40MB.',
+        //     });
+        //     return;
+        // }
+
         // Ajax request to submit the form data
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: formData,
             processData: false,
@@ -124,14 +131,10 @@ $(document).ready(function () {
     // Populate the table
     function populateTable(page = 1) {
         const section = $('#requestTableBody').data('section');
-        console.log('Section:', section);
         const status = $('#statusFilter').val();
         const FromdateRange = $('#fromDateFilter').val();
         const TodateRange = $('#toDateFilter').val();
         const searchQuery = $('#searchInput').val().toLowerCase();
-        
-        console.log(status, FromdateRange, TodateRange, searchQuery);
-
         const filters = {
             from: FromdateRange,
             to: TodateRange,
@@ -153,15 +156,16 @@ $(document).ready(function () {
         $tbody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_items', section: section, filters: filters, page: page },
             dataType: 'json',
             success: function (response) {
+                // console.log(response);
                 $tbody.empty(); // Clear loading spinner
 
-                console.log('Response from server:', response);
-                console.log(response.total, response.perPage);
+                // console.log('Response from server:', response);
+                // console.log(response.total, response.perPage);
                 if (response.status === 'success') {
                     response.data.forEach(item => {
                         const statusClasses = {
@@ -171,7 +175,7 @@ $(document).ready(function () {
                              'Hold': 'badge-hold'
                         };
 
-                        const isDisabled = (item.requestor_status === 'Approved' || item.requestor_status === 'Rejected');
+                        const isDisabled = (item.requestor_status === 'Approved');
                         const statusBadge = `<span class="status-badge ${statusClasses[item.requestor_status] || ''}">${item.requestor_status}</span>`;
                         const editButton = `<button class="btn btn-sm btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#editRfqModal" data-id=${item.id} id="edit_btn" ${isDisabled ? 'disabled' : ''}>
                                                 <i class="bi bi-pencil"></i>
@@ -191,7 +195,9 @@ $(document).ready(function () {
                                 <td>${item.item_purpose}</td>
                                 <td>${item.item_quantity}</td>
                                 <td>${item.item_unit}</td>
+                                <td>${item.requestor_section}</td>
                                 <td>${statusBadge}</td>
+                                <td>${item.requestor_name}</td>
                                 <td>${item.item_remarks}</td>
                                 <td>${item.created_at}</td>
                                 <td>
@@ -254,10 +260,9 @@ $(document).ready(function () {
     }
 
     function deleteItem(itemId) {
-
         // Ajax request to delete the item
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'delete_item', id: itemId },
             dataType: 'json',
@@ -292,7 +297,7 @@ $(document).ready(function () {
     function editItem(formData) {
         // Ajax request to edit the item
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: formData,
             processData: false,
@@ -363,14 +368,24 @@ $(document).ready(function () {
        $('#editRfqModal').data('itemId', itemId);
     });
 
+    // Edit item form submission
     $('#edit_request').submit(function (e) {
         e.preventDefault();
+
         const itemId = $('#editRfqModal').data('itemId');
-        const itemName = $('#item_name').val();
-        //console.log(itemId);
         const formData = new FormData($('#edit_request')[0]);
         formData.append('action', 'edit_request');
         formData.append('item_id', itemId);
+
+        const attachment = $('input[name="item_attachment[]"]')[0];
+        if (attachment.size > 10 * 1024 * 1024) { // Check if the file size exceeds 10MB
+            Swal.fire({
+                icon: 'error',
+                title: 'File Size Error',
+                text: 'The attachment exceeds the maximum allowed size of 40MB.',
+            });
+            return;
+        }
         
         debugFormData(formData);
 
@@ -392,22 +407,47 @@ $(document).ready(function () {
 
     $('#requestTableBody').on('click', '#view_btn', function(){
         const itemId = $(this).data('id');
-        console.log('this is clicked');
+        // console.log('this is clicked');
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_item_details', id: itemId },
             dataType: 'json',
             success: function(response){
-                console.log('Response from server:', response);
-                if (response.status === 'success') {
-                    const base64 = response.data.file_content;
-                    const mimeType = response.data.file_type;
-        
-                    $('#attachment_viewer').attr('src', `data:${mimeType};base64,${base64}`);
+            // console.log('Response from server:', response);
+
+            if (response.status === 'success') {
+                const base64 = response.data.file_content;
+                const mimeType = response.data.file_type;
+                const fileName = response.data.file_name || 'downloaded_file';
+
+                // Define image types
+                const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+                if (imageTypes.includes(mimeType)) {
+                    // Show image in the viewer
+                    $('#attachment_viewer')
+                        .attr('src', `data:${mimeType};base64,${base64}`)
+                        .show();
+                    
+                    // Hide download link if previously shown
+                    $('#download_link').hide();
                 } else {
-                    alert(response.message);
+                    // Hide image viewer
+                    $('#attachment_viewer').hide();
+
+                    // Create download link
+                    const blobUrl = `data:${mimeType};base64,${base64}`;
+                    $('#download_link')
+                        .attr('href', blobUrl)
+                        .attr('download', fileName)
+                        .text(`File is not an image type (${mimeType}). Click here to download the file`)
+                        .show();
                 }
+            } else {
+                alert(response.message);
+            }
+
             },
             error: function(xhr, status, error){
                 console.error('AJAX error:', status, error);
@@ -429,9 +469,19 @@ $(document).ready(function () {
         populateTable();
     });  
 
-    $('#searchInput').on('input', function() {
-        populateTable();
-    });
+    function debounce(func, delay) {
+        let timeout;
+        return function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(func, delay);
+        };
+    }
+
+
+    const debouncedPopulate = debounce(populateTable, 1000);
+
+    $('#searchInput').on('input', debouncedPopulate);
+
         
     // Clear Filters button
     $('.btn-outline-danger').on('click', function() {

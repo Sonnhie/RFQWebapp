@@ -1,10 +1,14 @@
 <?php
     session_start();
+    require __DIR__ . '/vendor/autoload.php';
 
-    include_once './database/dbconnection.php';
-    include_once './backend/Controller/user_management.php';
+    use Database\dbconnection;
+    use App\Controller\QueryBuilder;
+    use App\Controller\user_management;
+    $database = new dbconnection();
+    $db = $database->getConnection();
 
-    $usermanagement = new UserManagement($db);
+    $usermanagement = new user_management($db);
 
     if (!empty($_POST['action']) && $_POST['action'] == 'get_userlist') {
         header('Content-Type: application/json');

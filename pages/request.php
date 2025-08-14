@@ -10,33 +10,32 @@
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Welcome, 
             <?php
-                if ($_SESSION['user']['access_level'] == 'Admin') {
-                    echo 'Administrator';
-                } else {
-                    echo 'Client';
-                }
+                echo htmlspecialchars($_SESSION['user']['name']);
             ?>
         </h5>
         <div class="d-flex align-items-center">
             <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
             <span class="ms-2 fw-semibold">
                 <?php
-                    echo htmlspecialchars($_SESSION['user']['name']);
+                   if ($_SESSION['user']['access_level'] == 'Admin') {
+                        echo 'Administrator';
+                    } else {
+                        echo 'Client';
+                    }
                 ?>
             </span>
         </div>
     </div>
 </div>
 <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Request for Quotations</h2>
-            <button class="btn btn-primary btn-new-rfq" data-bs-toggle="modal" data-bs-target="#newRfqModal">
-                <i class="bi bi-plus-circle me-2"></i> Create New RFQ
-            </button>
+    <h2 class="mb-0">Request for Quotations</h2>
+    <button class="btn btn-primary btn-new-rfq" data-bs-toggle="modal" data-bs-target="#newRfqModal">
+        <i class="bi bi-plus-circle me-2"></i> Create New RFQ
+    </button>
 </div>
-        <div class="card shadow-sm mb-4 border-0">
-            <div class="card-body p-3 bg-light">
-                <div class="row g-3 align-items-end">
-             
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body p-3 bg-light">
+        <div class="row g-3 align-items-end"> 
                     <!-- Status Filter -->
                     <div class="col-md-3 col-6">
                         <label for="statusFilter" class="form-label small fw-bold text-muted mb-1">STATUS</label>
@@ -49,6 +48,7 @@
                                 <option value="Pending" class="text-warning">Pending</option>
                                 <option value="Approved" class="text-success">Approved</option>
                                 <option value="Rejected" class="text-danger">Rejected</option>
+                                <option value="Hold" class="text-primary">Hold</option>
                             </select>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                         </div>
                     </div>
                 </div>
-                
+    
                     <!-- Action Buttons Row -->
                     <div class="row mt-3">
                         <div class="col-12 d-flex justify-content-end">
@@ -106,16 +106,18 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table rfq-table table-hover">
+                    <table class="table rfq-table table-hover overflow-auto">
                         <thead>
                             <tr>
-                                <th>RFQ #</th>
+                                <th>Control Number</th>
                                 <th>Item Name</th>
                                 <th>Description</th>
                                 <th>Purpose</th>
                                 <th>Quantity</th>
                                 <th>Unit</th>
+                                <th>Section</th>
                                 <th>Status</th>
+                                <th>Requestor</th>
                                 <th>Remarks</th>
                                 <th>Date Requested</th>
                                 <th>Actions</th>
@@ -123,7 +125,8 @@
                         </thead>
                         <tbody id="requestTableBody" data-section="<?php echo $_SESSION['user']['department']; ?>">
                         </tbody>
-                        <tfoot>
+                    </table>
+                    <div>
                             <tr>
                                 <td colspan="10" class="text-center">
                                     <nav aria-label="Page navigation">
@@ -133,17 +136,16 @@
                                     </nav>
                                 </td>
                             </tr>
-                        </tfoot>
-                    </table>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- New RFQ Modal -->
-        <div class="modal fade rfq-modal" id="newRfqModal" tabindex="-1" aria-labelledby="newRfqModalLabel" aria-hidden="true">
+          <!-- New RFQ Modal -->
+         <div class="modal fade rfq-modal" id="newRfqModal" tabindex="-1" aria-labelledby="newRfqModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
+                    <div class="modal-header">
                         <h5 class="modal-title" id="newRfqModalLabel">
                             <i class="bi bi-file-earmark-plus me-2"></i> Create New RFQ
                         </h5>
@@ -192,39 +194,12 @@
                                                 <td><input type="number" class="form-control form-control-sm"  name="item_quantity[]" placeholder="Qty" required></td>
                                                 <td>
                                                     <select class="form-select form-select-sm" name="item_unit[]">
-                                                        <option value="">Select Unit</option>
                                                         <option value="Piece">Piece</option>
                                                         <option value="Box">Box</option>
                                                         <option value="Meter">Meter</option>
                                                         <option value="Set">Set</option>
                                                         <option value="Gallon">Gallon</option>
                                                         <option value="Sack">Sack</option>
-                                                        <option value="Pack">Pack</option>
-                                                        <option value="Roll">Roll</option>
-                                                        <option value="Liter">Liter</option>
-                                                        <option value="Milliliter">Milliliter</option>
-                                                        <option value="Kilogram">Kilogram</option>
-                                                        <option value="Gram">Gram</option>
-                                                        <option value="Pound">Pound</option>
-                                                        <option value="Ounce">Ounce</option>
-                                                        <option value="Can">Can</option>
-                                                        <option value="Bottle">Bottle</option>
-                                                        <option value="Bag">Bag</option>
-                                                        <option value="Carton">Carton</option>
-                                                        <option value="Dozen">Dozen</option>
-                                                        <option value="Pair">Pair</option>
-                                                        <option value="Feet">Feet</option>
-                                                        <option value="Inch">Inch</option>
-                                                        <option value="Yard">Yard</option>
-                                                        <option value="Sheet">Sheet</option>
-                                                        <option value="Tube">Tube</option>
-                                                        <option value="Bundle">Bundle</option>
-                                                        <option value="Ream">Ream</option>
-                                                        <option value="Tablet">Tablet</option>
-                                                        <option value="Strip">Strip</option>
-                                                        <option value="Kit">Kit</option>
-                                                        <option value="Case">Case</option>
-                                                        <option value="Tray">Tray</option>
                                                     </select>
                                                 </td>
                                                 <td><input class="form-control" type="file" id="attachment" name="item-attachment[]" required></td>
@@ -303,13 +278,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <!-- <div class="row mb-3">       
+                            <div class="row mb-3">       
                                 <div class="col-md-12">
                                     <label for="item_attachment" class="form-label">Attachment</label>
                                     <input class="form-control" type="file" id="item_attachment" name="item_attachment" required>
                                     <small class="text-muted">Upload specifications, drawings, or other documents</small>
                                 </div>
-                            </div> -->
+                            </div>
  
                         </div>
                         <div class="modal-footer">
@@ -336,6 +311,7 @@
                         <div class="col-md-12">
                         <div class="d-flex justify-content-center align-items-center" style="height: 500px;">
                             <img id="attachment_viewer" src="" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                            <a id="download_link" href="#" style="display:none;" target="_blank"></a>
                         </div>
                         </div>
                     </div>

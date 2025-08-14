@@ -31,7 +31,7 @@ $(document).ready(function () {
         
         // Perform AJAX request to login
         $.ajax({
-            url: './action.php',
+            url: './backend/Route/requestRouteAction.php',
             type: 'POST',
             data: {
                 action: action,

@@ -1,253 +1,164 @@
-$(document).ready(function() {
+$(document).ready(function(){
 
-    // Add this block inside your $(document).ready()
-const userSection = $('.chart-container').data('section'); // or from session
-const userRole = $('.chart-container').data('role') || 'User'; // optionally
-
-const socket = new WebSocket("ws://192.168.101.49:8080");
-
-socket.onopen = () => {
-    socket.send(JSON.stringify({
-        event: "auth",
-        section: userSection,
-        role: userRole
-    }));
-};
-
-socket.onmessage = function (event) {
-    console.log("Raw event data:", event.data); // DEBUG
-
-    const message = JSON.parse(event.data);
-    console.log("Parsed message:", message); // DEBUG
-
-    if (message.event === 'broadcast') {
-        const data = message.data;
-        // showToast(`New RFQ Created: ${data.control_number}`);
-        addActivityToTimeline(
-            'bi-file-earmark-plus',
-            `New RFQ created: ${data.control_number}`,
-            'Just now',
-            'text-primary'
-        );
-        populateTable();
-        updateSummaryOverview(currentYear, userSection);
-    }
-};
-
-
-socket.onerror = function (error) {
-    console.error('WebSocket error:', error);
-};
-
-socket.onclose = function () {
-    console.warn('WebSocket closed. Attempting to reconnect...');
-    setTimeout(() => location.reload(), 3000); // or attempt reconnect manually
-};
-
-
-    // Initialize RFQ Status Chart
-    let rfqChart = null; // Removed duplicate declaration
-    
-    // const currentYear = new Date().getFullYear();
-    const currentYear = $('.year-option').data('year');
+    const role = $('.chart-container').data('role');
     const section = $('.chart-container').data('section');
-
-    // $('#selectedYear').text(currentYear); // Set default visible label
-    // console.log("Current year:", currentYear);
+    const $tbody = $('#rfqTableBody');
+    const now = new Date();
+    const month = now.toLocaleString('default', { month: 'long' });
+    let rfqChartInstance = null;
     
-    // Load data for the default year
-    loadChartData(currentYear, section);
-    updateSummaryOverview(currentYear,section);
-
-    $(document).on('click', '.year-option', function (e) {
-        e.preventDefault(); // Prevent default anchor behavior
-        const selectedYear = $(this).data('year');
-        $('#selectedYear').text(selectedYear); // Update the visible label
-        
-        // console.log("Selected section:", section);
-
-        // console.log("Selected year:", selectedYear);
-    
-        
-        loadChartData(selectedYear, section);
-        updateSummaryOverview(selectedYear, section);
-    });
-    
-    // Load chart data based on the selected year
-    function loadChartData(year, section) {
-        // console.log("Loading chart data for year:", year, "and section:", section);
-        $.ajax({
-            url: './action.php',
-            type: 'POST',
-            data: { action: 'get_chart_data', section: section, year: year },
-            dataType: 'json',
-            success: function (response) {
-                // console.log('Chart data response:', response);
-                if (response.status === 'success') {
-                    if (rfqChart) {
-                        rfqChart.destroy(); // Destroy the previous chart instance
-                        rfqChart = null; // Reset the chart variable
-                    }
-
-                    // Create a new chart instance
-                    const ctx = $('#rfqChart')[0].getContext('2d');
-
-                    // Set the chart data
-                    rfqChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                            datasets: [
-                                {
-                                    label: 'Approved',
-                                    data: response.approved,
-                                    backgroundColor: '#007bff',
-                                    borderRadius: 4
-                                },
-                                {
-                                    label: 'Pending',
-                                    data: response.pending,
-                                    backgroundColor: '#ffc107',
-                                    borderRadius: 4
-                                },
-                                {
-                                    label: 'Rejected',
-                                    data: response.rejected,
-                                    backgroundColor: '#dc3545',
-                                    borderRadius: 4
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                x: {
-                                    grid: {
-                                        display: false
-                                    }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    grid: {
-                                        color: '#e9ecef'
-                                    }
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                    align: 'end'
-                                },
-                                tooltip: {
-                                    backgroundColor: '#2d3748',
-                                    titleFont: {
-                                        weight: 'bold'
-                                    },
-                                    bodyFont: {
-                                        size: 14
-                                    },
-                                    padding: 12,
-                                    cornerRadius: 8
-                                }
-                            }
-                        }
-                    });
-                    
-                } else {
-                    console.error('Error fetching chart data:', response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('AJAX error:', status, error);
-            }
-        })
-    }
-    
-    // Initialize RFQ table 
-    populateTable();
-
-    // Button click handlers
-    $('#newRfqBtn').click(function() {
-        $('#newRfqModal').modal('show');
-    });
-    
-    $('#manageVendorsBtn').click(function() {
-        alert('Redirecting to vendor management page');
-        // window.location.href = '/vendors';
-    });
-    
-    $('#generateReportBtn').click(function() {
-        alert('Generating RFQ report...');
-        // Generate report logic here
-    });
-    
-    // // Sample activity feed update
-    // function updateActivityFeed() {
-    //     const activities = [
-    //         {
-    //             icon: 'bi-check-circle-fill text-success',
-    //             text: 'RFQ-2023-058 submitted for approval',
-    //             time: 'Just now'
-    //         },
-    //         {
-    //             icon: 'bi-person-plus-fill text-info',
-    //             text: 'New vendor added: Office Supplies Co.',
-    //             time: '30 minutes ago'
-    //         },
-    //         {
-    //             icon: 'bi-file-earmark-text text-primary',
-    //             text: 'RFQ-2023-057 updated',
-    //             time: '1 hour ago'
-    //         }
-    //     ];
-        
-    //     // Prepend new activity
-    //     activities.forEach(activity => {
-    //         $('#activityTimeline').prepend(
-    //             $('<div class="list-group-item border-0">').append(
-    //                 $('<div class="d-flex overflow-scroll">').append(
-    //                     $('<i class="me-2">').addClass(activity.icon),
-    //                     $('<small>').text(activity.text)
-    //                 ),
-    //                 $('<small class="text-muted">').text(activity.time)
-    //             )
-    //         );
-    //     });
-    // }
-    
-    // // Simulate periodic activity updates
-    // setInterval(updateActivityFeed, 2400000);
-    
-    // Card hover effects
-    $('.dashboard-card').hover(
-        function() {
-            $(this).css('transform', 'translateY(-3px)')
-                   .css('box-shadow', '0 5px 15px rgba(0, 0, 0, 0.1)');
-        },
-        function() {
-            $(this).css('transform', '')
-                   .css('box-shadow', '');
-        }
-    );
-
-     // Populate the table
-     function populateTable(page = 1) {
-        const section = $('#rfqTableBody').data('section');
-
-        const today = new Date();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(today.getDate() - 6);
-        
-        const toDate = today.toISOString().split('T')[0];
-        const fromDate = sevenDaysAgo.toISOString().split('T')[0];
-
-        const filters = {
-            from: fromDate,
-            to: toDate
+    function InitializeBarChart() {
+        const year = $('#yearSelect').val();
+        const $data = {
+            role: role,
+            section: section,
+            year: year
         };
 
-        const $tbody = $('#rfqTableBody');
+        if (rfqChartInstance != null) {
+                    rfqChartInstance.destroy();
+        }
+
+        $.ajax({
+            url: './backend/Route/requestRouteAction.php',
+            type: 'POST',
+            data: {
+                action: 'get_chart_data',
+                data: $data
+            },
+            dataType: 'json',
+            success: function(response) {
+                
+
+
+                if (response.status !== "success") {
+                    console.log("No data from server:", response);
+                    return;
+                }
+
+                // Month labels: Jan, Feb, Mar...
+                const chartLabels = generateMonthLabels();
+
+                // Assign data from server
+                const chartCompleted = response.Completed;
+                const chartPending = response.Pending;
+                const chartHold = response.Rejected;
+                const ctx = document.getElementById('rfqChart').getContext('2d');
+
+                rfqChartInstance =  new Chart(ctx, {
+                    type: 'bar', // Area chart in Chart.js is basically a line chart with fill
+                    data: {
+                        labels: chartLabels, // e.g. ["January", "February", "March", ...]
+                        datasets: [
+                            {
+                                label: 'Completed',
+                                data: chartCompleted,
+                                backgroundColor: 'rgba(61, 228, 131, 0.44)',
+                                borderColor: 'rgba(61, 228, 131, 1)',
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Pending',
+                                data: chartPending,
+                                backgroundColor: 'rgba(24, 156, 218, 0.5)',
+                                borderColor: 'rgba(69, 174, 223, 1)',
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Hold',
+                                data: chartHold,
+                                backgroundColor: 'rgba(236, 29, 29, 0.4)',
+                                borderColor: 'rgba(243, 84, 84, 1)',
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: {
+                                display: true,
+                                text: 'Status Trend for the Year'
+                            }
+                        },
+                        scales: {
+                            x:{
+                                stacked: true
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        }
+                    }
+                });
+
+
+            },
+            error: function(err) {
+                console.error("Error fetching chart data:", err);
+            }
+        });
+
+        function generateMonthLabels() {
+            const months = [];
+            for (let i = 0; i < 12; i++) {
+                const date = new Date(2000, i, 1); // year is irrelevant
+                months.push(date.toLocaleString('default', { month: 'short' }));
+            }
+            return months;
+        }
+    }
+
+    function InitializeCardStatus(){
+        const year = $('#yearSelect').val();
+        const $data = {
+            role: role,
+            section: section,
+            year: year
+        };
+         $.ajax({
+            url: './backend/Route/requestRouteAction.php',
+            type: 'POST',
+            data: {
+                action: 'get_piechart_data',
+                data: $data
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status !== "success") {
+                    console.log("No data from server:", response);
+                    return;
+                }
+            const chartData = response.data.data.length > 0 ? response.data.data[0] : { 
+                Completed: 0, 
+                Pending: 0, 
+                Hold: 0 
+            };
+
+            const Completed = parseInt(chartData.Completed) || 0;
+            const Pending = parseInt(chartData.Pending) || 0;
+            const Hold = parseInt(chartData.Hold) || 0;
+
+            const TotalRFQs = Completed + Pending + Hold;
+                console.log(TotalRFQs);
+                $('#totalrfq').text(TotalRFQs);
+                $('#pending').text(Pending);
+                $('#completed').text(Completed);
+                $('#hold').text(Hold);
+                $('.overview').text('Overview of your RFQ activities for the month of ' + month);
+
+            },
+            error: function(err) {
+                console.error("Error fetching chart data:", err);
+            }
+        });       
+    }
+
+    function RenderLatestRequest(){
         $tbody.empty(); // Clear existing rows
         const loadingRow = $(`
             <tr>
@@ -259,54 +170,42 @@ socket.onclose = function () {
             </tr>
         `);
         $tbody.append(loadingRow);
-
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
-            data: { action: 'get_items', section: section, filters: filters, page: page },
+            data: {
+                action: 'get_latest_request',
+                section: section
+            },
             dataType: 'json',
-            success: function (response) {
-                $tbody.empty(); // Clear loading spinner
-
-                // console.log('Response from server:', response);
-                // console.log(response.total, response.perPage);
-                if (response.status === 'success') {
+            success: function(response){
+                $tbody.empty();
+                console.log(response);
+                if (response.status == 'success') {
                     response.data.forEach(item => {
-                        const statusClasses = {
-                            'Approved': 'badge-approved',
-                            'Pending': 'badge-pending',
-                            'Declined': 'badge-declined',
-                            'Cancelled': 'badge-cancelled'
-                        };
-
-                        const statusBadge = `<span class="status-badge ${statusClasses[item.requestor_status] || ''}">${item.requestor_status}</span>`;
-                        
                         const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
                                 <td>${item.item_name}</td>
                                 <td>${item.item_description}</td>
-                                <td>${statusBadge}</td>
+                                <td>${item.requestor_status}</td>
                                 <td>${item.created_at}</td>
                             </tr>
                         `);
-
+                        
                         $tbody.append($row);
                     });
-                    const totalPages = Math.ceil(response.total / response.perPage);
-                    paginateTable(page, totalPages);
-                
-                } else {
-                    console.error('Error fetching items:', response.message);
+                }else{
+                     console.error('Error fetching items:', response.message);
                     const $row = $(`
                         <tr>
                             <td colspan="10" class="text-center">No items found.</td>
                         </tr>
                     `);
-                    $tbody.append($row);
+                    $tbody.append($row);                   
                 }
             },
-            error: function (xhr, status, error) {
+            error: function(err){
                 $tbody.empty(); // Clear loading spinner
                 console.error('AJAX error:', status, error);
                 const $tbody = $('#requestTableBody');
@@ -321,27 +220,72 @@ socket.onclose = function () {
         });
     }
 
-    function paginateTable(currentPage, totalPages) {
+    $(document).on('change', '#yearSelect',function(e){
+        e.preventDefault();
+        const year = $(this).data('year');
+        $('.year-option').removeClass('active');
+        $(this).addClass('active');
+        InitializeBarChart();    
+    });
+    // Submit new request
+    $('#create_request').submit(function (e) {
+        e.preventDefault();
+        const formData = new FormData($('#create_request')[0]);
+        formData.append('action', 'create_request');
+        formData.append('remarks', 'For Section head approval');
+        console.log(formData);
 
-        const $pagination = $('#pagination');
-        $pagination.empty();
-
-        for (let i = 1; i <= totalPages; i++) {
-            const $pageItem = $(`
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#">${i}</a>
-                </li>
-            `);
-
-            $pageItem.on('click', function (e) {
-                e.preventDefault();
-                populateTable(i);
+        $.ajax({
+            url: '././backend/Route/requestRouteAction.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            beforeSend: function(){
+                Swal.fire({
+                    title: 'Please wait...',
+                    text: 'Processing your request',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            },
+            success: function (response) {
+                Swal.close();
+                console.log('Response from server:', response);
+                if (response.status === 'success') {
+                    Swal.fire({
+                    icon: 'success',
+                    title: 'Request Created',
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                    }).then(() => {
+                    window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message,
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+            //console.error('AJAX error:', status, error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while submitting the request.',
             });
+            }
+        });
+    });
 
-            $pagination.append($pageItem);
-        }
-    }
-
+    // Add new item row
     $('#addItemButton').on('click', function () {
         const $tbody = $('#itemsTableBody');
         const $newRow = $(`
@@ -376,120 +320,7 @@ socket.onclose = function () {
         });
     });
 
-    // Submit new request
-    $('#create_request').submit(function (e) {
-        e.preventDefault();
-
-        const formData = new FormData($('#create_request')[0]);
-        formData.append('action', 'create_request');
-        formData.append('remarks', 'For Section head approval');
-
-        //debugFormData(formData);
-
-        // Ajax request to submit the form data
-        $.ajax({
-            url: './action.php',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            dataType: 'json',
-            beforeSend: function(){
-                Swal.fire({
-                    title: 'Please wait...',
-                    text: 'Processing your request',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    willOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            },
-            success: function (response) {
-                Swal.close();
-                console.log('Response from server:', response);
-                if (response.status === 'success') {
-                    Swal.fire({
-                    icon: 'success',
-                    title: 'Request Created',
-                    text: response.message,
-                    showConfirmButton: false,
-                    timer: 1500
-                    }).then(() => {
-                        $('#newRfqModal').modal('hide');
-                        populateTable();
-                        updateSummaryOverview(currentYear, section);
-                    });
-                } else {
-                    Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: response.message,
-                    });
-                }
-            },
-            error: function (xhr, status, error) {
-            //console.error('AJAX error:', status, error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An error occurred while submitting the request.',
-            });
-            }
-        });
-    });
-
-    //Summary overview
-    function updateSummaryOverview(year, section) {
-        // console.log("Updating summary overview for year:", year, "and section:", section);
-        let total = 0;
-
-
-        $('#totalrfq').text('0');
-        $('#approved').text('0');
-        $('#pending').text('0');
-        $('#rejected').text('0');
-
-        $.ajax({
-            url: './action.php',
-            type: 'POST',
-            data: { action: 'get_summary_overview', section: section, year: year },
-            dataType: 'json',
-            success: function (response) {
-                // console.log('Summary overview response:', response);
-                response.forEach(item => {
-                    const count = parseInt(item.total_count);
-                    total += count;
-                    if (item.item_status === 'Approved') {
-                        $('#approved').text(count);
-                    } else if (item.item_status === 'Pending') {
-                        $('#pending').text(count);
-                    } else if (item.item_status === 'Rejected') {
-                        $('#rejected').text(count);
-                    }
-                });
-                $('#totalrfq').text(total);
-            },
-            error: function (xhr, status, error) {
-                console.error('AJAX error:', status, error);
-            }
-        });
-    }
-
-    function addActivityToTimeline(icon, text, time, color = 'text-muted') {
-        const timelineItem = `
-            <div class="list-group-item border-0">
-                <div class="d-flex">
-                    <i class="bi ${icon} ${color} me-2"></i>
-                    <small>${text}</small>
-                </div>
-                <small class="text-muted">${time}</small>
-            </div>
-        `;
-
-        // Prepend so newest is on top
-        $('#activityTimeline').prepend(timelineItem);
-    }
-
-
+    RenderLatestRequest();
+    InitializeCardStatus();
+    InitializeBarChart();
 });

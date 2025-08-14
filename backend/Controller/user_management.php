@@ -1,14 +1,13 @@
 <?php
-    // Include the user model
-    include_once './backend/Model/usermodel.php';
-    // Include the database connection
-    include_once './database/dbconnection.php';
-    // Create a new instance of the database connection
-    $database = new DBConnection();
+    namespace App\Controller;
+
+    use Database\dbconnection;
+    use App\Controller\QueryBuilder;
+    $database = new dbconnection();
     $db = $database->getConnection();
 
     // Fetch all users from the database
-    class UserManagement{
+    class user_management{
         private $user_table = 'user_table';
         private $role_table = 'role_table';
         private $department_table = 'department_table';
@@ -36,9 +35,9 @@
                     LIMIT  1";
                 
                 $stmt = $this->conn->prepare($sql);
-                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                $stmt->bindParam(':username', $username, \PDO::PARAM_STR);
                 $stmt->execute();
-                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
                 /* ---------- 1.  user not found ---------- */
                 if (!$user) {
@@ -92,7 +91,7 @@
                     'success' => true,
                     'message' => 'Login successful.'
                 ];
-            }catch(Exception $e){
+            }catch(\Exception $e){
                 return [
                     'success' => false,
                     'message' => 'Internal server error: ' . $e->getMessage()
@@ -131,7 +130,7 @@
                     'route' => 'login.php'
                 ];
 
-            }catch(Exception $e){
+            }catch(\Exception $e){
                 return [
                     'success' => false,
                     'message' => 'Internal server error: ' . $e->getMessage() 
@@ -160,7 +159,7 @@
             $query = "SELECT department FROM " . $this->department_table;
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             if ($result) {
                 return $result;
@@ -174,7 +173,7 @@
             $query = "SELECT access_level, role FROM " . $this->role_table;
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             if ($result) {
                 return $result;
@@ -216,11 +215,11 @@
                 $stmt->bindValue($key, $value);
             }
             //Bind LIMIT and OFFSET (must be integers)
-            $stmt->bindValue(':limit', (int)$perpage, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', (int)$perpage, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, \PDO::PARAM_INT);
             $stmt->execute();
         
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         }
 
         //Get user list count
@@ -247,7 +246,7 @@
             }
 
             $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
             return $result['total'] ?? 0;
         }
 
@@ -288,7 +287,7 @@
                 $stmt->bindParam(':department', $data['department']);
                 $stmt->bindParam(':role', $data['role']);
                 $stmt->bindParam(':name', $data['name']);
-                $stmt->bindParam(':id', $data['id'], PDO::PARAM_INT);
+                $stmt->bindParam(':id', $data['id'], \PDO::PARAM_INT);
 
                 if ($stmt->execute()) {
                     return [
@@ -301,7 +300,7 @@
                     'message' => 'Failed to update user data.'
                     ];
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return [
                     'success' => false,
                     'message' => 'Exception: ' . $e->getMessage()
@@ -322,7 +321,7 @@
             try{
                 $query = "delete from {$this->user_table} where id = :id";
                 $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':id', $id,PDO::PARAM_INT);
+                $stmt->bindParam(':id', $id,\PDO::PARAM_INT);
                 
                 if ($stmt->execute()) {
                     return [
@@ -335,7 +334,7 @@
                         'message' => 'Failed to delete.'
                     ];
                 }
-            }catch (Exception $e) {
+            }catch (\Exception $e) {
                 return [
                     'success' => false,
                     'message' => 'Exception: ' . $e->getMessage()
@@ -355,7 +354,7 @@
             try{
                 $query = "UPDATE {$this->user_table} SET password = :password where id = :id";
                 $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
                 $stmt->bindParam(':password', $password);
                 
                 if ($stmt->execute()) {
@@ -369,7 +368,7 @@
                         'message' => 'Failed to reset password.'
                     ];
                 }
-            }catch (Exception $e) {
+            }catch (\Exception $e) {
                 return [
                     'success' => false,
                     'message' => 'Exception: ' . $e->getMessage()
@@ -390,7 +389,7 @@
             try{
                 $query = "UPDATE {$this->user_table} SET password = :password where id = :id";
                 $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
                 $stmt->bindParam(':password', $password);
                 
                 if ($stmt->execute()) {
@@ -404,7 +403,7 @@
                         'message' => 'Failed to changed password.'
                     ];
                 }
-            }catch (Exception $e) {
+            }catch (\Exception $e) {
                 return [
                     'success' => false,
                     'message' => 'Exception: ' . $e->getMessage()

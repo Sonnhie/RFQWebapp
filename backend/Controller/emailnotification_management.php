@@ -1,24 +1,25 @@
 <?php
-    // Include the user model
-    include_once './backend/Model/usermodel.php';
-    // Include the database connection
-    include_once './database/dbconnection.php';
-    // Create a new instance of the database connection
-    require __DIR__ . '/vendor/autoload.php';
-    require __DIR__ . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
-    require __DIR__ . '/vendor/phpmailer/phpmailer/src/SMTP.php';
-    require __DIR__ . '/vendor/phpmailer/phpmailer/src/Exception.php';
+    namespace App\Controller;
 
+    // Create a new instance of the database connection
+    require __DIR__ . '/../../vendor/autoload.php';
+    require __DIR__ . '/../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+    require __DIR__ . '/../../vendor/phpmailer/phpmailer/src/SMTP.php';
+    require __DIR__ . '/../../vendor/phpmailer/phpmailer/src/Exception.php';
+
+    use Database\dbconnection;
+    use App\Controller\QueryBuilder;
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
+    use Dotenv\Dotenv;
 
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
     $dotenv->load();
 
-    $database = new DBConnection();
+    $database = new dbconnection();
     $db = $database->getConnection();
 
-    class EmailManagement{
+    class emailnotification_management{
         private $request_table = 'request_table';
         private $attachment_table = 'attachment_table';
         private $requeststatus_table = 'requeststatus_table';
@@ -34,44 +35,120 @@
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':section', $section);
             $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            return $stmt->fetch(\PDO::FETCH_ASSOC);
         }
 
-        public function getAttachments($content_id) {
-            $query = "SELECT item_attachment FROM " . $this->attachment_table . " WHERE content_id = :content_id";
+        public function getAttachments($control_number) {
+            $query = "SELECT item_attachment FROM " . $this->attachment_table . " WHERE control_number = :control_number";
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':content_id', $content_id, PDO::PARAM_INT);
+            $stmt->bindParam(':control_number', $control_number, \PDO::PARAM_STR); // Usually control_number is a string
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+            return $stmt->fetchAll(\PDO::FETCH_COLUMN);
         }
 
-        public function SendEmailNotification($recipients, $cc, $bcc, $subject, $message, $section, $control_number){
+        public function getEmails($section){
+            $params = [];
+            $builder = QueryBuilder::getEmailReceipient($section);
+            $query = $builder['query'];
+            $params = $builder['params'];
 
-            // Get the email sender details based on the section
-            $emailDetails = $this->getEmailSenderDetails($section);
-            if ($emailDetails) {
-                $email = $emailDetails['emailadd'];
-            } else {
-                // If no email found for the section, return false
+            $stmt = $this->conn->prepare($query);
+            foreach ($params as $key => $value) {
+                $stmt->bindParam($key, $value);
+            }
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        }
+
+        public function getBCC($section){
+            $params = [];
+            $builder = QueryBuilder::getBCC($section);
+            $query = $builder['query'];
+            $params = $builder['params'];
+
+            $stmt = $this->conn->prepare($query);
+            foreach ($params as $key => $value) {
+                $stmt->bindParam($key, $value);
+            }
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);           
+        }
+
+        public function SendEmailupdateStatus($data, $message, $subject){
+            $mail = new PHPMailer(true);
+
+            $mainrecipient = $data['address_section'];
+            $bccrecipient  = $data['bcc_Section'];
+            $recipient     = $this->getEmails($mainrecipient);
+            $bcc           = $this->getBCC($bccrecipient);
+
+            // Require at least one recipient
+            if (empty($recipient)) {
                 return false;
             }
+
+            try {
+                // Server settings
+                $mail->SMTPDebug  = 0; // Debug output
+                $mail->isSMTP();
+                $mail->Host       = $_ENV['SMTP_HOST'];
+                $mail->SMTPAuth   = true;
+                $mail->Username   = $_ENV['SMTP_USERNAME'];
+                $mail->Password   = $_ENV['SMTP_PASSWORD'];
+                $mail->SMTPSecure = $_ENV['SMTP_SECURE'];
+                $mail->Port       = $_ENV['SMTP_PORT'];
+
+                $mail->setFrom($_ENV['FROM_EMAIL'], $_ENV['FROM_NAME']);
+
+                // Add TO addresses
+                foreach ($recipient as $recip) {
+                    if (isset($recip['emailadd']) && filter_var($recip['emailadd'], FILTER_VALIDATE_EMAIL)) {
+                        $mail->addAddress($recip['emailadd']);
+                    }
+                }
+
+                // Add BCC addresses (optional)
+                if (!empty($bcc)) {
+                    foreach ($bcc as $rbcc) {
+                        if (isset($rbcc['emailadd']) && filter_var($rbcc['emailadd'], FILTER_VALIDATE_EMAIL)) {
+                            $mail->addBCC($rbcc['emailadd']);
+                        }
+                    }
+                }
+
+                // Content
+                $mail->isHTML(true);
+                $mail->Subject = $subject;
+                $mail->Body    = $message;
+                $mail->AltBody = strip_tags($message);
+
+                $mail->send();
+                return true;
+
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+
+
+        public function SendEmailNotification($recipients, $cc, $bcc, $subject, $message, $section, $control_number){
 
             // Validate recipients
             $mail = new PHPMailer(true);
             try {
                 //Server settings
-                $mail->SMTPDebug = 3;                                       // Enable verbose debug output
+                $mail->SMTPDebug = 0;                                       // Enable verbose debug output
                 $mail->isSMTP();                                            // Send using SMTP
-                $mail->Host       = getenv('SMTP_HOST');                     // Set the SMTP server to send through
+                $mail->Host       = $_ENV['SMTP_HOST'];                     // Set the SMTP server to send through
                 $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
-                $mail->Username   = getenv('SMTP_USERNAME');                    // SMTP username
-                $mail->Password   = getenv('SMTP_PASSWORD');                                     // SMTP password    
-                $mail->SMTPSecure = getenv('SMTP_SECURE');         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
-                $mail->Port       = getenv('SMTP_PORT');                                    // TCP port to connect to
+                $mail->Username   = $_ENV['SMTP_USERNAME'];                    // SMTP username
+                $mail->Password   = $_ENV['SMTP_PASSWORD'];                                     // SMTP password    
+                $mail->SMTPSecure = $_ENV['SMTP_SECURE'];         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+                $mail->Port       = $_ENV['SMTP_PORT'];                                    // TCP port to connect to
                                                 // TCP port to connect to
                 //Recipients
-                $mail->setFrom(getenv('FROM_EMAIL'), getenv('FROM_NAME')); // Set the sender's email and name
-
+                $mail->setFrom($_ENV['FROM_EMAIL'], $_ENV['FROM_NAME']); // Set the sender's email and name
+                
                 // Add BCC if needed
                 foreach ($recipients as $email) {
                     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -81,13 +158,14 @@
                         return false;
                     }
                 }
+
                 $attachments = $this->getAttachments($control_number);
                 foreach ($attachments as $index => $fileData) {
                     if (empty($fileData)) {
                         continue;
                     }
         
-                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $finfo = new \finfo(FILEINFO_MIME_TYPE);
                     $mimeType = $finfo->buffer($fileData);
         
                     // Assign a default filename since it's not stored in the DB
@@ -104,12 +182,22 @@
                 $mail->send();
 
                 // Email sent successfully
-                return true;
+                return [
+                    'success' => true,
+                    'message' => 'Email Sent!'
+                ];
 
             } catch (Exception $e) {
                 // Handle error
-                return false;
+                return [
+                    'success'=> false,
+                    'message' => $e->getMessage()
+                ];
             }
+        }
+
+        public function AutoEmailNotification($data, $targetEmails){
+            
         }
     }
 ?>

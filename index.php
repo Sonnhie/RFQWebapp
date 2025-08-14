@@ -1,12 +1,12 @@
 <?php
   session_start();
-  include_once './backend/Controller/user_management.php';
-  include_once './backend/Controller/request_management.php';
-  include_once './backend/Model/usermodel.php';
-  include_once './database/dbconnection.php';
+    require __DIR__ . '../vendor/autoload.php';
+  use App\Controller\user_management;
+  use Database\dbconnection;
 
-  $checkLogin = new UserManagement($db);
-  $request = new RequestManagement($db);
+  $database = new dbconnection();
+  $db = $database->getConnection();
+  $checkLogin = new user_management($db);
   $checkLogin->isLoggedIn();
 ?>
 <!DOCTYPE html>
@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Procurement RFQ System</title>
+    <title>Procurement RFM System</title>
     <link rel="icon" type="image/x-icon" href="./assets/img/upward.png">
 
     <!-- Bootstrap 5 CSS -->
@@ -31,6 +31,12 @@
 
     <!-- Custom JS -->
     <script src="./includes/js/common.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+
+    <!-- <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script> -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 
     <!-- Chart.js for Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -82,6 +88,10 @@
         //Verifier-Approver sidebar navigation
         else if ($_SESSION['user']['access_level'] == 'Verifier-Approver') {
             include_once './components/sidebar_procurement.php';
+        }
+        //Manager
+        else if ($_SESSION['user']['access_level'] == 'Manager') {
+            include_once './components/sidebar_manager.php';
         }
      ?>
      

@@ -32,7 +32,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title text-muted">TOTAL RFQs</h6>
-                                <h2 class="mb-0" id="totalrfq">48</h2>
+                                <h2 class="mb-0" id="totalrfq"></h2>
                             </div>
                             <i class="bi bi-file-earmark-text fs-3 text-primary"></i>
                         </div>
@@ -45,7 +45,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title text-muted">PENDING</h6>
-                                <h2 class="mb-0" id="pending">12</h2>
+                                <h2 class="mb-0" id="pending"></h2>
                             </div>
                             <i class="bi bi-hourglass-split fs-3 text-warning"></i>
                         </div>
@@ -57,8 +57,8 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title text-muted">APPROVED</h6>
-                                <h2 class="mb-0" id="approved">32</h2>
+                                <h6 class="card-title text-muted">COMPLETED</h6>
+                                <h2 class="mb-0" id="completed"></h2>
                             </div>
                             <i class="bi bi-check-circle fs-3 text-success"></i>
                         </div>
@@ -70,8 +70,8 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title text-muted">REJECTED</h6>
-                                <h2 class="mb-0" id="rejected">4</h2>
+                                <h6 class="card-title text-muted">HOLD</h6>
+                                <h2 class="mb-0" id="hold"></h2>
                             </div>
                             <i class="bi bi-x-circle fs-3 text-danger"></i>
                         </div>
@@ -81,26 +81,28 @@
         </div>
         
         <!-- Chart Section -->
-        <div class="card shadow-sm mb-4">
+          <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <h5 class="card-title">RFQ Status Overview</h5>
                 <p class="text-muted">This chart shows the status of your RFQs over the past 12 months.</p>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="yearDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                         <span id="selectedYear"><i class="bi bi-calendar me-2"></i> <?php echo date("Y"); ?></span>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="yearDropdown" id="yearDropdownMenu">
-                    <?php 
-                        $currentYear = date("Y");
-                        for ($year = $currentYear; $year >= $currentYear - 1; $year--) {
-                            $activeClass = ($year == $currentYear) ? "active" : "";
-                            echo "<li><a class='dropdown-item year-option $activeClass' data-year='{$year}' href='#'>{$year}</a></li>";
-                        }
-                    ?>
-                    </ul>
+                <!-- Dropdown Button -->
+                <div class="mb-3 col-3">
+                    <label for="yearSelect" class="form-label">Select Year</label>
+                    <select id="yearSelect" class="form-select">
+                        <?php 
+                            $currentYear = date("Y");
+                            for ($year = $currentYear; $year >= $currentYear - 1; $year--) {
+                                $selected = ($year == $currentYear) ? "selected" : "";
+                                echo "<option value='{$year}' {$selected}>{$year}</option>";
+                            }
+                        ?>
+                    </select>
                 </div>
-                <div class="chart-container" data-section= "<?php echo $_SESSION['user']['department']; ?>">
-                    <canvas id="rfqChart"></canvas>
+
+
+                <div class="chart-container" data-section= "<?php echo $_SESSION['user']['department']; ?>" data-role="<?php echo $_SESSION['user']['access_level'] ?>">
+                    <canvas id="rfqChart" height="400" width="900"></canvas>
+                    <!-- <canvas id="rfqChart2" height="300"></canvas> -->
                 </div>
             </div>
         </div>

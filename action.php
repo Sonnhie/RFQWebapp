@@ -1,9 +1,13 @@
 <?php
     ob_start();
     session_start();
-    
-    include_once './database/dbconnection.php';
-    include_once './backend/Controller/user_management.php';
+
+    // include_once './backend/Controller/request.php';
+    include_once __DIR__ . '/../../database/dbconnection.php';
+include_once __DIR__ . '/../../backend/Controller/queryBuilder.php';
+
+    // include_once './database/dbconnection.php';
+    // include_once './backend/Controller/user_management.php';
     include_once './backend/Controller/dashboard_management.php';
     include_once './backend/Controller/request_management.php';
     include_once './backend/Model/usermodel.php';
@@ -30,167 +34,7 @@
             'message' => $result['message']
         ]);
     }
-
-    //Create New Request
-    if (!empty($_POST['action']) && $_POST['action'] == 'create_request') {
-        header('Content-Type: application/json');
-
-        $responses = [];
-        $success_count = 0;
-        $error_count = 0;
-
-        // Variables
-        $item_name = $_POST['item_name'] ?? null;
-        $item_description = $_POST['item_description'] ?? null;
-        $item_quantity = $_POST['item_quantity'] ?? null;
-        $item_unit = $_POST['item_unit'] ?? null;
-        $item_purpose = $_POST['item_purpose'] ?? null;
-        $requestor_section = $_POST['requestor_section'] ?? null;
-        $requestor_name = $_POST['requestor_name'] ?? null;
-        $item_remarks = $_POST['remarks'] ?? null;
-        $requestor_status = 'Pending';
-        $item_attachment = $_FILES['item-attachment'] ?? null;
-
-        // Validate
-        if (empty($item_name)) {
-            echo json_encode(['status' => 'error', 'message' => 'Item name is required']);
-            exit;
-        }
-
-        if (empty($_FILES['item-attachment']['tmp_name']) || count($_FILES['item-attachment']['tmp_name']) === 0) {
-            echo json_encode(['status' => 'error', 'message' => 'File upload is required']);
-            exit;
-        }
-
-        $fileContents = [];
-        foreach ($_FILES['item-attachment']['tmp_name'] as $key => $tmpName) {
-            if ($_FILES['item-attachment']['error'][$key] === UPLOAD_ERR_OK) {
-                $fileContents[$key] = file_get_contents($tmpName);
-            } else {
-                $fileContents[$key] = null;
-            }
-        }
-
-        $control_number = $request_management->createRFQNumber();
-
-        // Create initial logs
-        $request_management->CreateRequestLogs([
-            'control_number' => $control_number,
-            'requestor_status' => $requestor_status,
-            'item_remarks' => 'Created Request'
-        ]);
-
-        // Loop through items
-        foreach ($item_name as $key => $name) {
-            $data = [
-                'control_number' => $control_number,
-                'item_name' => $name ?? null,
-                'item_description' => $item_description[$key] ?? null,
-                'item_quantity' => $item_quantity[$key] ?? null,
-                'item_unit' => $item_unit[$key] ?? null,
-                'item_purpose' => $item_purpose[$key] ?? null,
-                'requestor_section' => $requestor_section ?? null,
-                'requestor_status' => $requestor_status,
-                'item_remarks' => $item_remarks,
-                'requestor_name' => $requestor_name,
-                'item_attachment' => $fileContents[$key] ?? null
-            ];
-
-            $request_management->UploadAttachment($data);
-            $response = $request_management->CreateNewRequest($data);
-
-            if (isset($response['success']) && $response['success']) {
-                $success_count++;
-            } else {
-                $error_count++;
-            }
-
-            $responses[] = $response['message'] ?? 'Unknown result';
-        }
-
-        // Send back summary response
-        if ($success_count > 0 && $error_count === 0) {
-            // Create a new request log entry for the successful submission
-            $notification = [
-                'control_number' => $control_number,
-                'message' => "New request created by " . $requestor_section . " with Control Number: " . $control_number,
-                'section' => $requestor_section,
-            ];
-
-            $result = $request_management->InsertNotificationMessage($notification);
-
-            // Notify WebSocket clients about the new request
-            $notifier->send(
-                'new_request',
-                [
-                    'control_number' => $control_number,
-                    'item_requestor' => $requestor_name,
-                    'item_section' => $requestor_section,
-                    'date' => date('Y-m-d H:i:s'),
-                    'message' => "New request created with Control Number: $control_number"
-                ],
-                'Procurement' // Target section for the notification
-            );
-
-            echo json_encode(['status' => 'success', 'message' => "All $success_count items submitted successfully."]);
-        } elseif ($success_count > 0 && $error_count > 0) {
-            echo json_encode(['status' => 'partial', 'message' => "$success_count succeeded, $error_count failed.", 'details' => $responses]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => "Failed to submit all items.", 'details' => $responses]);
-        }
-    }
-
-    //Fetch Items
-    if (!empty($_POST['action']) && $_POST['action'] == 'get_items') {
-        header('Content-Type: application/json');
-    
-        $section = $_POST['section'] ?? null;
-        $filters = $_POST['filters'] ?? null;
-        $from = $filters['from'] ?? null;
-        $to = $filters['to'] ?? null;
-        $status = $filters['status'] ?? null;
-        $query = $filters['search'] ?? null;
-        $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
-        $perPage = 10;
-    
-        // Fetch paginated result
-        $result = $request_management->fetchAllRequests($section, $from, $to, $status, $query, $page, $perPage);
-    
-        // Optional: Fetch total count for pagination
-        $totalResult = $request_management->countAllRequests($section, $from, $to, $status, $query);
-    
-        $data = [];
-    
-        if ($result) {
-            foreach ($result as $row) {
-                $data[] = [
-                    'id' => $row['id'],
-                    'control_number' => $row['control_number'],
-                    'item_name' => $row['item_name'],
-                    'item_description' => $row['item_description'],
-                    'item_quantity' => $row['item_quantity'],
-                    'item_unit' => $row['item_uom'],
-                    'item_purpose' => $row['item_purpose'],
-                    'requestor_section' => $row['item_section'],
-                    'requestor_name' => $row['item_requestor'],
-                    'requestor_status' => $row['item_status'],
-                    'item_remarks' => $row['item_remarks'],
-                    'created_at' => $row['created_at'],
-                    'updated_at' => $row['updated_at']
-                ];
-            }
-            echo json_encode([
-                'status' => 'success',
-                'data' => $data,
-                'total' => $totalResult,
-                'currentPage' => $page,
-                'perPage' => $perPage
-            ]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'No data found']);
-        }
-    }
-
+ 
     //Fetch Items
     if (!empty($_POST['action']) && $_POST['action'] == 'get_itemsbycontrolnumber') {
         header('Content-Type: application/json');
@@ -214,7 +58,8 @@
         $data = [];
     
         if ($result) {
-            foreach ($result as $row) {
+
+            foreach ($result as $row) { 
                 $data[] = [
                     'id' => $row['id'],
                     'control_number' => $row['control_number'],
@@ -231,6 +76,7 @@
                     'created_at' => $row['created_at']
                 ];
             }
+
             echo json_encode([
                 'status' => 'success',
                 'data' => $data,
@@ -238,6 +84,7 @@
                 'currentPage' => $page,
                 'perPage' => $perPage
             ]);
+
         } else {
             echo json_encode(['status' => 'error', 'message' => 'No data found']);
         }
@@ -346,78 +193,92 @@
         }
     }
     
-    if (!empty($_POST['action']) && $_POST['action'] == 'get_chart_data') {
-        header('Content-Type: application/json');
+    // if (!empty($_POST['action']) && $_POST['action'] == 'get_chart_data') {
+    //     header('Content-Type: application/json');
     
-        $year = isset($_POST['year']) ? $_POST['year'] : null;
-        $section = isset($_POST['section']) ? $_POST['section'] : 'Procurement'; // Default to 'Procurement' if not set
+    //     $year = isset($_POST['year']) ? $_POST['year'] : null;
+    //     $section = isset($_POST['section']) ? $_POST['section'] : 'Procurement'; // Default to 'Procurement' if not set
     
-        if ($year) {
-            $chartData = $dashboard_management->getChartData($year, $section);
+    //     if ($year) {
+    //         $chartData = $dashboard_management->getChartData($year, $section);
 
-            // Initialize months with zeroes (1-based index)
-            $approvedData = array_fill(1, 12, 0);
-            $pendingData  = array_fill(1, 12, 0);
-            $rejectedData = array_fill(1, 12, 0);
+    //         // Initialize months with zeroes (1-based index)
+    //         $approvedData = array_fill(1, 12, 0);
+    //         $pendingData  = array_fill(1, 12, 0);
+    //         $rejectedData = array_fill(1, 12, 0);
 
-            foreach ($chartData as $row) {
-                $month = (int)$row['month'];
+    //         foreach ($chartData as $row) {
+    //             $month = (int)$row['month'];
 
-                // ✅ Accumulate counts instead of overwriting
-                $approvedData[$month] += (int)$row['approved'];
-                $pendingData[$month]  += (int)$row['pending'];
-                $rejectedData[$month] += (int)$row['rejected'];
-            }
+    //             // ✅ Accumulate counts instead of overwriting
+    //             $approvedData[$month] += (int)$row['approved'];
+    //             $pendingData[$month]  += (int)$row['pending'];
+    //             $rejectedData[$month] += (int)$row['rejected'];
+    //         }
 
-            // ✅ Output JSON only once after loop
-            echo json_encode([
-                'status' => 'success',
-                'approved' => array_values($approvedData),
-                'pending'  => array_values($pendingData),
-                'rejected' => array_values($rejectedData)
-            ]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Year is required']);
-        }
-    }
+    //         // ✅ Output JSON only once after loop
+    //         echo json_encode([
+    //             'status' => 'success',
+    //             'approved' => array_values($approvedData),
+    //             'pending'  => array_values($pendingData),
+    //             'rejected' => array_values($rejectedData)
+    //         ]);
+    //     } else {
+    //         echo json_encode(['status' => 'error', 'message' => 'Year is required']);
+    //     }
+    // }
     
-    if (!empty($_POST['action']) && $_POST['action'] == 'get_summary_overview') {
-        header('Content-Type: application/json');
+    // if (!empty($_POST['action']) && $_POST['action'] == 'get_summary_overview') {
+    //     header('Content-Type: application/json');
     
-        $year = isset($_POST['year']) ? $_POST['year'] : null;
-        $section = isset($_POST['section']) ? $_POST['section'] : 'Procurement'; // Default to 'Procurement' if not set
+    //     $year = isset($_POST['year']) ? $_POST['year'] : null;
+    //     $section = isset($_POST['section']) ? $_POST['section'] : 'Procurement'; // Default to 'Procurement' if not set
     
-        if ($year) {
-            $summaryData = $dashboard_management->getTotalCountPerStatus($year, $section);
-            echo json_encode(
-                $summaryData
-            );
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Year is required']);
-        }
-    }
+    //     if ($year) {
+    //         $summaryData = $dashboard_management->getTotalCountPerStatus($year, $section);
+    //         echo json_encode(
+    //             $summaryData
+    //         );
+    //     } else {
+    //         echo json_encode(['status' => 'error', 'message' => 'Year is required']);
+    //     }
+    // }
 
-    if (!empty($_POST['action']) && $_POST['action'] == 'sectionapprove_request') {
-        header('Content-Type: application/json');
+    // if (!empty($_POST['action']) && $_POST['action'] == 'sectionapprove_request') {
+    //     header('Content-Type: application/json');
 
-        $id = isset($_POST['control_number']) ? $_POST['control_number'] : null;
-        $remarks = isset($_POST['remarks']) ? $_POST['remarks'] : null;
-        $status = isset($_POST['status']) ? $_POST['status'] : null;
+    //     $id = isset($_POST['control_number']) ? $_POST['control_number'] : null;
+    //     $remarks = isset($_POST['remarks']) ? $_POST['remarks'] : null;
+    //     $status = isset($_POST['status']) ? $_POST['status'] : null;
+    //     $section = isset($_POST['section']) ? $_POST['section'] : null;
 
-        $data = [
-            'control_number' => $id,
-            'item_remarks' => $remarks,
-            'requestor_status' => $status
-        ];
+    //     $data = [
+    //         'control_number' => $id,
+    //         'item_remarks' => $remarks,
+    //         'requestor_status' => $status
+    //     ];
 
-        $result = $request_management->UpdateRequestStatus($data);
-        $resultLogs = $request_management->CreateRequestLogs($data);
-        if ($result && $resultLogs) {
-            echo json_encode(['status' => 'success', 'message' => 'Request updated successfully']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to update request']);
-        }
-    }
+       
+
+    //     $result = $request_management->UpdateRequestStatus($data);
+    //     $resultLogs = $request_management->CreateRequestLogs($data);
+    //     if ($result && $resultLogs) {
+
+    //         // $notifier->send(
+    //         //     'broadcast',
+    //         //     [
+    //         //         'control_number' => $id,
+    //         //         'item_section' => $section,
+    //         //         'date' => date('Y-m-d H:i:s'),
+    //         //         'message' => "Request with Control Number: $id has been approved by the {$section} department."
+    //         //     ],
+    //         //     'Procurement' // Target section for the notification
+    //         // );
+    //         echo json_encode(['status' => 'success', 'message' => 'Request updated successfully']);
+    //     } else {
+    //         echo json_encode(['status' => 'error', 'message' => 'Failed to update request']);
+    //     }
+    // }
 
     if (!empty($_POST['action']) && $_POST['action'] == 'sectiondecline_request') {
         header('Content-Type: application/json');
@@ -526,6 +387,7 @@
                     </tr>
                     </thead>
                     <tbody>";
+                    
         foreach($itemDetails as $row){
                     $tableHtml .= "
                     <tr></tr>
@@ -1078,4 +940,6 @@
             echo json_encode(['status' => 'error', 'message' => 'No notifications found']);
         }
     }
+
+
 ?>  

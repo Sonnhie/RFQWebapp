@@ -1,6 +1,7 @@
 <?php 
+    namespace Database;
 
-    class DBConnection {
+    class dbconnection {
         private $host = 'localhost';
         private $db_name = 'database_rfq';
         private $username = 'root';
@@ -10,9 +11,9 @@
         public function __construct() {
             $this->conn = null;
             try {
-                $this->conn = new PDO("mysql:host={$this->host};dbname={$this->db_name}", $this->username, $this->password);
-                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (PDOException $exception) {
+                $this->conn = new \PDO("mysql:host={$this->host};dbname={$this->db_name}", $this->username, $this->password);
+                $this->conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            } catch (\PDOException $exception) {
                 echo "Connection error: " . $exception->getMessage();
             }
         }

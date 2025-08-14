@@ -19,7 +19,10 @@
         } else if ($_SESSION['user']['access_level'] == 'Verifier-Approver') {
           include_once './content/verifier_content.php';
           echo '<script src="./includes/js/dashboard.js"></script>';
-      }
+        }else if ($_SESSION['user']['access_level'] == 'Manager') {
+          include_once './content/verifier_content.php';
+          echo '<script src="./includes/js/dashboard.js"></script>';
+        }
 ?>
 
         

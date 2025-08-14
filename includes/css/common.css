@@ -103,9 +103,10 @@ body {
 
 /* Chart Container */
 .chart-container {
-    position: relative;
-    height: 300px;
-    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 20px;
 }
 
 /* Status Badges */

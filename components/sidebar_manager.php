@@ -26,12 +26,6 @@ $role = $_SESSION['user']['access_level'] ?? '';
                     <div class="mb-3 mt-5 ">
                         <h6 class="text-white text-uppercase">request management</h6>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="request">
-                                <i class="bi bi-file-earmark-text me-2" style="color: var(--icon-color);"></i>
-                                Create Request
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-white" href="#" data-page="history">
                                 <i class="bi bi-list-check me-2" style="color: var(--icon-color);"></i>
                                 Request List
@@ -49,7 +43,7 @@ $role = $_SESSION['user']['access_level'] ?? '';
                         <h6 class="text-white text-uppercase">approval management</h6>
 
                         <?php
-                            if ($_SESSION['user']['access_level'] == 'Verifier-Approver') {
+                            if ($_SESSION['user']['access_level'] == 'Verifier-Approver' || $_SESSION['user']['access_level'] == 'Manager') {
                         ?>
                             <li class="nav-item">
                                 <a class="nav-link text-white" href="#" data-page="for_sectionapproval">
@@ -75,12 +69,6 @@ $role = $_SESSION['user']['access_level'] ?? '';
                     </div>
                     <div class="mb-3 mt-5">
                         <h6 class="text-white text-uppercase">Comparison management</h6>
-                        <!-- <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="crearte_comparison">
-                                <i class="bi bi-arrow-down-up me-2" style="color: var(--icon-color);"></i>
-                                Create Comparison
-                            </a>
-                        </li> -->
                         <li class="nav-item">
                             <a class="nav-link text-white" href="#" data-page="comparison-checklist">
                                 <i class="bi bi-card-checklist me-2" style="color: var(--icon-color);"></i>

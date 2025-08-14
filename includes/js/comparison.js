@@ -36,9 +36,9 @@ $(document).ready(function () {
         $tbody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/comparisonRouteAction.php',
             type: 'POST',
-            data: { action: 'get_itemsbycontrolnumber', section: section, filters: filters, page: page },
+            data: { action: 'get_comparison', section: section, filters: filters, page: page },
             dataType: 'json',
             success: function (response) {
                 $tbody.empty(); // Clear loading spinner
@@ -74,10 +74,7 @@ $(document).ready(function () {
                                 <i class="bi bi-eye"></i> View Comparison
                             </button>`;
                         }
-
-
-
-                        
+  
                         const buttonGroup = `
                             ${itemsButton}
                             ${viewcomparisonButton}
@@ -165,7 +162,7 @@ $(document).ready(function () {
         $itemsTableBody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_single_items', control_number: controlNumber },
             dataType: 'json',
@@ -236,7 +233,7 @@ $(document).ready(function () {
         $comparisonTableBody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/comparisonRouteAction.php',
             type: 'POST',
             data: { action: 'get_comparison_items', control_number: controlNumber },
             dataType: 'json',
@@ -292,7 +289,7 @@ $(document).ready(function () {
         const itemId = $(this).data('id');
         console.log('this is clicked');
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_item_details', id: itemId },
             dataType: 'json',

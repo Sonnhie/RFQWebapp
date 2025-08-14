@@ -90,4 +90,8 @@
       loadPage(page);
     };
     
+    $('#notificationBadge').on('click', function() {
+        $(this).text('');
+        console.log("Notification badge clicked, resetting count");
+    });
   });

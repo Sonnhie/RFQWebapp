@@ -9,18 +9,18 @@
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Welcome, 
             <?php
-                if ($_SESSION['user']['access_level'] == 'Admin') {
-                    echo 'Administrator';
-                } else {
-                    echo 'Client';
-                }
+                echo htmlspecialchars($_SESSION['user']['name']);
             ?>
         </h5>
         <div class="d-flex align-items-center">
             <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
             <span class="ms-2 fw-semibold">
                 <?php
-                    echo htmlspecialchars($_SESSION['user']['name']);
+                   if ($_SESSION['user']['access_level'] == 'Admin') {
+                        echo 'Administrator';
+                    } else {
+                        echo 'Client';
+                    }
                 ?>
             </span>
         </div>
@@ -46,6 +46,7 @@
                                 <option value="Pending" class="text-warning">Pending</option>
                                 <option value="Approved" class="text-success">Approved</option>
                                 <option value="Rejected" class="text-danger">Rejected</option>
+                                <option value="Hold" class="text-primary">Hold</option>
                             </select>
                         </div>
                     </div>
@@ -145,6 +146,7 @@
                         <div class="col-md-12">
                         <div class="d-flex justify-content-center align-items-center" style="height: 500px;">
                             <img id="attachment_viewer" src="" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                            <a id="download_link" href="#" style="display:none;" target="_blank"></a>
                         </div>
                         </div>
                     </div>

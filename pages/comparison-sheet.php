@@ -10,18 +10,18 @@
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Welcome, 
             <?php
-                if ($_SESSION['user']['access_level'] == 'Admin') {
-                    echo 'Administrator';
-                } else {
-                    echo 'Client';
-                }
+                echo htmlspecialchars($_SESSION['user']['name']);
             ?>
         </h5>
         <div class="d-flex align-items-center">
             <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
             <span class="ms-2 fw-semibold">
                 <?php
-                    echo htmlspecialchars($_SESSION['user']['name']);
+                   if ($_SESSION['user']['access_level'] == 'Admin') {
+                        echo 'Administrator';
+                    } else {
+                        echo 'Client';
+                    }
                 ?>
             </span>
         </div>
@@ -29,7 +29,7 @@
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">RFQ Management</h2>
+    <h2 class="mb-0">Comparison Management</h2>
 </div>
 
 <div class="card shadow-sm mb-4 border-0">
@@ -230,7 +230,7 @@
         </div>
 
 
-        <script src="./includes/js/for_quotation.js"></script>
+        <script src="./includes/js/comparison.js"></script>
 
         <?php
             // Include the footer

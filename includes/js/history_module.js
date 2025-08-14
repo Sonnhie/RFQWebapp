@@ -1,13 +1,8 @@
 $(document).ready(function () {
     const page = 1;
-   // const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-   // $('#fromDateFilter').attr('max', today).val(today);
-    //$('#toDateFilter').attr('max', today).val(today);
 
     // Initialize the table
     populateTable();
-    //paginateTable();
- 
 
     // Populate the table
     function populateTable(page = 1) {
@@ -41,7 +36,7 @@ $(document).ready(function () {
         $tbody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_itemsbycontrolnumber', section: section, filters: filters, page: page },
             dataType: 'json',
@@ -68,6 +63,8 @@ $(document).ready(function () {
                         const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
+                                <td>${item.requestor_name}</td>
+                                <td>${item.requestor_section}</td>
                                 <td>${statusBadge}</td>
                                 <td>${item.item_remarks}</td>
                                 <td>${item.created_at}</td>
@@ -145,7 +142,7 @@ $(document).ready(function () {
         $itemsTableBody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_single_items', control_number: controlNumber },
             dataType: 'json',
@@ -202,27 +199,49 @@ $(document).ready(function () {
     $('#requestTableBody').on('click', '#itemview_btn', function(){
         const controlNumber = $(this).data('id');
         populateItems(controlNumber);
-        console.log('this is clicked');
+        // console.log('this is clicked');
     });
 
     $('#itemsTableBody').on('click', '#view_btn', function(){
         const itemId = $(this).data('id');
-        console.log('this is clicked');
+        // console.log('this is clicked');
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_item_details', id: itemId },
             dataType: 'json',
             success: function(response){
-                console.log('Response from server:', response);
-                if (response.status === 'success') {
-                    const base64 = response.data.file_content;
-                    const mimeType = response.data.file_type;
-        
-                    $('#attachment_viewer').attr('src', `data:${mimeType};base64,${base64}`);
+            if (response.status === 'success') {
+                const base64 = response.data.file_content;
+                const mimeType = response.data.file_type;
+                const fileName = response.data.file_name || 'downloaded_file';
+
+                // Define image types
+                const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+                if (imageTypes.includes(mimeType)) {
+                    // Show image in the viewer
+                    $('#attachment_viewer')
+                        .attr('src', `data:${mimeType};base64,${base64}`)
+                        .show();
+                    
+                    // Hide download link if previously shown
+                    $('#download_link').hide();
                 } else {
-                    alert(response.message);
+                    // Hide image viewer
+                    $('#attachment_viewer').hide();
+
+                    // Create download link
+                    const blobUrl = `data:${mimeType};base64,${base64}`;
+                    $('#download_link')
+                        .attr('href', blobUrl)
+                        .attr('download', fileName)
+                        .text(`File is not an image type (${mimeType}). Click here to download the file`)
+                        .show();
                 }
+            } else {
+                alert(response.message);
+            }
             },
             error: function(xhr, status, error){
                 console.error('AJAX error:', status, error);
@@ -245,15 +264,21 @@ $(document).ready(function () {
        populateTable();
     });
 
-
     $('#fromDateFilter, #toDateFilter').on('change', function () {
         populateTable();
     });
-    
 
-    $('#searchInput').on('input', function() {
-        populateTable();
-    });
+    function debounce(func, delay) {
+        let timeout;
+        return function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(func, delay);
+        };
+    }
+
+    const debouncedPopulate = debounce(populateTable, 1000);
+
+    $('#searchInput').on('input', debouncedPopulate);
         
     // Clear Filters button
     $('.btn-danger').on('click', function() {

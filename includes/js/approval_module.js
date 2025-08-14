@@ -24,7 +24,8 @@ $(document).ready(function () {
             from: FromdateRange,
             to: TodateRange,
             status: status,
-            search: searchQuery
+            search: searchQuery,
+            remarks: 'For Procurement Verification'
         };
 
         const $tbody = $('#requestTableBody');
@@ -41,9 +42,13 @@ $(document).ready(function () {
         $tbody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
-            data: { action: 'get_itemsbycontrolnumber', section: section, filters: filters, page: page },
+            data: { 
+                action: 'get_itemsbycontrolnumber', 
+                section: section, 
+                filters: filters, 
+                page: page },
             dataType: 'json',
             success: function (response) {
                 $tbody.empty(); 
@@ -58,55 +63,28 @@ $(document).ready(function () {
                             'Hold': 'badge-hold'
                         };
 
-                        const isQuotationOrRejected = (item.item_remarks == 'For Quotation' || item.requestor_status == 'Rejected');
-                        const isHold = (item.requestor_status === 'Hold' || item.item_remarks != 'For Quotation');
+                        // const isQuotationOrRejected = (item.item_remarks == 'For Quotation' || item.requestor_status == 'Rejected');
+                        // const isHold = (item.requestor_status === 'Hold' || item.item_remarks != 'For Quotation');
 
                         const statusBadge = `<span class="status-badge ${statusClasses[item.requestor_status] || ''}">${item.requestor_status}</span>`;
 
                         // Always show this
                         const itemsButton = `<button class="btn btn-sm btn-primary rounded-4 me-3" data-bs-toggle="modal" data-bs-target="#itemsRfqModal" data-id=${item.control_number} id="itemview_btn">
-                            <i class="bi bi-card-checklist"></i> View Items
-                        </button>`;
+                                                <i class="bi bi-card-checklist"></i> View Items
+                                            </button>`;
 
-                        let approvedButton = '', declinedButton = '', emailButton = '', createcompasisonButton = '', viewcomparisonButton = '';
-
-                        if (item.item_remarks === 'For Procurement Verification') {
-                            approvedButton = `<button class="btn btn-sm btn-success rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="approve_btn">
-                                <i class="bi bi-check2-circle"></i> Verify
-                            </button>`;
-
-                            declinedButton = `<button class="btn btn-sm btn-danger rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="hold_btn">
-                                <i class="bi bi-slash-circle"></i> Hold
-                            </button>`;
-                        }
-
-                        if (item.requestor_status === 'Hold') {
-                            approvedButton = `<button class="btn btn-sm btn-success rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="approve_btn">
-                                <i class="bi bi-check2-circle"></i> Verify
-                            </button>`;
-                        }
-
-                        if (item.item_remarks === 'For Quotation') {
-                            emailButton = `<button class="btn btn-sm btn-secondary rounded-4 me-3" data-bs-toggle="modal" data-bs-target="#emailsupplier" data-section="${item.item_section}" data-id="${item.control_number}" id="email_btn">
-                                <i class="bi bi-envelope"></i> Email Supplier
-                            </button>`;
-
-                            createcompasisonButton = `<button class="btn btn-sm rounded-4 btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#comparisonModal" data-section="${item.item_section}" data-id="${item.control_number}" id="create_comparison_btn">
-                                <i class="bi bi-file-earmark-text"></i> Create Comparison
-                            </button>`;
-
-                            viewcomparisonButton = `<button class="btn btn-sm rounded-4 btn-outline-secondary me-3" data-bs-toggle="modal" data-bs-target="#comparisonTableModal" data-section="${item.item_section}" data-id="${item.control_number}" id="view_comparison_btn">
-                                <i class="bi bi-eye"></i> View Comparison
-                            </button>`;
-                        }
+                        const approvedButton = `<button class="btn btn-sm btn-success rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="approve_btn">
+                                                    <i class="bi bi-check2-circle"></i> Verify
+                                                </button>`;
+                        
+                        const declinedButton = `<button class="btn btn-sm btn-danger rounded-4 me-3" data-id="${item.control_number}" data-section="${item.item_section}" id="hold_btn">
+                                                    <i class="bi bi-slash-circle"></i> Hold
+                                                </button>`;
 
                         const buttonGroup = `
                             ${itemsButton}
                             ${approvedButton}
                             ${declinedButton}
-                            ${emailButton}
-                            ${createcompasisonButton}
-                            ${viewcomparisonButton}
                         `;
 
                         const $row = $(`
@@ -191,7 +169,7 @@ $(document).ready(function () {
         $itemsTableBody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_single_items', control_number: controlNumber },
             dataType: 'json',
@@ -261,7 +239,7 @@ $(document).ready(function () {
         $comparisonTableBody.append(loadingRow);
 
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_comparison_items', control_number: controlNumber },
             dataType: 'json',
@@ -317,20 +295,42 @@ $(document).ready(function () {
         const itemId = $(this).data('id');
         console.log('this is clicked');
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_item_details', id: itemId },
             dataType: 'json',
             success: function(response){
-                console.log('Response from server:', response);
-                if (response.status === 'success') {
-                    const base64 = response.data.file_content;
-                    const mimeType = response.data.file_type;
-        
-                    $('#attachment_viewer').attr('src', `data:${mimeType};base64,${base64}`);
+            if (response.status === 'success') {
+                const base64 = response.data.file_content;
+                const mimeType = response.data.file_type;
+                const fileName = response.data.file_name || 'downloaded_file';
+
+                // Define image types
+                const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+
+                if (imageTypes.includes(mimeType)) {
+                    // Show image in the viewer
+                    $('#attachment_viewer')
+                        .attr('src', `data:${mimeType};base64,${base64}`)
+                        .show();
+                    
+                    // Hide download link if previously shown
+                    $('#download_link').hide();
                 } else {
-                    alert(response.message);
+                    // Hide image viewer
+                    $('#attachment_viewer').hide();
+
+                    // Create download link
+                    const blobUrl = `data:${mimeType};base64,${base64}`;
+                    $('#download_link')
+                        .attr('href', blobUrl)
+                        .attr('download', fileName)
+                        .text(`File is not an image type (${mimeType}). Click here to download the file`)
+                        .show();
                 }
+            } else {
+                alert(response.message);
+            }
             },
             error: function(xhr, status, error){
                 console.error('AJAX error:', status, error);
@@ -379,6 +379,7 @@ $(document).ready(function () {
         const controlNumber = $(this).data('id');
         const status = 'Pending';
         const section = $(this).data('section');
+        const mainsection = $('#requestTableBody').data('section');
         const remarks = 'For Quotation';
         Swal.fire({
             title: 'Are you sure?',
@@ -400,9 +401,16 @@ $(document).ready(function () {
                     }
                 });
                 $.ajax({
-                    url: './action.php',
+                    url: '././backend/Route/requestRouteAction.php',
                     type: 'POST',
-                    data: { action: 'verify_item', control_number: controlNumber, status: status, remarks: remarks, section: section },
+                    data: { 
+                        action: 'update_request', 
+                        control_number: controlNumber, 
+                        status: status, 
+                        remarks: remarks, 
+                        section: section,
+                        main: mainsection 
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.status === 'success') {
@@ -436,15 +444,14 @@ $(document).ready(function () {
     $('#requestTableBody').on('click', '#hold_btn', function() {
         const controlNumber = $(this).data('id');
         const section = $(this).data('section');
+        const mainsection = $('#requestTableBody').data('section');
         const status = 'Hold';
         Swal.fire({
             title: 'Hold Item',
             text: "You want to hold this item? Please provide remarks.",
-            input: 'textarea',
+            input: 'text',
+            inputLabel: 'Remarks',
             inputPlaceholder: 'Enter remarks here...',
-            inputAttributes: {
-                'aria-label': 'Type your remarks here'
-            },
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
@@ -467,9 +474,15 @@ $(document).ready(function () {
                     }
                 });
                 $.ajax({
-                    url: './action.php',
+                    url: '././backend/Route/requestRouteAction.php',
                     type: 'POST',
-                    data: { action: 'hold_item', control_number: controlNumber, remarks: result.value, status: status, section: section },
+                    data: { action: 'update_request', 
+                        control_number: controlNumber, 
+                        remarks: result.value, 
+                        status: status, 
+                        section: section,
+                        main: mainsection  
+                    },
                     dataType: 'json',
                     success: function(response) {
                         Swal.close();
@@ -603,6 +616,7 @@ $(document).ready(function () {
         $('#section').text(`Section: ${section}`);
 
         $('#comparisonModal').modal('show'); // Show the comparison modal
+        console.log(section);
     });
 
     // Populate the comparison table inside the comparison modal
@@ -621,7 +635,7 @@ $(document).ready(function () {
 
         // Get the items for this control number, but do not fetch supplier data
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: { action: 'get_items_for_comparison', control_number: controlNumber },
             dataType: 'json',
@@ -869,9 +883,7 @@ $(document).ready(function () {
         const controlNumber = $('#comparisonModal').data('id'); // Get control number from the modal
         const section = $('#comparisonModal').data('section'); // Get section from the modal
         const formData = $(this).serialize() + `&action=create_comparison&control_number=${controlNumber}&section=${section}`;
-        
-        // console.log('Form Data:', formData); // Debugging line to check form data
-        // console.log($(this).serializeArray()); // Debugging line to check serialized form data
+        console.log(section);
         Swal.fire({
             title: 'Are you sure?',
             text: "You want to create comparison?",

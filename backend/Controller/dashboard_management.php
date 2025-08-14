@@ -1,65 +1,76 @@
 <?php
-    // Include the user model
-    include_once './backend/Model/usermodel.php';
-    // Include the database connection
-    include_once './database/dbconnection.php';
-    // Create a new instance of the database connection
+    namespace App\Controller;
+
+    use Database\DBConnection;
+    use App\Controller\QueryBuilder;
+
     $database = new DBConnection();
     $db = $database->getConnection();
 
-    class DashboardManagement{
+    class dashboard_management{
         private $request_table = 'request_table';
-        private $attachment_table = 'attachment_table';
-        private $requeststatus_table = 'requeststatus_table';
         private $conn;
 
         public function __construct($db){
             $this->conn = $db;
         }
 
-        public function getChartData($year, $section){
-            $sql = "
-                SELECT 
-                    MONTH(latest.created_at) AS month,
-                    SUM(CASE WHEN latest.item_status = 'Approved' THEN 1 ELSE 0 END) AS approved,
-                    SUM(CASE WHEN latest.item_status = 'Pending' THEN 1 ELSE 0 END) AS pending,
-                    SUM(CASE WHEN latest.item_status = 'Rejected' THEN 1 ELSE 0 END) AS rejected
-                FROM (
-                    SELECT 
-                        control_number,
-                        MAX(created_at) as created_at,
-                        -- Prefer latest status per control_number
-                        SUBSTRING_INDEX(GROUP_CONCAT(item_status ORDER BY created_at DESC), ',', 1) AS item_status
-                    FROM {$this->request_table}
-                    WHERE YEAR(created_at) = :year
-            ";
+        public function getChartData($data){
+            try{
+                $params = [];
+                $builder = QueryBuilder::getTotalStatusCount($data);
+                $query = $builder['query'];
+                $params = $builder['params'];
+                $stmt = $this->conn->prepare($query);
+                foreach ($params as $key => $value) {
+                    $stmt->bindValue($key, $value);
+                }
+                $stmt->execute();
+                $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            if ($section !== 'Procurement') {
-                $sql .= " AND item_section = :section";
+                return [
+                    'status' => true,
+                    'message' => 'Successfully data received.',
+                    'data' => $data
+                ];
+
+            }catch(\PDOException $e){
+                return [
+                    'status'=> false,
+                    'message'=> $e->getMessage()
+                ];
             }
+        }
 
-            $sql .= "
-                    GROUP BY control_number
-                ) AS latest
-                GROUP BY MONTH(latest.created_at)
-                ORDER BY MONTH(latest.created_at)
-            ";
+        public function getPieChartData($data){
+            try{
+                $params = [];
+                $builder = QueryBuilder::getTotalStatusCountofMonth($data);
+                $query = $builder['query'];
+                $params = $builder['params'];
+                $stmt = $this->conn->prepare($query);
+                foreach ($params as $key => $value) {
+                    $stmt->bindValue($key, $value);
+                }
+                $stmt->execute();
+                $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(':year', $year);
+                return [
+                    'status' => true,
+                    'message' => 'Successfully data received.',
+                    'data' => $data
+                ];
 
-            if ($section !== 'Procurement') {
-                $stmt->bindParam(':section', $section);
+            }catch(\PDOException $e){
+                return [
+                    'status'=> false,
+                    'message'=> $e->getMessage()
+                ];
             }
-
-            $stmt->execute();
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            return $data;
         }
 
         
-       public function getTotalCountPerStatus($year, $section){
+        public function getTotalCountPerStatus($year, $section){
             $sql = "
                 SELECT 
                     status_summary.item_status, 
@@ -91,7 +102,7 @@
             }
 
             $stmt->execute();
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             return $data;
         }
 

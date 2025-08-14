@@ -50,7 +50,7 @@ $(document).ready(function() {
         const message = JSON.parse(event.data);
         console.log("Parsed message:", message); // DEBUG
 
-        if (message.event === 'new_request') {
+        if (message.event === 'broadcast') {
             $notificationBadge.text(parseInt($notificationBadge.text() || '0', 10) + 1);
         }
     };
@@ -64,8 +64,6 @@ $(document).ready(function() {
         setTimeout(() => location.reload(), 3000);
     };
 
-    $notificationBadge.on('click', function() {
-        $(this).text('');
-        console.log("Notification badge clicked, resetting count");
-    });
+ 
+
 });
