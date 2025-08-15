@@ -152,7 +152,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Quick Actions</h5>
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary" id="newRfqBtn">
+                            <button class="btn btn-primary" id="newRfqBtn" data-bs-toggle="modal" data-bs-target="#newRfqModal">
                                 <i class="bi bi-file-earmark-plus me-2"></i> Create New RFQ
                             </button>
                         </div>
@@ -161,7 +161,7 @@
             </div>
         </div>
 
-         <!-- New RFQ Modal -->
+          <!-- New RFQ Modal -->
          <div class="modal fade rfq-modal" id="newRfqModal" tabindex="-1" aria-labelledby="newRfqModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
