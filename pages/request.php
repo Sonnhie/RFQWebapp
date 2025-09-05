@@ -29,7 +29,7 @@
 </div>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">Request for Quotations</h2>
-    <button class="btn btn-primary btn-new-rfq" data-bs-toggle="modal" data-bs-target="#newRfqModal">
+    <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#newRfqModal">
         <i class="bi bi-plus-circle me-2"></i> Create New RFQ
     </button>
 </div>
@@ -145,7 +145,7 @@
          <div class="modal fade rfq-modal" id="newRfqModal" tabindex="-1" aria-labelledby="newRfqModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="newRfqModalLabel">
                             <i class="bi bi-file-earmark-plus me-2"></i> Create New RFQ
                         </h5>

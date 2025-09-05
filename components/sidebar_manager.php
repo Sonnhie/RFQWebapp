@@ -10,7 +10,7 @@ $role = $_SESSION['user']['access_level'] ?? '';
         <div class="sidebar-header p-3">
             <a href="#" class="d-flex align-items-center text-white text-decoration-none">
                 <i class="bi bi-file-earmark-text fs-4 me-2" style="color: var(--accent-color);"></i>
-                <span class="fs-5 fw-bold">RFM System</span>
+                <span class="fs-5 fw-bold">RFQ System</span>
             </a>
         </div>
         

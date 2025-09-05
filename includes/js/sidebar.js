@@ -31,38 +31,38 @@ $(document).ready(function() {
         }
     });
 
-    const userSection = $sidebar.data('section');
-    const userRole = $sidebar.data('role');
-    const socket = new WebSocket("ws://192.168.101.49:8080");
-    console.log("WebSocket connection established for section:", userSection, "and role:", userRole); // DEBUG
+    // const userSection = $sidebar.data('section');
+    // const userRole = $sidebar.data('role');
+    // const socket = new WebSocket("ws://192.168.101.49:8080");
+    // console.log("WebSocket connection established for section:", userSection, "and role:", userRole); // DEBUG
 
-    socket.onopen = () => {
-        socket.send(JSON.stringify({
-            event: "auth",
-            section: userSection,
-            role: userRole
-        }));
-    };
+    // socket.onopen = () => {
+    //     socket.send(JSON.stringify({
+    //         event: "auth",
+    //         section: userSection,
+    //         role: userRole
+    //     }));
+    // };
 
-    socket.onmessage = function(event) {
-        console.log("Raw event data:", event.data); // DEBUG
+    // socket.onmessage = function(event) {
+    //     console.log("Raw event data:", event.data); // DEBUG
 
-        const message = JSON.parse(event.data);
-        console.log("Parsed message:", message); // DEBUG
+    //     const message = JSON.parse(event.data);
+    //     console.log("Parsed message:", message); // DEBUG
 
-        if (message.event === 'broadcast') {
-            $notificationBadge.text(parseInt($notificationBadge.text() || '0', 10) + 1);
-        }
-    };
+    //     if (message.event === 'broadcast') {
+    //         $notificationBadge.text(parseInt($notificationBadge.text() || '0', 10) + 1);
+    //     }
+    // };
 
-    socket.onerror = function(error) {
-        console.error('WebSocket error:', error);
-    };
+    // socket.onerror = function(error) {
+    //     console.error('WebSocket error:', error);
+    // };
 
-    socket.onclose = function() {
-        console.warn('WebSocket closed. Attempting to reconnect...');
-        setTimeout(() => location.reload(), 3000);
-    };
+    // socket.onclose = function() {
+    //     console.warn('WebSocket closed. Attempting to reconnect...');
+    //     setTimeout(() => location.reload(), 3000);
+    // };
 
  
 

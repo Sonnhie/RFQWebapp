@@ -18,9 +18,9 @@
         public function CreateRequestLogs($data){
             $query = QueryBuilder::insertNewLogs();
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':control_number', $data['control_number']);
-            $stmt->bindParam(':item_status', $data['requestor_status']);
-            $stmt->bindParam(':item_remarks', $data['item_remarks']);
+            $stmt->bindValue(':control_number', $data['control_number']);
+            $stmt->bindValue(':item_status', $data['requestor_status']);
+            $stmt->bindValue(':item_remarks', $data['item_remarks']);
             if ($stmt->execute()) {
                 return true;
             } else {

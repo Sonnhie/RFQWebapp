@@ -122,12 +122,33 @@
                     </div>
                  </div>
                   <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 mb-4">
                         <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
                         <input type="text" class="form-control" name="name" placeholder="Employee Name" aria-describedby="visible-addon">
                         </div>
                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-paperclip"></i></span>
+                            <input type="file" class="form-control" name="signature" placeholder="">
+                        </div>                        
+                     </div>
+                     <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <select class="form-select" name="position" id="position">
+                                <option selected>Select role</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Manager">Manager</option>
+                                <option value="GenManager">General Manager</option>
+                                <option value="DepGenManager">Deputy General Manager</option>
+                            </select>
+                        </div>                        
+                     </div>
                   </div>
             </div>
             <div class="modal-footer">
@@ -182,12 +203,33 @@
                     </div>
                  </div>
                   <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 mb-4">
                         <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
                         <input type="text" class="form-control" name="name" id="name" placeholder="Employee Name" aria-describedby="visible-addon">
                         </div>
                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-paperclip"></i></span>
+                            <input type="file" class="form-control" name="signature" placeholder="">
+                        </div>                        
+                     </div>
+                     <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <select class="form-select" name="position" id="position">
+                                <option selected>Select role</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Manager">Manager</option>
+                                <option value="GenManager">General Manager</option>
+                                <option value="DepGenManager">Deputy General Manager</option>
+                            </select>
+                        </div>                        
+                     </div>
                   </div>
             </div>
             <div class="modal-footer">

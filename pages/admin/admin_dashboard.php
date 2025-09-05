@@ -25,46 +25,46 @@
 </div>
         <!-- Summary Cards -->
         <div class="row mb-4">
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <div class="card dashboard-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                            <h6 class="card-title text-muted">Pending RFQs</h6>
-                            <h2 class="mb-0" id="pendingRfqs">18</h2>
+                            <h6 class="card-title text-muted">Total User</h6>
+                            <h2 class="mb-0" id="total_user">18</h2>
                             </div>
-                            <i class="bi bi-hourglass-split fs-3 text-warning"></i>
+                            <i class="bi bi-people-fill fs-3 text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <div class="card dashboard-card">
                     <div class="card-body">
                        <div class="d-flex justify-content-between align-items-center">
                             <div>
-                            <h6 class="card-title text-muted">Approved RFQs</h6>
-                            <h2 class="mb-0" id="approvedRfqs">220</h2>
+                            <h6 class="card-title text-muted">Online User</h6>
+                            <h2 class="mb-0" id="online_user">220</h2>
                             </div>
-                            <i class="bi bi-check-circle-fill fs-3 text-success"></i>
+                            <i class="bi bi-person-check-fill fs-3 text-primary"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <div class="card dashboard-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                            <h6 class="card-title text-muted">Rejected RFQs</h6>
-                            <h2 class="mb-0" id="rejectedRfqs">45</h2>
+                            <h6 class="card-title text-muted">Offline User</h6>
+                            <h2 class="mb-0" id="offline_user">45</h2>
                             </div>
-                            <i class="bi bi-x-circle-fill fs-3 text-danger"></i>
+                            <i class="bi bi-person-dash-fill fs-3 text-danger"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <!-- <div class="col-md-3 mb-3">
                 <div class="card dashboard-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
@@ -76,12 +76,15 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
+<div class="">
+
+</div>
 <div class="row mb-4">
         <!-- Chart Section -->
-         <div class="col-md-8 mb-4">
+         <div class="col-md-12 mb-4">
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <h5 class="card-title">RFQ Status Overview</h5>
@@ -107,7 +110,7 @@
         </div>
          </div>
     <!-- Status Pie Chart -->
-        <div class="col-md-4 mb-4">
+        <!-- <div class="col-md-4 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
                 <h6 class="mb-0">RFQ Status Distribution</h6>
@@ -116,7 +119,7 @@
                 <canvas id="statusChart" style="max-height: 388px;"></canvas>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 

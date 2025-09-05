@@ -16,7 +16,8 @@ $(document).ready(function () {
                 <td>
                     <select class="form-select form-select-sm" name="item_unit[]">
                         <option value="Piece">Piece</option>
-                        <option value="Box">Box</option>
+                        <option value="Box">Box</option>s
+                        <option value="Meter">Meter</option>
                         <option value="Set">Set</option>
                         <option value="Gallon">Gallon</option>
                         <option value="Sack">Sack</option>
@@ -153,6 +154,7 @@ $(document).ready(function () {
                 </td>
             </tr>
         `);
+        
         $tbody.append(loadingRow);
 
         $.ajax({
@@ -168,25 +170,27 @@ $(document).ready(function () {
                 // console.log(response.total, response.perPage);
                 if (response.status === 'success') {
                     response.data.forEach(item => {
-                        const statusClasses = {
-                            'Approved': 'badge-approved',
+                    const statusClasses = {
+                            'Completed': 'badge-approved',
                             'Pending': 'badge-pending',
                             'Rejected': 'badge-rejected',
                              'Hold': 'badge-hold'
-                        };
-
+                    }
                         const isDisabled = (item.requestor_status === 'Approved');
                         const statusBadge = `<span class="status-badge ${statusClasses[item.requestor_status] || ''}">${item.requestor_status}</span>`;
                         const editButton = `<button class="btn btn-sm btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#editRfqModal" data-id=${item.id} id="edit_btn" ${isDisabled ? 'disabled' : ''}>
                                                 <i class="bi bi-pencil"></i>
                                             </button>`;
-                        const deleteButton = `<button class="btn btn-sm btn-danger" data-id=${item.id} id="delete_btn" ${isDisabled && item.requestor_status !== 'Cancelled' ? 'disabled' : ''}>
-                                                <i class="bi bi-trash"></i>
-                                            </button>`;
                         const viewButton = `<button class="btn btn-sm btn-primary me-3" data-bs-toggle="modal" data-bs-target="#attachmentRfqModal" data-id=${item.id} id="view_btn">
                                                 <i class="bi bi-eye"></i>
                                             </button>`;
+                        let deleteButton = '';
 
+                        if (item.item_remarks === 'For Procurement Verification') {
+                            deleteButton = `<button class="btn btn-sm btn-danger" data-id=${item.id} id="delete_btn" ${isDisabled && item.requestor_status !== 'Cancelled' ? 'disabled' : ''}>
+                                                <i class="bi bi-trash"></i>
+                                            </button>`;
+                        }
                         const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
@@ -217,7 +221,7 @@ $(document).ready(function () {
                     console.error('Error fetching items:', response.message);
                     const $row = $(`
                         <tr>
-                            <td colspan="10" class="text-center">No items found.</td>
+                            <td colspan="12" class="text-center">No items found.</td>
                         </tr>
                     `);
                     $tbody.append($row);
@@ -377,8 +381,9 @@ $(document).ready(function () {
         formData.append('action', 'edit_request');
         formData.append('item_id', itemId);
 
-        const attachment = $('input[name="item_attachment[]"]')[0];
-        if (attachment.size > 10 * 1024 * 1024) { // Check if the file size exceeds 10MB
+        const attachmentInput = $('input[name="item_attachment"]');
+        const attachment = attachmentInput.files; // get the first selected file
+        if (attachment && attachment.size > 10 * 1024 * 1024) { // Check if the file size exceeds 10MB
             Swal.fire({
                 icon: 'error',
                 title: 'File Size Error',

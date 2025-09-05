@@ -4,7 +4,7 @@ $(document).ready(function(){
         const control_number = $('#controlNumberInput').val();
         console.log(control_number);
         $.ajax({
-            url: './action.php',
+            url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
             data: {action: 'gettimeline', control_number: control_number},
             dataType: 'json',
@@ -32,6 +32,10 @@ $(document).ready(function(){
                             case 'completed':
                                 statusIcon = 'bi bi-check-circle-fill';
                                 statusColor = 'text-success';
+                                break;
+                            case 'cancelled':
+                                statusIcon = 'bi bi-x-circle';
+                                statusColor = 'text-danger';
                                 break;
                             default:
                                 statusIcon = 'bi bi-info-circle';
@@ -78,7 +82,7 @@ $(document).ready(function(){
 
         if ($query.length >= 2) {
             $.ajax({
-                url: './action.php',
+                url: '././backend/Route/requestRouteAction.php',
                 type: 'POST',
                 data: {query: $query, action: 'getsuggestion'},
                 dataType: 'json',

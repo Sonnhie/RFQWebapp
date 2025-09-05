@@ -10,7 +10,7 @@ $role = $_SESSION['user']['access_level'] ?? '';
         <div class="sidebar-header p-3">
             <a href="#" class="d-flex align-items-center text-white text-decoration-none">
                 <i class="bi bi-file-earmark-text fs-4 me-2" style="color: var(--accent-color);"></i>
-                <span class="fs-5 fw-bold">RFM System</span>
+                <span class="fs-5 fw-bold">RFQ System</span>
             </a>
         </div>
         
@@ -89,6 +89,15 @@ $role = $_SESSION['user']['access_level'] ?? '';
                         </li>
                     </div>
                 </div>
+                    <div class="mb-3 mt-3 ">
+                        <h6 class="text-white text-uppercase">settings</h6>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" data-page="settings">
+                                <i class="bi bi-gear me-2" style="color: var(--icon-color);"></i>
+                                Configuration    
+                            </a>
+                        </li>
+                    </div> 
                 <!-- <li class="nav-item">
                     <a class="nav-link text-white" href="#" data-page="verifier/delivery">
                         <i  class="bi bi-truck me-2" style="color: var(--icon-color);"></i>

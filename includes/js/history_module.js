@@ -47,12 +47,12 @@ $(document).ready(function () {
                 //console.log(response.total, response.perPage);
                 if (response.status === 'success') {
                     response.data.forEach(item => {
-                        const statusClasses = {
-                            'Approved': 'badge-approved',
+                    const statusClasses = {
+                            'Completed': 'badge-approved',
                             'Pending': 'badge-pending',
                             'Rejected': 'badge-rejected',
-                            'Hold': 'badge-hold'
-                        };
+                             'Hold': 'badge-hold'
+                    };
 
                         const statusBadge = `<span class="status-badge ${statusClasses[item.requestor_status] || ''}">${item.requestor_status}</span>`;
 

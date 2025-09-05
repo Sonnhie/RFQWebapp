@@ -81,10 +81,15 @@ $(document).ready(function () {
                                                     <i class="bi bi-slash-circle"></i> Hold
                                                 </button>`;
 
+                        const deleteButton = `<button class="btn btn-sm btn-danger rounded-4 me-3" data-id="${item.control_number}" data-reqsection="${item.item_section}" id="delete_btn">
+                                                    <i class="bi bi-trash3"></i> Delete
+                                                </button>`;
+
                         const buttonGroup = `
                             ${itemsButton}
                             ${approvedButton}
                             ${declinedButton}
+                            ${deleteButton}
                         `;
 
                         const $row = $(`
@@ -441,6 +446,79 @@ $(document).ready(function () {
         });
     });
 
+    $('#requestTableBody').on('click', '#delete_btn', function() {
+        const controlNumber = $(this).data('id');
+        const reqsection = $(this).data('reqsection');
+        const section = $("#requestTableBody").data('section');
+        const requestor = $("#requestTableBody").data('requestor');
+        console.table(reqsection,section,controlNumber,requestor);
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to delete this item?",
+            icon: 'warning',
+            input: 'textarea',
+            inputPlaceholder: 'Enter remarks...',
+            inputAttributes: {
+                'aria-label': 'Type your remarks here'
+            },
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+            preConfirm: (remarks) => {
+                if (!remarks) {
+                    Swal.showValidationMessage('Remarks are required!')
+                }
+                return remarks;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we delete the item.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: '././backend/Route/requestRouteAction.php',
+                    type: 'POST',
+                    data: { action: 'delete_request', requestor: requestor, control_number: controlNumber, section: section, reqsection: reqsection, remarks: result.value },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log(response);
+                        Swal.close();
+                        if (response.status === 'success') {
+                            Swal.fire(
+                                'Deleted!',
+                                response.message,
+                                'success'
+                            );
+                            populateTable();
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                response.message,
+                                'error'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.close();
+                        console.error('AJAX error:', status, error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while deleting the item.',
+                        });
+                    }
+                });
+            }
+        });
+    });
     $('#requestTableBody').on('click', '#hold_btn', function() {
         const controlNumber = $(this).data('id');
         const section = $(this).data('section');

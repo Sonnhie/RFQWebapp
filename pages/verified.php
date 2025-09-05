@@ -172,7 +172,7 @@
         </div>
         <!-- Comparison Modal -->
         <div class="modal fade" id="comparisonModal" tabindex="-1" aria-labelledby="comparisonModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
+            <div class="modal-dialog  modal-xl">
                 <div class="modal-content">
                     <form id="comparisonForm">
                         <div class="modal-header bg-success text-white">
@@ -180,9 +180,14 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="row">
-                                <div class="input-group">
-                                    
+                            <div class="row mb-3">
+                                <div class="input-group col-4">
+                                <label for="currency" class="input-group-text"><strong>Currency:</strong></label>
+                                    <select class="form-select" name="currency" id="currency" required>
+                                        <!-- <option value="">Select Unit</option> -->
+                                        <option value="PHP">PHP</option>
+                                        <option value="USD">USD</option>
+                                    </select>                                     
                                 </div>
                             </div>
                             <div class="row">

@@ -3,7 +3,9 @@
         "phpmailer/phpmailer": "^6.10",
         "vlucas/phpdotenv": "^5.6",
         "cboden/ratchet": "^0.4.4",
-        "textalk/websocket": "^1.5"
+        "textalk/websocket": "^1.5",
+        "phpoffice/phpspreadsheet": "^5.0",
+        "mpdf/mpdf": "^8.2"
     },
     "autoload": {
     "psr-4": {

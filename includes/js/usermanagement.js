@@ -12,7 +12,7 @@ $(document).ready(function(){
             dataType: 'json',
             success: function(response) {
                 if (response.status == 'success') {
-                    // console.log(response.access);
+                    console.log(response.access);
                     var $select = $('#department');
                     $select.empty();
                     $select.append('<option value="">Select Department</option>');
@@ -216,7 +216,7 @@ $(document).ready(function(){
                 });
             },
             success: function(response){
-                    // console.log(response);
+                    console.log(response);
                     Swal.close();
                     if (response.status == 'success') {
                          Swal.fire({
@@ -292,7 +292,7 @@ $(document).ready(function(){
                 });
             },
             success: function(response){
-                    // console.log(response);
+                    console.log(response);
                     Swal.close();
                     if (response.status == 'success') {
                          Swal.fire({
@@ -302,7 +302,7 @@ $(document).ready(function(){
                             showConfirmButton: false,
                             timer: 1500
                         }).then(() => {
-                            window.location.reload();
+                            populateUserTable();
                         });
                     }else {
                         Swal.fire({

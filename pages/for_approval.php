@@ -113,7 +113,7 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="requestTableBody" data-section="<?php echo $_SESSION['user']['department']; ?>">
+                        <tbody id="requestTableBody" data-requestor="<?php echo $_SESSION['user']['name']?>" data-section="<?php echo $_SESSION['user']['department']; ?>">
                         </tbody>
                         <tfoot>
                             <tr>
