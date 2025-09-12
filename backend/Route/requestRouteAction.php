@@ -51,7 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error_count = 0;
 
         // Variables
-        $control_number = $request->createRFQNumber();
+        $gencontrol_number = $request->createRFQNumber();
+
+        $control_number = $gencontrol_number;
         $item_name = $_POST['item_name'] ?? null;
         $item_description = $_POST['item_description'] ?? null;
         $item_quantity = $_POST['item_quantity'] ?? null;
@@ -70,23 +72,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($_FILES['item-attachment']['tmp_name']) || count($_FILES['item-attachment']['tmp_name']) === 0) {
-            echo json_encode(['status' => 'error', 'message' => 'File upload is required']);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'File upload is required'
+            ]);
             exit;
         }
-        $maxFileSize = 400 * 1024 * 1024; // 2MB in bytes
-        $fileSize = $_FILES['item-attachment']['size'][0] ?? 0;
-        $fileContents = [];
+        $uploadDir = __DIR__ . "/../../" . "/Uploads/Items"; // absolute path
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $maxFileSize = 40 * 1024 * 1024; // 40MB
+        $filePaths = [];
+
         foreach ($_FILES['item-attachment']['tmp_name'] as $key => $tmpName) {
+            $fileSize = $_FILES['item-attachment']['size'][$key] ?? 0;
+
             if ($fileSize > $maxFileSize) {
-                echo json_encode(['status' => 'error', 'message' => 'File size is ' . $fileSize . ' exceeds 40MB']);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => "File {$key} size exceeds 40MB"
+                ]);
                 exit;
             }
+
             if ($_FILES['item-attachment']['error'][$key] === UPLOAD_ERR_OK) {
-                $fileContents[$key] = file_get_contents($tmpName);
-            } else {
-                $fileContents[$key] = null;
+                $ext = pathinfo($_FILES['item-attachment']['name'][$key], PATHINFO_EXTENSION);
+                $uniqueName = uniqid("file_") . "." . $ext;
+                $filePath = $uploadDir . "/" . $uniqueName;
+
+                if (move_uploaded_file($tmpName, $filePath)) {
+                    // store relative path for DB
+                    $filePaths[$key] = "/Uploads/Items/" . $uniqueName;
+                }
             }
         }
+
 
         // Create initial logs
         $logs->CreateRequestLogs([
@@ -98,18 +121,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Loop through items
         foreach ($item_name as $key => $name) {
             $data = [
-                'control_number' => $control_number,
-                'item_name' => $name ?? null,
+                'control_number'   => $control_number,
+                'item_name'        => $name ?? null,
                 'item_description' => $item_description[$key] ?? null,
-                'item_quantity' => $item_quantity[$key] ?? null,
-                'item_unit' => $item_unit[$key] ?? null,
-                'item_purpose' => $item_purpose[$key] ?? null,
+                'item_quantity'    => $item_quantity[$key] ?? null,
+                'item_unit'        => $item_unit[$key] ?? null,
+                'item_purpose'     => $item_purpose[$key] ?? null,
                 'requestor_section' => $requestor_section ?? null,
                 'requestor_status' => $requestor_status,
-                'item_remarks' => $item_remarks,
-                'requestor_name' => $requestor_name,
-                'item_attachment' => $fileContents[$key] ?? null
+                'item_remarks'     => $item_remarks,
+                'requestor_name'   => $requestor_name,
+                'path_file'        => $filePaths[$key] ?? null  // ✅ correct reference
             ];
+
 
             $request->UploadAttachment($data);
             $response = $request->CreateNewRequest($data);
@@ -131,22 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'message' => "New request created by " . $requestor_section . " with Control Number: " . $control_number,
                 'section' => $requestor_section,
             ];
-
-            // $result = $request_management->InsertNotificationMessage($notification);
-
-            // // Notify WebSocket clients about the new request
-            // $notifier->send(
-            //     'broadcast',
-            //     [
-            //         'control_number' => $control_number,
-            //         'item_requestor' => $requestor_name,
-            //         'item_section' => $requestor_section,
-            //         'date' => date('Y-m-d H:i:s'),
-            //         'message' => "New request created with Control Number: $control_number"
-            //     ],
-            //     $requestor_section // Target section for the notification
-            // );
-
             echo json_encode(['status' => 'success', 'message' => "All $success_count items submitted successfully."]);
         } elseif ($success_count > 0 && $error_count > 0) {
             echo json_encode(['status' => 'partial', 'message' => "$success_count succeeded, $error_count failed.", 'details' => $responses]);
@@ -215,23 +223,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
 
         $id = isset($_POST['id']) ? $_POST['id'] : null;
-        $filePath = $request->getAttachment($id); // this already returns the file path
+        $control_number = isset($_POST['control_number']) ? $_POST['control_number'] : null;
+        $filePath = $request->getAttachment($id, $control_number); // this already returns the file path
 
         if (empty($filePath)) {
-            echo json_encode(['status' => 'error', 'message' => 'File not found']);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'File not found.'
+            ]);
             exit;
         } else {
+            $filepaths = $filePath;
+            $url = __DIR__ . "/../../" . $filepaths;
+            $fileContents = file_get_contents($url);
             $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $mimeType = $finfo->buffer($filePath);
-            $encodedFile = base64_encode($filePath);
+            $mimeType = $finfo->file($url);
 
             $data = [
                 'file_type' => $mimeType,
-                'file_content' => $encodedFile
+                'file_path' => './Uploads/Items/' . basename($filePath), // relative path for frontend
+                'file_name' => basename($filePath)
             ];
 
             echo json_encode(['status' => 'success', 'data' => $data]);
         }
+
+        // if (empty($filePath)) {
+        //     echo json_encode(['status' => 'error', 'message' => 'File not found']);
+        //     exit;
+        // } else {
+        //     $finfo = new finfo(FILEINFO_MIME_TYPE);
+        //     $mimeType = $finfo->buffer($filePath);
+        //     $encodedFile = base64_encode($filePath);
+
+        //     $data = [
+        //         'file_type' => $mimeType,
+        //         'file_content' => $encodedFile
+        //     ];
+
+        //     echo json_encode(['status' => 'success', 'data' => $data]);
+        // }
     }
 
     if (!empty($_POST['action']) && $_POST['action'] == 'edit_request') {
@@ -485,65 +516,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $subject = "Request for Quotation - {$data['control_number']}";
         // $subject = "tEST EMAI";
         $message = "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
-    <tr>
-        <td align='center'>
-            <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
-                
-                <!-- Header with Logo -->
                 <tr>
-                    <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
-                        <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                    <td align='center'>
+                        <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
+                            
+                            <!-- Header with Logo -->
                             <tr>
-                                <td align='left'>
-                                    <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px;'>
-                                </td>
-                                <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
-                                    Request for Quotation Update
+                                <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
+                                    <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                        <tr>
+                                            <td align='left'>
+                                                <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px;'>
+                                            </td>
+                                            <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
+                                                Request for Quotation Update
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
                             </tr>
+
+                            <!-- Body -->
+                            <tr>
+                                <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
+                                    <p>Dear <strong>{$main} Team</strong>,</p>
+
+                                    <p>This is to inform you that the request for the <strong>{$main}</strong> department with control number:</p>
+                                    <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
+                                        {$data['control_number']}
+                                    </div>
+
+                                    <p>Current Status:</p>
+                                    <p style='margin:15px 0;'>
+                                        <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
+                                            {$data['requestor_status']}
+                                        </span>
+                                    </p>
+
+                                    <p><strong>Remarks:</strong></p>
+                                    <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
+                                        {$data['item_remarks']}
+                                    </div>
+
+                                    <p>Please review the details and take the necessary actions if required.</p>
+                                    <p style='margin-top:25px;'>Best regards,<br>
+                                    <strong>Nidec Instruments Philippines Corporation</strong></p>
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
+                                    This is an automated notification. Please do not reply directly.<br>
+                                    &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
+                                </td>
+                            </tr>
+
+                        <!-- Confidentiality Notice -->
+                        <tr>
+                            <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
+                                <strong>Confidentiality and Data Privacy Notice:</strong><br>
+                                This message, including any attachments, is intended solely for the addressee and may contain 
+                                confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
+                                If you received this message in error, please notify the sender immediately and permanently delete it. 
+                                NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
+                                Act of 2012 (RA 10173) and its Privacy Policy.
+                            </td>
+                        </tr>
                         </table>
                     </td>
                 </tr>
-
-                <!-- Body -->
-                <tr>
-                    <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
-                        <p>Dear <strong>{$main} Team</strong>,</p>
-
-                        <p>This is to inform you that the request for the <strong>{$main}</strong> department with control number:</p>
-                        <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
-                            {$data['control_number']}
-                        </div>
-
-                        <p>Current Status:</p>
-                        <p style='margin:15px 0;'>
-                            <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
-                                {$data['requestor_status']}
-                            </span>
-                        </p>
-
-                        <p><strong>Remarks:</strong></p>
-                        <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
-                            {$data['item_remarks']}
-                        </div>
-
-                        <p>Please review the details and take the necessary actions if required.</p>
-                        <p style='margin-top:25px;'>Best regards,<br>
-                        <strong>Nidec Instruments Philippines Corporation</strong></p>
-                    </td>
-                </tr>
-
-                <!-- Footer -->
-                <tr>
-                    <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
-                        This is an automated notification. Please do not reply directly.<br>
-                        &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>";
+            </table>";
 
 
         $result = $request->UpdateRequestStatus($data);
@@ -606,93 +649,104 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $itemDetails = $request->fetchRequestById($controlNumber);
         $companyLogo = __DIR__ . '/../../' . 'img/logo.png';
-$tableHtml = "
-<table width='100%' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif; font-size:14px;'>
-    <thead>
-        <tr style='background-color:#003366; color:#ffffff; text-align:left;'>
-            <th style='padding:10px; border:1px solid #ddd;'>Item Name</th>
-            <th style='padding:10px; border:1px solid #ddd;'>Description</th>
-            <th style='padding:10px; border:1px solid #ddd;'>Quantity</th>
-            <th style='padding:10px; border:1px solid #ddd;'>UOM</th>
-        </tr>
-    </thead>
-    <tbody>";
-
-foreach ($itemDetails as $row) {
-    $tableHtml .= "
-        <tr style='background-color:#f9f9f9;'>
-            <td style='padding:10px; border:1px solid #ddd;'>{$row['item_name']}</td>
-            <td style='padding:10px; border:1px solid #ddd;'>{$row['item_description']}</td>
-            <td style='padding:10px; border:1px solid #ddd; text-align:center;'>{$row['item_quantity']}</td>
-            <td style='padding:10px; border:1px solid #ddd; text-align:center;'>{$row['item_uom']}</td>
-        </tr>";
-}
-$tableHtml .= "
-    </tbody>
-</table>";
-
-$subject = "Request for Quotation";
-$body = "
-<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
-    <tr>
-        <td align='center'>
-            <table width='650' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
-                
-                <!-- Header with Logo -->
-                <tr>
-                    <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
-                        <table width='100%' cellpadding='0' cellspacing='0' border='0'>
-                            <tr>
-                                <td align='left' style='vertical-align:middle;'>
-                                    <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' style='height:40px;'>
-                                </td>
-                                <td align='center' style='font-size:20px; font-weight:bold; letter-spacing:0.5px; color:#ffffff;'>
-                                    Request for Quotation
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
+        $tableHtml = "
+        <table width='100%' cellpadding='8' cellspacing='0' style='border-collapse: collapse; font-family: Arial, sans-serif; font-size:14px;'>
+            <thead>
+                <tr style='background-color:#003366; color:#ffffff; text-align:left;'>
+                    <th style='padding:10px; border:1px solid #ddd;'>Item Name</th>
+                    <th style='padding:10px; border:1px solid #ddd;'>Description</th>
+                    <th style='padding:10px; border:1px solid #ddd;'>Quantity</th>
+                    <th style='padding:10px; border:1px solid #ddd;'>UOM</th>
                 </tr>
+            </thead>
+            <tbody>";
 
-                <!-- Body -->
-                <tr>
-                    <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
-                        <p>Dear Supplier,</p>
-                        <p>I hope this email finds you well. We would like to request a quotation for the following items:</p>
+        foreach ($itemDetails as $row) {
+            $tableHtml .= "
+                <tr style='background-color:#f9f9f9;'>
+                    <td style='padding:10px; border:1px solid #ddd;'>{$row['item_name']}</td>
+                    <td style='padding:10px; border:1px solid #ddd;'>{$row['item_description']}</td>
+                    <td style='padding:10px; border:1px solid #ddd; text-align:center;'>{$row['item_quantity']}</td>
+                    <td style='padding:10px; border:1px solid #ddd; text-align:center;'>{$row['item_uom']}</td>
+                </tr>";
+        }
+        $tableHtml .= "
+            </tbody>
+        </table>";
+
+        $subject = "Request for Quotation";
+        $body = "
+        <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
+            <tr>
+                <td align='center'>
+                    <table width='650' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
                         
-                        {$tableHtml}
+                        <!-- Header with Logo -->
+                        <tr>
+                            <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
+                                <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                    <tr>
+                                        <td align='left' style='vertical-align:middle;'>
+                                            <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' style='height:40px;'>
+                                        </td>
+                                        <td align='center' style='font-size:20px; font-weight:bold; letter-spacing:0.5px; color:#ffffff;'>
+                                            Request for Quotation
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
 
-                        <p style='margin-top:20px;'>Please provide us with the following details in your quotation:</p>
-                        <ul style='margin:15px 0; padding-left:20px;'>
-                            <li>Unit price and total price</li>
-                            <li>Payment terms</li>
-                            <li>Lead time and delivery schedule</li>
-                            <li>Availability of stock</li>
-                            <li>Warranty (if applicable)</li>
-                        </ul>
+                        <!-- Body -->
+                        <tr>
+                            <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
+                                <p>Dear Supplier,</p>
+                                <p>I hope this email finds you well. We would like to request a quotation for the following items:</p>
+                                
+                                {$tableHtml}
 
-                        <p>Should you require any further information, please feel free to reach out.</p>
+                                <p style='margin-top:20px;'>Please provide us with the following details in your quotation:</p>
+                                <ul style='margin:15px 0; padding-left:20px;'>
+                                    <li>Unit price and total price</li>
+                                    <li>Payment terms</li>
+                                    <li>Lead time and delivery schedule</li>
+                                    <li>Availability of stock</li>
+                                    <li>Warranty (if applicable)</li>
+                                </ul>
 
-                        <p>Looking forward to your prompt response.<br>
-                        Kindly see the attached file for reference.</p>
+                                <p>Should you require any further information, please feel free to reach out.</p>
 
-                        <p style='margin-top:25px;'>Best regards,<br>
-                        <strong>Nidec Instruments Philippines Corporation</strong></p>
-                    </td>
-                </tr>
+                                <p>Looking forward to your prompt response.<br>
+                                Kindly see the attached file for reference.</p>
 
-                <!-- Footer -->
-                <tr>
-                    <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#555; border-top:1px solid #e0e0e0;'>
-                        <strong>Note:</strong> This is an auto-generated email. Please do not reply directly.<br>
-                        Send your response to <a href='mailto:regine.guellena@nidec.com' style='color:#003366; font-weight:bold;'>regine.guellena@nidec.com</a>.<br><br>
-                        &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>";
+                                <p style='margin-top:25px;'>Best regards,<br>
+                                <strong>Nidec Instruments Philippines Corporation</strong></p>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#555; border-top:1px solid #e0e0e0;'>
+                                <strong>Note:</strong> This is an auto-generated email. Please do not reply directly.<br>
+                                Send your response to <a href='mailto:regine.guellena@nidec.com' style='color:#003366; font-weight:bold;'>regine.guellena@nidec.com</a>.<br><br>
+                                &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
+                            </td>
+                        </tr>
+                        <!-- Confidentiality Notice -->
+                        <tr>
+                            <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
+                                <strong>Confidentiality and Data Privacy Notice:</strong><br>
+                                This message, including any attachments, is intended solely for the addressee and may contain 
+                                confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
+                                If you received this message in error, please notify the sender immediately and permanently delete it. 
+                                NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
+                                Act of 2012 (RA 10173) and its Privacy Policy.
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>";
 
         $mailSent = $autoemail->SendEmailNotification($recipients, $ccs, $bccs, $subject, $body, $section, $controlNumber);
         if ($mailSent) {
@@ -1319,12 +1373,14 @@ $body = "
             $groupedData = [];
             $suppliers = [];
             $totalDiscounts = [];
+
             // Collect all supplier names (to make them as column headers)
             foreach ($items as $row) {
                 if (!in_array($row['supplier_name'], $suppliers)) {
                     $suppliers[] = $row['supplier_name'];
                 }
             }
+
             $cells = ['G35', 'I35', 'K35', 'M35', 'O35'];
             //Group Item and Suppliers Details
             foreach ($items as $row) {

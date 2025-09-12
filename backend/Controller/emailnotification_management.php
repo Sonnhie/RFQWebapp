@@ -44,7 +44,7 @@ class emailnotification_management
 
     public function getAttachments($control_number)
     {
-        $query = "SELECT item_attachment FROM " . $this->attachment_table . " WHERE control_number = :control_number";
+        $query = "SELECT path_file FROM " . $this->attachment_table . " WHERE control_number = :control_number";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':control_number', $control_number, \PDO::PARAM_STR); // Usually control_number is a string
         $stmt->execute();
@@ -167,19 +167,27 @@ class emailnotification_management
             }
 
             $attachments = $this->getAttachments($control_number);
-            foreach ($attachments as $index => $fileData) {
-                if (empty($fileData)) {
+
+            foreach ($attachments as $filePath) {
+                if (empty($filePath)) {
                     continue;
                 }
 
+                $absolutePath = __DIR__ . "/../../" . ltrim($filePath, '/');
+
+                if (!file_exists($absolutePath)) {
+                    continue; // Skip missing files
+                }
+
                 $finfo = new \finfo(FILEINFO_MIME_TYPE);
-                $mimeType = $finfo->buffer($fileData);
+                $mimeType = $finfo->file($absolutePath);
 
-                // Assign a default filename since it's not stored in the DB
-                $filename = "attachment_" . ($index + 1) . ".jpeg";  // Change .bin to expected file type if possible
+                $filename = basename($filePath);
 
-                $mail->addStringAttachment($fileData, $filename, 'base64', $mimeType);
+                $mail->addAttachment($absolutePath, $filename, 'base64', $mimeType);
             }
+
+
 
             //Content
             $mail->isHTML(true);                                  // Set email format to HTML
@@ -202,8 +210,4 @@ class emailnotification_management
         }
     }
 
-    public function AutoEmailNotification($data, $targetEmails) 
-    {
-        
-    }
 }

@@ -36,8 +36,8 @@ class QueryBuilder
 
     public static function insertNewAttachment()
     {
-        return "INSERT INTO " . self::$attachment_table . " (control_number, item_name, item_attachment) 
-                    VALUES (:control_number, :item_name, :item_attachment)";
+        return "INSERT INTO " . self::$attachment_table . " (control_number, item_name, path_file) 
+                    VALUES (:control_number, :item_name, :path_file)";
     }
 
     public static function updateAttachment()
@@ -157,7 +157,7 @@ class QueryBuilder
 
     public static function getAttachment()
     {
-        return "SELECT item_attachment FROM " . self::$attachment_table . " WHERE id = :id";
+        return "SELECT path_file FROM " . self::$attachment_table . " WHERE id = :id and control_number = :control_number";
     }
 
     public static function updateItem()
@@ -567,7 +567,6 @@ class QueryBuilder
                     supplier_discount = :item_discount, total_price = :item_total where id = :supplier_id";
     }
 
-
     public static function getTotalStatusCount($data)
     {
         $params = [];
@@ -762,25 +761,29 @@ class QueryBuilder
         return "SELECT * FROM " . self::$currency_table . " WHERE currency_id = :currency_id";
     }
 
-    public static function GetUploadPath(){
+    public static function GetUploadPath()
+    {
         return "SELECT upload_path from " . self::$upload_path . " WHERE department_name = :department LIMIT 1";
     }
 
-    public static function InsertSignature(){
+    public static function InsertSignature()
+    {
         return "INSERT INTO " . self::$signature_table . " (requestor_name, section, signature_path, printed_name, role) 
         VALUES (:requestor_name, :section, :signature_path, :printed_name, :role)";
     }
 
-    public static function GetUserESign(){
+    public static function GetUserESign()
+    {
         return "SELECT signature_path FROM " . self::$signature_table . " WHERE requestor_name = :requestor_name AND section = :section";
     }
 
-    public static function UpdateEsign(){
+    public static function UpdateEsign()
+    {
         return "UPDATE " . self::$signature_table . " SET signature_path = :signature_path WHERE requestor_name = :requestor_name AND section = :section";
     }
 
-    public static function getDeptEsign(){
+    public static function getDeptEsign()
+    {
         return "SELECT * FROM " . self::$signature_table . " WHERE section = :section";
     }
-
 }

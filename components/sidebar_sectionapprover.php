@@ -6,88 +6,75 @@ $section = $_SESSION['user']['department'] ?? '';
 $role = $_SESSION['user']['access_level'] ?? '';
 ?>
 <nav class="sidebar" id="sidebar" data-section="<?= htmlspecialchars($section) ?>" data-role="<?= htmlspecialchars($role) ?>">
-        <div class="sidebar-header p-3">
-            <a href="#" class="d-flex align-items-center text-white text-decoration-none">
-                <i class="bi bi-file-earmark-text fs-4 me-2" style="color: var(--accent-color);"></i>
-                <span class="fs-5 fw-bold">RFQ System</span>
+    <!-- Sidebar Header / Brand -->
+    <div class="sidebar-header">
+        <a href="#" class="d-flex align-items-center sidebar-brand text-decoration-none">
+            <i class="bi bi-file-earmark-text sidebar-icon"></i>
+            <span class="fs-5 fw-bold">RFM System</span>
+        </a>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <ul class="nav flex-column h-100">
+        <!-- Dashboard -->
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-page="dashboard">
+                <i class="bi bi-house-fill sidebar-icon"></i>
+                <span>Dashboard</span>
             </a>
-        </div>
-        
-        <div class="sidebar-menu p-2">
-            <ul class="nav nav-pills flex-column">
-                <div class="mt-3">
-                    <li class="nav-item">
-                        <a class="nav-link text-white active" href="#" data-page ="dashboard">
-                            <i class="bi bi-speedometer2 me-2" style="color: var(--icon-color);"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <div class="mb-3 mt-5 ">
-                        <h6 class="text-white text-uppercase">request management</h6>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="for_sectionapproval">
-                                <i class="bi bi-building me-2" style="color: var(--icon-color);"></i>
-                                RFQ Approval
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="history">
-                                <i class="bi bi-list-check me-2" style="color: var(--icon-color);"></i>
-                                RFQs History
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="history">
-                                <i class="bi bi-list-check me-2" style="color: var(--icon-color);"></i>
-                                Request List
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="reports">
-                                <i class="bi bi-hourglass-split me-2" style="color: var(--icon-color);"></i>
-                                Timeline
-                            </a>
-                        </li>
-                    </div>
-                    <div class="mb-3 mt-3 ">
-                        <h6 class="text-white text-uppercase">Comparison Management</h6>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="comparison-checklist">
-                                <i class="bi bi-card-checklist me-2" style="color: var(--icon-color);"></i>
-                                Comparison Checklist
-                            </a>
-                        </li>
-                    </div> 
-                    <div class="mb-3 mt-3 ">
-                        <h6 class="text-white text-uppercase">settings</h6>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="#" data-page="settings">
-                                <i class="bi bi-gear me-2" style="color: var(--icon-color);"></i>
-                                Configuration    
-                            </a>
-                        </li>
-                    </div>
-                </div>
+        </li>
 
-                <!-- <li class="nav-item">
-                    <a class="nav-link text-white d-flex align-items-center justify-content-between" href="#" data-page="verifier/notification">
-                        <span>
-                            <i class="bi bi-bell me-2" style="color: var(--icon-color);"></i>
-                            Notification
-                        </span>
-                        <span class="badge bg-danger ms-2" id="notificationBadge" ></span>
-                    </a>
-                </li> -->
-                <div class="mt-3">
-                    <li class="nav-item mt-auto">
-                        <a class="nav-link text-white" href="#" id="logoutBtn">
-                            <i class="bi bi-box-arrow-right me-2" style="color: var(--icon-color);"></i>
-                            Logout
-                        </a>
-                    </li>
-                </div>
-            </ul>
-        </div>
-    </nav>
+        <!-- Request Management -->
+        <li class="sidebar-section-title">Request Management</li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-page="for_sectionapproval">
+                <i class="bi bi-building sidebar-icon"></i>
+                <span>RFQ Approval</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-page="rfqs-history">
+                <i class="bi bi-card-list sidebar-icon"></i>
+                <span>RFQs History</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-page="request-list">
+                <i class="bi bi-list-check sidebar-icon"></i>
+                <span>Request List</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-page="timeline">
+                <i class="bi bi-clock-history sidebar-icon"></i>
+                <span>Timeline</span>
+            </a>
+        </li>
 
+        <!-- Comparison Management -->
+        <li class="sidebar-section-title">Comparison Management</li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-page="comparison-checklist">
+                <i class="bi bi-file-check sidebar-icon"></i>
+                <span>Comparison Checklist</span>
+            </a>
+        </li>
 
+        <!-- Settings -->
+        <li class="sidebar-section-title">Settings</li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-page="settings">
+                <i class="bi bi-gear sidebar-icon"></i>
+                <span>Configuration</span>
+            </a>
+        </li>
+
+        <!-- Logout at bottom -->
+        <li class="nav-item mt-auto">
+            <a class="nav-link logout-link" href="#" id="logoutBtn">
+                <i class="bi bi-door-open sidebar-icon"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+    </ul>
+</nav>

@@ -10,8 +10,6 @@ $(document).ready(function () {
     populateTable();
     //paginateTable();
 
- 
-
     // Populate the table
     function populateTable(page = 1) {
         const section = $('#requestTableBody').data('section');
@@ -444,6 +442,5 @@ $(document).ready(function () {
             }
         });
     });
-
-    
+  
 });

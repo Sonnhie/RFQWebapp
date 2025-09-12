@@ -152,7 +152,7 @@ $(document).ready(function () {
                 console.log('Response from server:', response);
                 if (response.status === 'success') {
                     response.data.forEach(item => {
-                        const viewButton = `<button class="btn btn-sm btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#attachmentRfqModal" data-id=${item.id} id="view_btn">
+                        const viewButton = `<button class="btn btn-sm btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#attachmentRfqModal" data-control_number="${item.control_number}" data-id=${item.id} id="view_btn">
                                                 <i class="bi bi-eye"></i>
                                             </button>`;
                         const $row = $(`
@@ -204,42 +204,42 @@ $(document).ready(function () {
 
     $('#itemsTableBody').on('click', '#view_btn', function(){
         const itemId = $(this).data('id');
+        const controlNumber = $(this).data('control_number');
         // console.log('this is clicked');
         $.ajax({
             url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
-            data: { action: 'get_item_details', id: itemId },
+            data: { action: 'get_item_details', id: itemId, control_number: controlNumber },
             dataType: 'json',
             success: function(response){
-            if (response.status === 'success') {
-                const base64 = response.data.file_content;
+         if (response.status === 'success') {
                 const mimeType = response.data.file_type;
-                const fileName = response.data.file_name || 'downloaded_file';
+                const filePath = response.data.file_path;
+                const fileName = response.data.file_name;
 
                 // Define image types
                 const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 
                 if (imageTypes.includes(mimeType)) {
-                    // Show image in the viewer
+                    // Show image directly
                     $('#attachment_viewer')
-                        .attr('src', `data:${mimeType};base64,${base64}`)
+                        .attr('src',  filePath)
                         .show();
-                    
-                    // Hide download link if previously shown
+
                     $('#download_link').hide();
                 } else {
                     // Hide image viewer
                     $('#attachment_viewer').hide();
 
-                    // Create download link
-                    const blobUrl = `data:${mimeType};base64,${base64}`;
+                    // Show download link
                     $('#download_link')
-                        .attr('href', blobUrl)
+                        .attr('href',  filePath)
                         .attr('download', fileName)
-                        .text(`File is not an image type (${mimeType}). Click here to download the file`)
+                        .text(`Download ${fileName}`)
                         .show();
                 }
-            } else {
+            }
+            else {
                 alert(response.message);
             }
             },

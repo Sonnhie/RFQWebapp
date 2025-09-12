@@ -1,55 +1,54 @@
+<nav class="sidebar d-flex flex-column" id="sidebar">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header p-3 mb-3 border-bottom">
+        <a href="#" class="d-flex align-items-center text-decoration-none sidebar-brand">
+            <i class="bi bi-file-earmark-text sidebar-icon me-2"></i>
+            <span class="fs-5 fw-bold"> Request for Material</span>
+        </a>
+    </div>
 
-<nav class="sidebar" id="sidebar">
-        <div class="sidebar-header p-3">
-            <a href="#" class="d-flex align-items-center text-white text-decoration-none">
-                <i class="bi bi-file-earmark-text fs-4 me-2" style="color: var(--accent-color);"></i>
-                <span class="fs-5 fw-bold">RFQ System</span>
+    <!-- Sidebar Menu -->
+    <ul class="nav nav-pills flex-column flex-grow-1 justify-content-between">
+        <div>
+            <!-- Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-page="dashboard">
+                    <i class="bi bi-speedometer2 sidebar-icon"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- User Management -->
+            <li class="sidebar-section-title">User Management</li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-page="admin/user_management">
+                    <i class="bi bi-person-fill-gear sidebar-icon"></i>
+                    <span>User Accounts</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-page="admin/Activity_logs">
+                    <i class="bi bi-list-columns-reverse sidebar-icon"></i>
+                    <span>Activity Logs</span>
+                </a>
+            </li>
+
+            <!-- Settings -->
+            <li class="sidebar-section-title">Settings</li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-page="settings">
+                    <i class="bi bi-gear sidebar-icon"></i>
+                    <span>Configuration</span>
+                </a>
+            </li>
+        </div>
+
+        <!-- Logout pinned at bottom -->
+        <li class="nav-item mt-auto">
+            <a class="nav-link logout-link" href="#" id="logoutBtn">
+                <i class="bi bi-box-arrow-right sidebar-icon"></i>
+                <span>Logout</span>
             </a>
-        </div>
-        
-        <div class="sidebar-menu p-2">
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                    <a class="nav-link text-white active" href="#" data-page ="dashboard">
-                        <i class="bi bi-speedometer2 me-2" style="color: var(--icon-color);"></i>
-                        Dashboard
-                    </a>
-                </li>
-            <div class="mb-3 mt-5 ">
-                <h6 class="text-white text-uppercase">User Management</h6>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="admin/user_management">
-                        <i class="bi bi-person-fill-gear me-2" style="color: var(--icon-color);"></i>
-                        User Accounts
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="admin/Activity_logs">
-                        <i class="bi bi-list-columns-reverse me-2" style="color: var(--icon-color);"></i>
-                        Activity logs
-                    </a>
-                </li>
-            </div>
-            <div class="mb-3 mt-5 ">
-                <h6 class="text-white text-uppercase">Settings</h6>
-                <li class="nav-item">
-                    <a class="nav-link text-white" href="#" data-page="settings">
-                        <i class="bi bi-gear me-2" style="color: var(--icon-color);"></i>
-                        Configuration
-                    </a>
-                </li>
-            </div>      
-            <div class="mb-3 mt-5 ">
-                <li class="nav-item mt-auto">
-                    <a class="nav-link text-white" href="#" id="logoutBtn">
-                        <i class="bi bi-box-arrow-right me-2" style="color: var(--icon-color);"></i>
-                        Logout
-                    </a>
-                </li>
-            </div>
-
-            </ul>
-        </div>
-    </nav>
-
-
+        </li>
+    </ul>
+</nav>

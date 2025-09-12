@@ -47,19 +47,7 @@ $(document).ready(function () {
         formData.append('action', 'create_request');
         formData.append('remarks', 'For Section head approval');
         console.log(formData);
-        //debugFormData(formData);
-
-        // const attachment = $('input[name="item-attachment[]"]')[0];
-        // if (attachment.size > 40 * 1024 * 1024) { // Check if the file size exceeds 10MB
-        //     Swal.fire({
-        //         icon: 'error',
-        //         title: 'File Size Error',
-        //         text: 'The attachment exceeds the maximum allowed size of 40MB.',
-        //     });
-        //     return;
-        // }
-
-        // Ajax request to submit the form data
+ 
         $.ajax({
             url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
@@ -89,7 +77,7 @@ $(document).ready(function () {
                     showConfirmButton: false,
                     timer: 1500
                     }).then(() => {
-                    window.location.reload();
+                        populateTable(1);
                     });
                 } else {
                     Swal.fire({
@@ -181,7 +169,7 @@ $(document).ready(function () {
                         const editButton = `<button class="btn btn-sm btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#editRfqModal" data-id=${item.id} id="edit_btn" ${isDisabled ? 'disabled' : ''}>
                                                 <i class="bi bi-pencil"></i>
                                             </button>`;
-                        const viewButton = `<button class="btn btn-sm btn-primary me-3" data-bs-toggle="modal" data-bs-target="#attachmentRfqModal" data-id=${item.id} id="view_btn">
+                        const viewButton = `<button class="btn btn-sm btn-primary me-3" data-bs-toggle="modal" data-bs-target="#attachmentRfqModal" data-control_number = ${item.control_number} data-id=${item.id} id="view_btn">
                                                 <i class="bi bi-eye"></i>
                                             </button>`;
                         let deleteButton = '';
@@ -412,44 +400,44 @@ $(document).ready(function () {
 
     $('#requestTableBody').on('click', '#view_btn', function(){
         const itemId = $(this).data('id');
-        // console.log('this is clicked');
+        const controlNumber = $(this).data('control_number');
+        console.log(itemId, controlNumber);
         $.ajax({
             url: '././backend/Route/requestRouteAction.php',
             type: 'POST',
-            data: { action: 'get_item_details', id: itemId },
+            data: { action: 'get_item_details', id: itemId, control_number: controlNumber },
             dataType: 'json',
             success: function(response){
             // console.log('Response from server:', response);
 
             if (response.status === 'success') {
-                const base64 = response.data.file_content;
                 const mimeType = response.data.file_type;
-                const fileName = response.data.file_name || 'downloaded_file';
+                const filePath = response.data.file_path;
+                const fileName = response.data.file_name;
 
                 // Define image types
                 const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 
                 if (imageTypes.includes(mimeType)) {
-                    // Show image in the viewer
+                    // Show image directly
                     $('#attachment_viewer')
-                        .attr('src', `data:${mimeType};base64,${base64}`)
+                        .attr('src',  filePath)
                         .show();
-                    
-                    // Hide download link if previously shown
+
                     $('#download_link').hide();
                 } else {
                     // Hide image viewer
                     $('#attachment_viewer').hide();
 
-                    // Create download link
-                    const blobUrl = `data:${mimeType};base64,${base64}`;
+                    // Show download link
                     $('#download_link')
-                        .attr('href', blobUrl)
+                        .attr('href',  filePath)
                         .attr('download', fileName)
-                        .text(`File is not an image type (${mimeType}). Click here to download the file`)
+                        .text(`Download ${fileName}`)
                         .show();
                 }
-            } else {
+            }
+            else {
                 alert(response.message);
             }
 

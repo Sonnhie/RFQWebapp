@@ -97,12 +97,12 @@ class request
     //Function to upload attachments
     public function UploadAttachment($files)
     {
-        $control_number = $this->createRFQNumber();
+        // $control_number = $this->createRFQNumber();
         $query = QueryBuilder::insertNewAttachment();
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':control_number', $control_number);
+        $stmt->bindParam(':control_number', $files['control_number']);
         $stmt->bindParam(':item_name', $files['item_name']);
-        $stmt->bindValue(':item_attachment', $files['item_attachment'], \PDO::PARAM_LOB);
+        $stmt->bindValue(':path_file',$files['path_file']);
         if ($stmt->execute()) {
             return true;
         } else {
@@ -165,15 +165,16 @@ class request
     }
 
     //Get attachment
-    public function getAttachment($id)
+    public function getAttachment($id, $control_number)
     {
         $query = QueryBuilder::getAttachment($id);
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, \PDO::PARAM_INT); // Use type hinting for safety
+        $stmt->bindPAram(':control_number', $control_number, \PDO::PARAM_STR);
         $stmt->execute();
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-        return $result && isset($result['item_attachment']) ? $result['item_attachment'] : null;
+        return $result && isset($result['path_file']) ? $result['path_file'] : null;
     }
 
     //Update Attachment
