@@ -10,7 +10,7 @@ $role = $_SESSION['user']['access_level'] ?? '';
     <!-- Sidebar Header -->
     <div class="sidebar-header p-3 mb-3 border-bottom">
         <a href="#" class="d-flex align-items-center text-decoration-none sidebar-brand">
-            <i class="bi bi-file-earmark-text sidebar-icon me-2"></i>
+            <!-- <i class="bi bi-file-earmark-text sidebar-icon me-2"></i> -->
             <span class="fs-5 fw-bold"> Request for Material</span>
         </a>
     </div>

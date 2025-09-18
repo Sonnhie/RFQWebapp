@@ -1295,7 +1295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($procurement_sign as $sign) {
 
-            $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFQ/' . $sign['signature_path'];
+            $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $sign['signature_path'];
             $signature3 = new Drawing();
             $signature3->setName('Signature4');
             $signature3->setDescription('Electronic Signature');
@@ -1325,7 +1325,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         foreach ($deptesign as $sign) {
 
-            $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFQ/' . $sign['signature_path'];
+            $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $sign['signature_path'];
             $signature3 = new Drawing();
             $signature3->setName('Signature4');
             $signature3->setDescription('Electronic Signature');

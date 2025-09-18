@@ -11,7 +11,7 @@ $role = $_SESSION['user']['access_level'] ?? '';
     <div class="sidebar-header p-3 mb-3 border-bottom">
         <a href="#" class="d-flex align-items-center text-decoration-none sidebar-brand">
             <i class="bi bi-file-earmark-text sidebar-icon me-2"></i>
-            <span class="fs-5 fw-bold">RFQ System</span>
+            <span class="fs-5 fw-bold"> Request for Material</span>
         </a>
     </div>
 
@@ -51,7 +51,7 @@ $role = $_SESSION['user']['access_level'] ?? '';
                     </a>
                 </li>
             <?php endif; ?>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="#" data-page="for_approval">
                     <i class="bi bi-check2-all sidebar-icon"></i>
                     <span>Verification</span>
@@ -62,7 +62,7 @@ $role = $_SESSION['user']['access_level'] ?? '';
                     <i class="bi bi-clipboard-check sidebar-icon"></i>
                     <span>Verified Checklist</span>
                 </a>
-            </li>
+            </li> -->
 
             <!-- Comparison Management -->
             <li class="sidebar-section-title">Comparison Management</li>

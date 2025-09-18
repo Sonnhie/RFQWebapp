@@ -55,11 +55,3 @@
         </li>
     </ul>
 </nav>
-
-<script>
-    $(document).ready(function() {
-        $('.nav-link').on('click', function() {
-
-        });
-    });
-</script>

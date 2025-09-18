@@ -225,7 +225,7 @@ error_reporting(E_ALL);
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Submit RFQ</button>
+                    <button type="submit" class="btn btn-custom">Submit RFQ</button>
                 </div>
         </div>
         </form>
@@ -310,7 +310,7 @@ error_reporting(E_ALL);
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <div class="d-flex justify-content-center align-items-center" style="height: 500px;">
-                            <img id="attachment_viewer" src="" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                            <img id="attachment_viewer" src="" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: stretch;" />
                             <a id="download_link" href="#" style="display:none;" target="_blank"></a>
                         </div>
                     </div>

@@ -6,11 +6,11 @@ $section = $_SESSION['user']['department'] ?? '';
 $role = $_SESSION['user']['access_level'] ?? '';
 ?>
 <nav class="sidebar" id="sidebar" data-section="<?= htmlspecialchars($section) ?>" data-role="<?= htmlspecialchars($role) ?>">
-    <!-- Sidebar Header / Brand -->
-    <div class="sidebar-header">
-        <a href="#" class="d-flex align-items-center sidebar-brand text-decoration-none">
-            <i class="bi bi-file-earmark-text sidebar-icon"></i>
-            <span class="fs-5 fw-bold">RFM System</span>
+    <div class="sidebar-header p-3">
+        <a href="#" class="d-flex align-items-center text-decoration-none sidebar-brand">
+            <!-- <i class="bi bi-file-earmark-text sidebar-icon"></i> -->
+            <!-- <span class="fs-5 fw-bold"> Request for Material</span> -->
+            <span class="fs-5 fw-bold"> Request for Material</span>
         </a>
     </div>
 
@@ -33,19 +33,19 @@ $role = $_SESSION['user']['access_level'] ?? '';
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#" data-page="rfqs-history">
+            <a class="nav-link" href="#" data-page="history">
                 <i class="bi bi-card-list sidebar-icon"></i>
                 <span>RFQs History</span>
             </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
             <a class="nav-link" href="#" data-page="request-list">
                 <i class="bi bi-list-check sidebar-icon"></i>
                 <span>Request List</span>
             </a>
-        </li>
+        </li> -->
         <li class="nav-item">
-            <a class="nav-link" href="#" data-page="timeline">
+            <a class="nav-link" href="#" data-page="reports">
                 <i class="bi bi-clock-history sidebar-icon"></i>
                 <span>Timeline</span>
             </a>
