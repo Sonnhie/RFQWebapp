@@ -107,6 +107,7 @@ body {
   padding: 1rem;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s;
+  cursor: pointer;
 }
 
 .dashboard-card:hover {

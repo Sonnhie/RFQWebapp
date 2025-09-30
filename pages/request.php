@@ -189,9 +189,9 @@ error_reporting(E_ALL);
                                 <tbody id="itemsTableBody">
                                     <tr>
                                         <td><input type="text" class="form-control form-control-sm" name="item_name[]" placeholder="Item name" required></td>
-                                        <td><input type="text" class="form-control form-control-sm" name="item_description[]" placeholder="Description" required></td>
-                                        <td><input type="text" class="form-control" name="item_purpose[]" id="purpose" placeholder="Purchase purpose" required></td>
-                                        <td><input type="number" class="form-control form-control-sm" name="item_quantity[]" placeholder="Qty" required></td>
+                                        <td><textarea class="form-control" name="item_description[]" placeholder="Description" rows="4" required></textarea></td>
+                                        <td><textarea class="form-control" name="item_purpose[]" id="purpose" placeholder="Purchase purpose" rows="4" required></textarea></td>
+                                        <td><input type="text" class="form-control form-control-sm" min="1" id="quantity" name="item_quantity[]" placeholder="Qty" required></td>
                                         <td>
                                             <select class="form-select form-select-sm" name="item_unit[]">
                                                 <option value="Piece">Piece</option>
@@ -202,7 +202,7 @@ error_reporting(E_ALL);
                                                 <option value="Sack">Sack</option>
                                             </select>
                                         </td>
-                                        <td><input class="form-control" type="file" id="attachment" name="item-attachment[]" required></td>
+                                        <td><input class="form-control" type="file" id="attachment" accept=".jpg,.png,application/pdf" name="item-attachment[]" required></td>
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-danger" id="removeItemButton" type="button">
                                                 <i class="bi bi-trash"></i>
@@ -216,12 +216,6 @@ error_reporting(E_ALL);
                             <i class="bi bi-plus-circle me-1"></i> Add Item
                         </button>
                     </div>
-
-                    <!-- <div class="mb-3">
-                                <label for="attachment" class="form-label">Attachments</label>
-                                <input class="form-control" type="file" id="attachment" name="item-attachment[]" multiple required>
-                                <small class="text-muted">Upload specifications, drawings, or other documents</small>
-                            </div> -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -234,7 +228,7 @@ error_reporting(E_ALL);
 
 <!-- Edit RFQ Modal -->
 <div class="modal fade rfq-modal" id="editRfqModal" data-itemId="" tabindex="-1" aria-labelledby="editRfqModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="editrfqModalLabel">
@@ -251,19 +245,19 @@ error_reporting(E_ALL);
                         </div>
                         <div class="col-md-6">
                             <label for="requestor" class="form-label">Item Description</label>
-                            <input type="text" class="form-control" name="item_description" id="item_description" required>
+                            <textarea class="form-control" name="item_description" id="item_description" rows="4" required></textarea>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label for="item_purpose" class="form-label">Purpose</label>
-                            <input type="text" class="form-control" name="item_purpose" id="item_purpose" required>
+                            <textarea class="form-control" name="item_purpose" id="item_purpose" rows="4" required></textarea>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="item_quantity" class="form-label">Quantity</label>
-                            <input type="number" class="form-control" name="item_quantity" id="item_quantity" required>
+                            <input type="text" class="form-control" min="1" name="item_quantity" id="quantity" required>
                         </div>
                         <div class="col-md-6">
                             <label for="item_unit" class="form-label">Unit</label>

@@ -10,9 +10,9 @@ $(document).ready(function () {
     const $newRow = $(`
             <tr>
                 <td><input type="text" class="form-control form-control-sm" name="item_name[]" placeholder="Item name"></td>
-                <td><input type="text" class="form-control form-control-sm" name="item_description[]" placeholder="Description"></td>
-                <td><input type="text" class="form-control" name="item_purpose[]" id="purpose" placeholder="Purchase purpose" required></td>
-                <td><input type="number" class="form-control form-control-sm" name="item_quantity[]" placeholder="Qty"></td>
+                <td><textarea class="form-control" name="item_description[]" placeholder="Description" rows="4" required></textarea></td>
+                <td><textarea class="form-control" name="item_purpose[]" id="purpose" placeholder="Purchase purpose" rows="4" required></textarea></td>
+                <td><input type="text" class="form-control form-control-sm" name="item_quantity[]" min="1" id="quantity" placeholder="Qty"></td>
                 <td>
                     <select class="form-select form-select-sm" name="item_unit[]">
                         <option value="Piece">Piece</option>
@@ -23,7 +23,7 @@ $(document).ready(function () {
                         <option value="Sack">Sack</option>
                     </select>
                 </td>
-                 <td><input class="form-control" type="file" id="attachment" name="item-attachment[]" required></td>
+                 <td><input class="form-control" type="file" id="attachment" accept=".jpg,.png,application/pdf" name="item-attachment[]" required></td>
                 <td class="text-center">
                     <button class="btn btn-sm btn-danger">
                         <i class="bi bi-trash"></i>
@@ -38,6 +38,14 @@ $(document).ready(function () {
     $newRow.find(".btn-danger").on("click", function () {
       $newRow.remove();
     });
+  });
+
+  $("#itemsTableBody").on("input", "#quantity", function () {
+    this.value = this.value.replace(/[^0-9.]/g, "");
+  });
+
+  $("#edit_request").on("input", "#quantity", function () {
+    this.value = this.value.replace(/[^0-9.]/g, "");
   });
 
   // Submit new request
