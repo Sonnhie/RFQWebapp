@@ -43,7 +43,7 @@ class QueryBuilder
     public static function updateAttachment()
     {
         return "UPDATE " . self::$attachment_table . " 
-                    SET item_name = :item_name, item_attachment = :item_attachment 
+                    SET item_name = :item_name, path_file = :path_file 
                     WHERE id = :id";
     }
 
@@ -491,11 +491,11 @@ class QueryBuilder
         }
 
         if ($filters["role"] == "Requestor") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
+            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
         }
 
         if ($filters["role"] == "Section-Approver") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
+            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
         }
 
 
@@ -541,11 +541,11 @@ class QueryBuilder
         }
 
         if ($filters["role"] == "Requestor") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
+            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
         }
 
         if ($filters["role"] == "Section-Approver") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
+            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
         }
 
         return [

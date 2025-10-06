@@ -16,7 +16,9 @@ use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Accounting;
+use Dotenv\Dotenv;
 
+$dotenv = Dotenv::createImmutable(__DIR__ . "/../../");
 $database = new dbconnection();
 $db = $database->getConnection();
 $request = new request($db);
@@ -25,6 +27,7 @@ $autoemail = new emailnotification_management($db);
 $dashboard_management = new dashboard_management($db);
 $user_management = new user_management($db);
 
+$dotenv->load();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Login Action
@@ -277,14 +280,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $item_purpose = isset($_POST['item_purpose']) ? $_POST['item_purpose'] : null;
 
         $maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
-
+        $uploadDir = __DIR__ . "/../../" . "/Uploads/Items"; // absolute path
         if (isset($_FILES['item_attachment']) && $_FILES['item_attachment']['error'] === UPLOAD_ERR_OK) {
             if ($_FILES['item_attachment']['size'] > $maxFileSize) {
                 echo json_encode(['status' => 'error', 'message' => 'File size exceeds 40MB']);
                 exit;
             }
 
-            $fileContents = file_get_contents($_FILES['item_attachment']['tmp_name']);
+            if ($_FILES['item_attachment']['error'] === UPLOAD_ERR_OK) {
+                $tmpName = $_FILES['item_attachment']['tmp_name'];
+                $ext = pathinfo($_FILES['item_attachment']['name'], PATHINFO_EXTENSION);
+                $uniqueName = uniqid("file_") . "." . $ext;
+                $filePath = $uploadDir . "/" . $uniqueName;
+
+                if (move_uploaded_file($tmpName, $filePath)) {
+                    // store relative path for DB
+                    $filePaths = "/Uploads/Items/" . $uniqueName;
+                }
+            }
         } else {
             echo json_encode(['status' => 'error', 'message' => 'File upload error']);
             exit;
@@ -298,7 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'item_quantity' => $item_quantity,
             'item_unit' => $item_unit,
             'item_purpose' => $item_purpose,
-            'item_attachment' => $fileContents ? $fileContents : null
+            'path_file'        => $filePaths ?? null
         ];
 
         $request->updateAttachment($data);

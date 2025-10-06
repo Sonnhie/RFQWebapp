@@ -16,7 +16,7 @@ $(document).ready(function () {
                 <td>
                     <select class="form-select form-select-sm" name="item_unit[]">
                         <option value="Piece">Piece</option>
-                        <option value="Box">Box</option>s
+                        <option value="Box">Box</option>
                         <option value="Meter">Meter</option>
                         <option value="Set">Set</option>
                         <option value="Gallon">Gallon</option>

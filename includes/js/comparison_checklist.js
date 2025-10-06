@@ -143,7 +143,7 @@ $(document).ready(function () {
         groupBtn.push(viewButton);
 
         // Always include edit button (optional condition)
-        groupBtn.push(editButton);
+        // groupBtn.push(editButton);
 
         // Conditionally include approve button based on role
         if (
@@ -153,6 +153,10 @@ $(document).ready(function () {
           $role === "Requestor"
         ) {
           groupBtn.push(approveButton);
+        }
+
+        if ($role === "Verifier") {
+          groupBtn.push(editButton);
         }
 
         if ($role === "Requestor") {

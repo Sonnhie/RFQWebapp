@@ -102,7 +102,7 @@ class request
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':control_number', $files['control_number']);
         $stmt->bindParam(':item_name', $files['item_name']);
-        $stmt->bindValue(':path_file',$files['path_file']);
+        $stmt->bindValue(':path_file', $files['path_file']);
         if ($stmt->execute()) {
             return true;
         } else {
@@ -178,13 +178,13 @@ class request
     }
 
     //Update Attachment
-    public function updateAttachment($data)
+    public function updateAttachment($files)
     {
         $query = QueryBuilder::updateAttachment();
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':item_name', $data['item_name']);
-        $stmt->bindParam(':item_attachment', $data['item_attachment']);
-        $stmt->bindParam(':id', $data['id']);
+        $stmt->bindParam(':id', $files['id']);
+        $stmt->bindParam(':item_name', $files['item_name']);
+        $stmt->bindValue(':path_file', $files['path_file']);
         if ($stmt->execute()) {
             return true;
         } else {
@@ -727,22 +727,23 @@ class request
         }
     }
 
-    public function getEsign($data){
-        try{
+    public function getEsign($data)
+    {
+        try {
             $query = QueryBuilder::GetUserESign();
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':requestor_name', $data['requestor_name']);
             $stmt->bindValue(':section', $data['section']);
-            
-            if(!$stmt->execute()){
-                return[
+
+            if (!$stmt->execute()) {
+                return [
                     'message' => throw new \Exception . 'Faile to execute query.'
                 ];
             }
 
             $row = $stmt->Fetch(\PDO::FETCH_ASSOC);
             return $row;
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Internal server error: ' . $e
@@ -750,14 +751,15 @@ class request
         }
     }
 
-    public function getDeptEsign($section){
-        try{
+    public function getDeptEsign($section)
+    {
+        try {
             $query = QueryBuilder::getDeptEsign();
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':section', $section);
-            
-            if(!$stmt->execute()){
-                return[
+
+            if (!$stmt->execute()) {
+                return [
                     'success' => false,
                     'message' => throw new Exception . 'Failed to execute query.'
                 ];
@@ -765,31 +767,32 @@ class request
 
             $row = $stmt->fetchALL(\PDO::FETCH_ASSOC);
             return $row;
-        }catch(\Exception $e){
-            return[
+        } catch (\Exception $e) {
+            return [
                 'success' => false,
                 'message' => 'Internal server error: ' . $e
             ];
         }
     }
-    
-    public function DeleteRequestByControlNumber($control_number){
-        try{
+
+    public function DeleteRequestByControlNumber($control_number)
+    {
+        try {
             $query = QueryBuilder::deleteAllRequest();
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':id', $control_number);
             if (!$stmt->execute()) {
-                return[
+                return [
                     'success' => false,
                     'message' => throw new Exception . 'Failed to execute query.'
                 ];
-            }else{
+            } else {
                 return [
                     'success' => true,
                     'message' => 'Request successfully deleted.'
                 ];
             }
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Internal server error: ' . $e
