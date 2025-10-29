@@ -57,7 +57,7 @@ $(document).ready(function () {
             // Determine the status badge class based on the requestor_status
             const statusClasses = {
               Approved: "badge-approved",
-              Pending: "badge-pending",
+              "On-going": "badge-pending",
               Rejected: "badge-rejected",
               Hold: "badge-hold",
             };
@@ -99,7 +99,7 @@ $(document).ready(function () {
                                 <td>${statusBadge}</td>
                                 <td>${item.item_remarks}</td>
                                 <td>${item.created_at}</td>
-                                <td>${item.item_section}</td>
+                                <td class="section">${item.item_section}</td>
                                 <td>
                                     ${buttonGroup}
                                 </td>
@@ -409,10 +409,12 @@ $(document).ready(function () {
 
   // Approve button
   $("#requestTableBody").on("click", "#approve_btn", function () {
+    const $row = $(this).closest("tr");
+    const $section = $row.find(".section").text().trim();
     const controlNumber = $(this).data("id");
-    const status = "Pending";
+    const status = "On-going";
     const section = $(this).data("section");
-    const mainsection = $("#requestTableBody").data("section");
+    // const mainsection = $("#requestTableBody").data("section");
     const remarks = "For Quotation";
     Swal.fire({
       title: "Are you sure?",
@@ -442,7 +444,7 @@ $(document).ready(function () {
             status: status,
             remarks: remarks,
             section: section,
-            main: mainsection,
+            main: $section,
           },
           dataType: "json",
           success: function (response) {
@@ -538,6 +540,7 @@ $(document).ready(function () {
       }
     });
   });
+
   $("#requestTableBody").on("click", "#hold_btn", function () {
     const controlNumber = $(this).data("id");
     const section = $(this).data("section");

@@ -16,6 +16,8 @@ class QueryBuilder
     private static $currency_table = "currency_table";
     private static $upload_path = "department_paths";
     private static $signature_table = "signature_table";
+    private static $user_table = "user_table";
+    private static $department_table = "department_table";
 
 
     public static function insertNewRequest()
@@ -58,21 +60,39 @@ class QueryBuilder
     {
         $query = "SELECT * FROM " . self::$request_table . " where 1=1";
 
-        if (!empty($filters['section'])) {
+        if ($filters['section'] != 'Procurement' && $filters['access'] == 'Requestor') {
             $query .= " AND item_section = :item_section";
             $params[':item_section'] = $filters['section'];
         }
 
-        if (!empty($filters['status'])) {
-            $query .= " AND item_status = :status";
-            $params[':status'] = $filters['status'];
+        if ($filters['access'] == 'Section-Approver' && $filters['section'] != 'Procurement') {
+            $query .= " AND item_section = :item_section";
+            $params[':item_section'] = $filters['section'];
         }
 
-        if (!empty($filters['from']) && !empty($filters['to'])) {
-            $query .= " AND created_at BETWEEN :from AND :to";
-            $params[':from'] = $filters['from'];
-            $params[':to'] = $filters['to'];
+        if ($filters['access'] == 'Manager') {
+            $query .= " AND item_section IN (SELECT department FROM  " . self::$department_table . " WHERE  SectionManagerID = :sectionHeadID)";
+            $params[':sectionHeadID'] = $filters['username'];
         }
+
+        // if (!empty($filters['section']) && $filters['section'] == 'Procurement') {
+        //     $query .= " AND item_section = :item_section";
+        //     $params[':item_section'] = $filters['section'];
+        // }
+
+        // if (!empty($filters['access'])) {
+        // }
+
+        // if (!empty($filters['status'])) {
+        //     $query .= " AND item_status = :status";
+        //     $params[':status'] = $filters['status'];
+        // }
+
+        // if (!empty($filters['from']) && !empty($filters['to'])) {
+        //     $query .= " AND created_at BETWEEN :from AND :to";
+        //     $params[':from'] = $filters['from'];
+        //     $params[':to'] = $filters['to'];
+        // }
 
         if (!empty($filters['search'])) {
             $query .= " AND (item_name LIKE :search OR item_description LIKE :search OR control_number LIKE :search
@@ -92,21 +112,37 @@ class QueryBuilder
 
         $query = "SELECT COUNT(*) as total FROM " . self::$request_table . " WHERE 1=1 ";
 
-        if (!empty($filters['section'])) {
+
+        if ($filters['section'] != 'Procurement' && $filters['access'] == 'Requestor') {
             $query .= " AND item_section = :item_section";
             $params[':item_section'] = $filters['section'];
         }
 
-        if (!empty($filters['status'])) {
-            $query .= " AND item_status = :status";
-            $params[':status'] = $filters['status'];
+        if ($filters['access'] == 'Section-Approver' && $filters['section'] != 'Procurement') {
+            $query .= " AND item_section = :item_section";
+            $params[':item_section'] = $filters['section'];
         }
 
-        if (!empty($filters['from']) && !empty($filters['to'])) {
-            $query .= " AND created_at BETWEEN :from AND :to";
-            $params[':from'] = $filters['from'];
-            $params[':to'] = $filters['to'];
+        if ($filters['access'] == 'Manager') {
+            $query .= " AND item_section IN (SELECT department FROM  " . self::$department_table . " WHERE  SectionManagerID = :sectionHeadID)";
+            $params[':sectionHeadID'] = $filters['username'];
         }
+
+        // if (!empty($filters['section'])) {
+        //     $query .= " AND item_section = :item_section";
+        //     $params[':item_section'] = $filters['section'];
+        // }
+
+        // if (!empty($filters['status'])) {
+        //     $query .= " AND item_status = :status";
+        //     $params[':status'] = $filters['status'];
+        // }
+
+        // if (!empty($filters['from']) && !empty($filters['to'])) {
+        //     $query .= " AND created_at BETWEEN :from AND :to";
+        //     $params[':from'] = $filters['from'];
+        //     $params[':to'] = $filters['to'];
+        // }
 
         if (!empty($filters['search'])) {
             $query .= " AND (item_name LIKE :search OR item_description LIKE :search OR control_number LIKE :search
@@ -157,7 +193,7 @@ class QueryBuilder
 
     public static function getAttachment()
     {
-        return "SELECT path_file FROM " . self::$attachment_table . " WHERE id = :id and control_number = :control_number";
+        return "SELECT path_file FROM " . self::$attachment_table . " WHERE id = :id OR control_number = :control_number";
     }
 
     public static function updateItem()
@@ -392,6 +428,99 @@ class QueryBuilder
         ];
     }
 
+    public static function fetchRequestHistory($filters, $params)
+    {
+        $query = "SELECT * FROM " . self::$request_table . " where 1=1";
+        if ($filters['section'] != 'Procurement' && $filters['access'] == 'Requestor') {
+            $query .= " AND item_section = :item_section";
+            $params[':item_section'] = $filters['section'];
+        }
+
+        if ($filters['access'] == 'Section-Approver' && $filters['section'] != 'Procurement') {
+            $query .= " AND item_section = :item_section";
+            $params[':item_section'] = $filters['section'];
+        }
+
+        if ($filters['access'] == 'Manager') {
+            $query .= " AND item_section IN (SELECT department FROM  " . self::$department_table . " WHERE  SectionManagerID = :sectionHeadID)";
+            $params[':sectionHeadID'] = $filters['username'];
+        }
+        // if ($filters['section'] != "Procurement") {
+        //     $query .= " AND item_section = :section";
+        //     $params[':section'] = $filters['section'];
+        // }
+
+
+        // if (!empty($filters['status'])) {
+        //     $query .= " AND item_status = :status";
+        //     $params[':status'] = $filters['status'];
+        // }
+
+        // if (!empty($filters['from']) && !empty($filters['to'])) {
+        //     $query .= " AND created_at BETWEEN :from AND :to";
+        //     $params[':from'] = $filters['from'];
+        //     $params[':to'] = $filters['to'];
+        // }
+
+        if (!empty($filters['search'])) {
+            $query .= " AND (item_name LIKE :search OR item_description LIKE :search OR control_number LIKE :search
+                OR item_requestor LIKE :search OR item_section LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        return [
+            'query' => $query,
+            'params' => $params
+        ];
+    }
+
+    public static function CountRequestHistory($filters)
+    {
+        $params = [];
+
+        $query = "SELECT COUNT(distinct control_number) as total FROM " . self::$request_table . " WHERE 1=1 ";
+        if ($filters['section'] != 'Procurement' && $filters['access'] == 'Requestor') {
+            $query .= " AND item_section = :item_section";
+            $params[':item_section'] = $filters['section'];
+        }
+
+        if ($filters['access'] == 'Section-Approver' && $filters['section'] != 'Procurement') {
+            $query .= " AND item_section = :item_section";
+            $params[':item_section'] = $filters['section'];
+        }
+
+        if ($filters['access'] == 'Manager') {
+            $query .= " AND item_section IN (SELECT department FROM  " . self::$department_table . " WHERE  SectionManagerID = :sectionHeadID)";
+            $params[':sectionHeadID'] = $filters['username'];
+        }
+        // if ($filters['section'] != "Procurement") {
+        //     $query .= " AND item_section = :section";
+        //     $params[':section'] = $filters['section'];
+        // }
+
+        // if (!empty($filters['status'])) {
+        //     $query .= " AND item_status = :status";
+        //     $params[':status'] = $filters['status'];
+        // }
+
+        // if (!empty($filters['from']) && !empty($filters['to'])) {
+        //     $query .= " AND created_at BETWEEN :from AND :to";
+        //     $params[':from'] = $filters['from'];
+        //     $params[':to'] = $filters['to'];
+        // }
+
+        if (!empty($filters['search'])) {
+            $query .= " AND (item_name LIKE :search OR item_description LIKE :search OR control_number LIKE :search
+                OR item_requestor LIKE :search OR item_section LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+
+        return [
+            'query' => $query,
+            'params' => $params
+        ];
+    }
+
     public static function getTotalVerifiedCount($filters)
     {
         $params = [];
@@ -451,8 +580,8 @@ class QueryBuilder
     public static function InserNewComparison()
     {
         return "INSERT INTO " . self::$comparison_table . " 
-                    (control_number, item_name, item_quantity, item_description, item_uom, payment_terms, delivery_time, supplier_name, supplier_price, currency, supplier_discount, total_price) 
-                    VALUES (:control_number, :item_name, :item_quantity, :item_description, :item_uom, :payment_terms, :delivery_time, :supplier_name, :supplier_price, :currency, :supplier_discount, :total_price)";
+                    (control_number, item_name, item_quantity, item_description, item_uom, payment_terms, delivery_time, supplier_name, supplier_price, currency, supplier_discount, total_price, upload_path) 
+                    VALUES (:control_number, :item_name, :item_quantity, :item_description, :item_uom, :payment_terms, :delivery_time, :supplier_name, :supplier_price, :currency, :supplier_discount, :total_price, :upload_path)";
     }
 
     public static function getTotalComparisonCount($filters, $section)
@@ -461,8 +590,37 @@ class QueryBuilder
 
         $query = "SELECT COUNT(distinct control_number) as total from " . self::$request_table . " where 1=1";
 
-        if ($section != 'Procurement') {
-            $query .= " AND item_section = :section";
+        // if ($section != 'Procurement') {
+        //     $query .= " AND item_section = :section";
+        //     $params[":section"] = $section;
+        // }
+        if ($filters['role'] == 'Verifier') {
+            $query .= " AND (item_remarks = 'Comparison Created' 
+                                OR item_remarks LIKE '%Comparison Approved by:%' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Acknowledge by:%' OR item_remarks LIKE '%Comparison Verified by:%')";
+        }
+
+        if ($filters["role"] == "Verifier-Approver") {
+            $query .= " AND item_remarks = 'Comparison Created'";
+        }
+
+        if ($filters["role"] == "Manager" && $section == "Procurement") {
+            $query .= " AND item_remarks = 'Comparison Verified by: Melanie Gancayco'";
+        }
+
+        if ($filters["role"] == "Manager" && $section !== "Procurement") {
+            $query .= " AND (
+                    item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' 
+                    OR item_remarks LIKE '%Disapproved by:%' 
+                    OR item_remarks LIKE '%Comparison Approved by:%'
+                )
+                AND item_section IN (
+                    SELECT department FROM " . self::$department_table . " WHERE SectionManagerID = :sectionHeadID
+                )";
+            $params[':sectionHeadID'] = $filters['username'];
+        }
+
+        if ($filters["role"] == "Requestor" || $filters["role"] == "Section-Approver") {
+            $query .= " AND ( item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%') AND item_section = :section";
             $params[":section"] = $section;
         }
 
@@ -477,26 +635,11 @@ class QueryBuilder
             $params[":search"] = '%' . $filters["searchValue"] . '%';
         }
 
-        if ($filters['role'] == 'Verifier') {
-            $query .= " AND (item_remarks = 'Comparison Created' 
-                                OR item_remarks LIKE '%Comparison Approved by:%' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Acknowledge by:%' OR item_remarks LIKE '%Comparison Verified by:%')";
-        }
 
-        if ($filters["role"] == "Verifier-Approver") {
-            $query .= " AND item_remarks = 'Comparison Created'";
-        }
 
-        if ($filters["role"] == "Manager") {
-            $query .= " AND item_remarks = 'Comparison Verified by: Melanie Gancayco'";
-        }
-
-        if ($filters["role"] == "Requestor") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
-        }
-
-        if ($filters["role"] == "Section-Approver") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
-        }
+        // if ($filters["role"] == "Section-Approver") {
+        //     $query .= " AND ( item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
+        // }
 
 
         return [
@@ -511,8 +654,33 @@ class QueryBuilder
         $query = "SELECT distinct control_number, item_remarks, item_requestor, item_status, item_section, created_at from "
             . self::$request_table . " WHERE 1=1";
 
-        if ($section != 'Procurement') {
-            $query .= " AND item_section = :section";
+        if ($filters['role'] == 'Verifier') {
+            $query .= " AND (item_remarks = 'Comparison Created' 
+                                OR item_remarks LIKE '%Comparison Approved by:%' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Acknowledge by:%' OR item_remarks LIKE '%Comparison Verified by:%')";
+        }
+
+        if ($filters["role"] == "Verifier-Approver") {
+            $query .= " AND item_remarks = 'Comparison Created'";
+        }
+
+        if ($filters["role"] == "Manager" && $section == "Procurement") {
+            $query .= " AND item_remarks = 'Comparison Verified by: Melanie Gancayco'";
+        }
+
+        if ($filters["role"] == "Manager" && $section !== "Procurement") {
+            $query .= " AND (
+                    item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' 
+                    OR item_remarks LIKE '%Disapproved by:%' 
+                    OR item_remarks LIKE '%Comparison Approved by:%'
+                )
+                AND item_section IN (
+                    SELECT department FROM " . self::$department_table . " WHERE SectionManagerID = :sectionHeadID
+                )";
+            $params[':sectionHeadID'] = $filters['username'];
+        }
+
+        if ($filters["role"] == "Requestor" || $filters["role"] == "Section-Approver") {
+            $query .= " AND ( item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%') AND item_section = :section";
             $params[":section"] = $section;
         }
 
@@ -527,26 +695,7 @@ class QueryBuilder
             $params[":search"] = '%' . $filters["searchValue"] . '%';
         }
 
-        if ($filters['role'] == 'Verifier') {
-            $query .= " AND (item_remarks = 'Comparison Created' 
-                                OR item_remarks LIKE '%Comparison Approved by:%' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Acknowledge by:%' OR item_remarks LIKE '%Comparison Verified by:%')";
-        }
 
-        if ($filters["role"] == "Verifier-Approver") {
-            $query .= " AND item_remarks = 'Comparison Created'";
-        }
-
-        if ($filters["role"] == "Manager") {
-            $query .= " AND item_remarks = 'Comparison Verified by: Melanie Gancayco'";
-        }
-
-        if ($filters["role"] == "Requestor") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
-        }
-
-        if ($filters["role"] == "Section-Approver") {
-            $query .= " AND (item_remarks = 'Comparison Acknowledge by: Wilfredo Arante' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%')";
-        }
 
         return [
             "query" => $query,
@@ -574,7 +723,7 @@ class QueryBuilder
                 SELECT 
                     MONTH(latest.created_at) AS month,
                     SUM(CASE WHEN latest.item_status = 'Completed' THEN 1 ELSE 0 END) AS Completed,
-                    SUM(CASE WHEN latest.item_status = 'Pending' THEN 1 ELSE 0 END) AS Pending,
+                    SUM(CASE WHEN latest.item_status = 'On-going' THEN 1 ELSE 0 END) AS 'On-going',
                     SUM(CASE WHEN latest.item_status = 'Hold' THEN 1 ELSE 0 END) AS Hold
                 FROM (
                     SELECT 
@@ -594,11 +743,23 @@ class QueryBuilder
             ";
         $params[":current_year"] = $data['current_year'];
 
-        // Role condition
-        if ($data['section'] != "Procurement") {
+        if ($data['section'] != 'Procurement' && ($data['role'] == 'Requestor' || $data['role'] == 'Section-Approver')) {
             $query .= " AND latest.item_section = :item_section";
-            $params[":item_section"] = $data['section'];
+            $params[':item_section'] = $data['section'];
         }
+
+        if ($data['role'] == 'Manager') {
+            $query .= " AND latest.item_section IN (
+            SELECT department FROM " . self::$department_table . " WHERE SectionManagerID = :sectionHeadID
+            )";
+            $params[':sectionHeadID'] = $data['username'];
+        }
+
+        // // Role condition
+        // if ($data['section'] != "Procurement") {
+        //     $query .= " AND latest.item_section = :item_section";
+        //     $params[":item_section"] = $data['section'];
+        // }
 
         // Final grouping and ordering
         $query .= "
@@ -619,7 +780,7 @@ class QueryBuilder
                 SELECT 
                     MONTH(latest.created_at) AS month,
                     SUM(CASE WHEN latest.item_status = 'Completed' THEN 1 ELSE 0 END) AS Completed,
-                    SUM(CASE WHEN latest.item_status = 'Pending' THEN 1 ELSE 0 END) AS Pending,
+                    SUM(CASE WHEN latest.item_status = 'On-going' THEN 1 ELSE 0 END) AS 'On-going',
                     SUM(CASE WHEN latest.item_status = 'Hold' THEN 1 ELSE 0 END) AS Hold
                 FROM (
                     SELECT 
@@ -642,11 +803,23 @@ class QueryBuilder
         $params[":current_year"] = date('Y');
         $params[":current_month"] = date('n'); // numeric month without leading zero
 
-        // Role condition
-        if ($data['section'] != "Procurement") {
+        if ($data['section'] != 'Procurement' && ($data['role'] == 'Requestor' || $data['role'] == 'Section-Approver')) {
             $query .= " AND latest.item_section = :item_section";
-            $params[":item_section"] = $data['section'];
+            $params[':item_section'] = $data['section'];
         }
+
+        if ($data['role'] == 'Manager') {
+            $query .= " AND latest.item_section IN (
+            SELECT department FROM " . self::$department_table . " WHERE SectionManagerID = :sectionHeadID
+            )";
+            $params[':sectionHeadID'] = $data['username'];
+        }
+
+        // // Role condition
+        // if ($data['section'] != "Procurement") {
+        //     $query .= " AND latest.item_section = :item_section";
+        //     $params[":item_section"] = $data['section'];
+        // }
 
         // Final grouping and ordering
         $query .= "
@@ -774,7 +947,7 @@ class QueryBuilder
 
     public static function GetUserESign()
     {
-        return "SELECT signature_path FROM " . self::$signature_table . " WHERE requestor_name = :requestor_name AND section = :section";
+        return "SELECT signature_path FROM " . self::$user_table . " WHERE id = :id OR (name = :requestor_name AND department = :section)";
     }
 
     public static function UpdateEsign()
@@ -784,6 +957,32 @@ class QueryBuilder
 
     public static function getDeptEsign()
     {
-        return "SELECT * FROM " . self::$signature_table . " WHERE section = :section";
+        return "SELECT * FROM " . self::$user_table . " WHERE department = :section";
+    }
+
+    public static function InsertEmail()
+    {
+        return "INSERT INTO " . self::$email_table . " (name, emailadd, department) 
+        VALUES (:name, :email, :department)";
+    }
+
+    public static function UpdateEmail()
+    {
+        return "UPDATE " . self::$email_table . " SET name = :name, department = :department, emailadd = :email WHERE id = :id";
+    }
+
+    public static function GetRegisteredNames()
+    {
+        return "SELECT DISTINCT(name) from " . self::$user_table;
+    }
+
+    public static function getDepartments()
+    {
+        return "SELECT department_name FROM " . self::$department_table;
+    }
+
+    public static function DeleteEmail()
+    {
+        return "DELETE FROM " . self::$email_table . " WHERE id = :id";
     }
 }

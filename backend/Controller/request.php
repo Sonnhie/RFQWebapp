@@ -170,7 +170,7 @@ class request
         $query = QueryBuilder::getAttachment($id);
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, \PDO::PARAM_INT); // Use type hinting for safety
-        $stmt->bindPAram(':control_number', $control_number, \PDO::PARAM_STR);
+        $stmt->bindParam(':control_number', $control_number, \PDO::PARAM_STR);
         $stmt->execute();
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -369,15 +369,16 @@ class request
     {
         $query = QueryBuilder::UpdateRequestStatus();
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':item_remarks', $data['item_remarks']);
-        $stmt->bindParam(':item_status', $data['requestor_status']);
-        $stmt->bindParam(':control_number', $data['control_number']);
+        $stmt->bindValue(':item_remarks', $data['item_remarks']);
+        $stmt->bindValue(':item_status', $data['requestor_status']);
+        $stmt->bindValue(':control_number', $data['control_number']);
         if ($stmt->execute()) {
             return true;
         } else {
             return false;
         }
     }
+
 
     //fetch all requests by control number
     public function fetchVerificationRequestsByControlNumber($filters, $page = 1, $perPage = 10)
@@ -416,6 +417,58 @@ class request
     {
         $params = [];
         $builder = QueryBuilder::CountRequestForverification($filters, $params);
+        $query = $builder['query'];
+        $params = $builder['params'];
+
+        $stmt = $this->conn->prepare($query);
+
+        // Bind dynamic parameters
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
+
+    //fetch all requests by control number
+    public function fetchHistoryByControlNumber($filters, $page = 1, $perPage = 10)
+    {
+
+        $params = [];
+        $builder = QueryBuilder::fetchRequestHistory($filters, $params);
+        $query = $builder['query'];
+        $params = $builder['params'];
+        // Order by newest first
+        $query .= " Group by control_number  ORDER BY created_at DESC";
+
+        // Pagination using LIMIT and OFFSET
+        $offset = ($page - 1) * $perPage;
+        $query .= " LIMIT :limit OFFSET :offset";
+
+        // Prepare and bind
+        $stmt = $this->conn->prepare($query);
+
+        // Bind dynamic parameters
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        // Bind LIMIT and OFFSET (must be integers)
+        $stmt->bindValue(':limit', (int)$perPage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, \PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    //Count all requests by control number
+    public function countHistoryByControlNumber($filters)
+    {
+        $params = [];
+        $builder = QueryBuilder::CountRequestHistory($filters, $params);
         $query = $builder['query'];
         $params = $builder['params'];
 
@@ -481,24 +534,34 @@ class request
         ]);
 
         $count = $stmt->fetchColumn();
+        // var_dump($data);
+        // exit;
 
         if ($count == 0) {
             $query = QueryBuilder::InserNewComparison();
             $stmt = $this->conn->prepare($query);
-            return $stmt->execute([
-                ':control_number'     => $data['control_number'],
-                ':item_name'          => $data['item_name'],
-                ':item_quantity'      => $data['item_quantity'],
-                ':item_description'   => $data['item_description'],
-                ':item_uom'          => $data['item_unit'],
-                ':supplier_name'      => $data['supplier_name'],
-                ':supplier_price'     => $data['supplier_price'],
-                ':currency'          => $data['currency'],
-                ':supplier_discount'  => $data['supplier_discount'],
-                ':total_price'        => $data['total_price'],
-                ':payment_terms'      => $data['payment_days'],
-                ':delivery_time'      => $data['delivery_days']
-            ]);
+            $stmt->bindValue(':control_number', $data['control_number']);
+            $stmt->bindValue(':item_name', $data['item_name']);
+            $stmt->bindValue(':item_quantity', $data['item_quantity']);
+            $stmt->bindValue(':item_description', $data['item_description']);
+            $stmt->bindValue(':item_uom', $data['item_unit']);
+            $stmt->bindValue(':supplier_name', $data['supplier_name']);
+            $stmt->bindValue(':supplier_price', $data['supplier_price']);
+            $stmt->bindValue(':currency', $data['currency']);
+            $stmt->bindValue(':supplier_discount', $data['supplier_discount']);
+            $stmt->bindValue(':total_price', $data['total_price']);
+            $stmt->bindValue(':payment_terms', $data['payment_days']);
+            $stmt->bindValue(':delivery_time', $data['delivery_days']);
+            $stmt->bindValue(':upload_path', $data['path']);
+
+
+            $result = $stmt->execute();
+
+            if ($result) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         // Record already exists

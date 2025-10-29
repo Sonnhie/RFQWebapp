@@ -19,7 +19,7 @@ class dashboard_management
     }
 
     public function getChartData($data)
-    {   
+    {
         try {
             $params = [];
             $builder = QueryBuilder::getTotalStatusCount($data);
@@ -30,12 +30,12 @@ class dashboard_management
                 $stmt->bindValue($key, $value);
             }
             $stmt->execute();
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $datas = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             return [
                 'status' => true,
                 'message' => 'Successfully data received.',
-                'data' => $data
+                'data' => $datas
             ];
         } catch (\PDOException $e) {
             return [

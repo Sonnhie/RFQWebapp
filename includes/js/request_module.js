@@ -106,24 +106,24 @@ $(document).ready(function () {
     });
   });
 
-  function debugFormData(formData) {
-    console.log("Debugging initialized");
-    console.log("Form submitted");
-    console.log("Serialized form data:");
-    for (const [key, value] of formData.entries()) {
-      console.table(`${key}: ${value}`);
-    }
+  // function debugFormData(formData) {
+  //   console.log("Debugging initialized");
+  //   console.log("Form submitted");
+  //   console.log("Serialized form data:");
+  //   for (const [key, value] of formData.entries()) {
+  //     console.table(`${key}: ${value}`);
+  //   }
 
-    const attachment = $('input[name="item-attachment[]"]')[0];
-    if (attachment.files.length === 0) {
-      console.log("Attachment is null or empty");
-    } else {
-      console.log("Attachments:", attachment.files);
-      for (let i = 0; i < attachment.files.length; i++) {
-        console.table(attachment.files[i].name);
-      }
-    }
-  }
+  //   const attachment = $('input[name="item-attachment[]"]')[0];
+  //   if (attachment.files.length === 0) {
+  //     console.log("Attachment is null or empty");
+  //   } else {
+  //     console.log("Attachments:", attachment.files);
+  //     for (let i = 0; i < attachment.files.length; i++) {
+  //       console.table(attachment.files[i].name);
+  //     }
+  //   }
+  // }
 
   // Populate the table
   function populateTable(page = 1) {
@@ -132,6 +132,8 @@ $(document).ready(function () {
     const FromdateRange = $("#fromDateFilter").val();
     const TodateRange = $("#toDateFilter").val();
     const searchQuery = $("#searchInput").val().toLowerCase();
+    const access = $("#requestTableBody").data("access");
+    const username = $("#requestTableBody").data("username");
     const filters = {
       from: FromdateRange,
       to: TodateRange,
@@ -139,6 +141,7 @@ $(document).ready(function () {
       search: searchQuery,
     };
 
+    console.log(section, access, username);
     const $tbody = $("#requestTableBody");
     $tbody.empty(); // Clear existing rows
     const loadingRow = $(`
@@ -159,6 +162,8 @@ $(document).ready(function () {
       data: {
         action: "get_items",
         section: section,
+        access: access,
+        username: username,
         filters: filters,
         page: page,
       },
@@ -173,35 +178,101 @@ $(document).ready(function () {
           response.data.forEach((item) => {
             const statusClasses = {
               Completed: "badge-approved",
-              Pending: "badge-pending",
+              "On-going": "badge-pending",
               Rejected: "badge-rejected",
               Hold: "badge-hold",
             };
-            const isDisabled = item.requestor_status === "Approved";
-            const statusBadge = `<span class="status-badge ${
-              statusClasses[item.requestor_status] || ""
-            }">${item.requestor_status}</span>`;
-            const editButton = `<button class="btn btn-sm btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#editRfqModal" data-id=${
-              item.id
-            } id="edit_btn" ${isDisabled ? "disabled" : ""}>
-                                                <i class="bi bi-pencil"></i>
-                                            </button>`;
-            const viewButton = `<button class="btn btn-sm btn-primary me-3" data-bs-toggle="modal" data-bs-target="#attachmentRfqModal" data-control_number = ${item.control_number} data-id=${item.id} id="view_btn">
-                                                <i class="bi bi-eye"></i>
-                                            </button>`;
-            let deleteButton = "";
 
-            if (item.item_remarks === "For Procurement Verification") {
-              deleteButton = `<button class="btn btn-sm btn-danger" data-id=${
-                item.id
-              } id="delete_btn" ${
-                isDisabled && item.requestor_status !== "Cancelled"
-                  ? "disabled"
-                  : ""
-              }>
-                                                <i class="bi bi-trash"></i>
-                                            </button>`;
+            const remark = {
+              created: "created",
+              approve: "Approved by",
+              section: "Section head approval",
+              hold: "Hold",
+              verified: "Verified by",
+              acknowledge: "Acknowledge by",
+              disapprove: "Disapproved by",
+            };
+
+            let isDisabled = false;
+            let editButton = "";
+            let viewButton = "";
+            let deleteButton = "";
+            let remarks = item.item_remarks || "";
+            let status = item.requestor_status || "";
+            console.log(remarks);
+
+            if (
+              !(
+                remarks.includes(remark.created) ||
+                remarks.includes(remark.section) ||
+                status == "Hold"
+              )
+            ) {
+              isDisabled = true;
             }
+
+            // const isDisabled = item.requestor_status === "Approved";
+
+            const statusBadge = `
+                  <span class="status-badge ${
+                    statusClasses[item.requestor_status] || ""
+                  }">
+                    ${item.requestor_status}
+                  </span>`;
+
+            editButton = `<button class="btn btn-sm btn-secondary me-3" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#editRfqModal" 
+                          data-id=${item.id} 
+                          data-control_number=${item.control_number} 
+                          id="edit_btn" 
+                          ${isDisabled ? "disabled" : ""}>
+                          <i class="bi bi-pencil"></i>
+                          </button>`;
+
+            viewButton = `<button class="btn btn-sm btn-primary me-3" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#attachmentRfqModal" 
+                          data-control_number = ${item.control_number} 
+                          data-id=${item.id} 
+                          id="view_btn">
+                          <i class="bi bi-eye"></i>
+                          </button>`;
+            deleteButton = `<button class="btn btn-sm btn-danger" 
+                            data-id=${item.id} 
+                            data-control_number=${item.control_number}
+                            id="delete_btn" 
+                            ${
+                              isDisabled &&
+                              item.requestor_status !== "Cancelled"
+                                ? "disabled"
+                                : ""
+                            }>
+                            <i class="bi bi-trash"></i>
+                            </button>`;
+
+            const $CalculateDaysDelay = (actualDate) => {
+              const oneDay = 1000 * 60 * 60 * 24;
+              const requestedDate = new Date(actualDate);
+              const currdate = new Date();
+              // console.log(requestedDate, currdate);
+              requestedDate.setHours(0, 0, 0, 0);
+              currdate.setHours(0, 0, 0, 0);
+
+              const diffInMs = currdate.getTime() - requestedDate.getTime();
+              // console.log("Diff in M: ", diffInMs);
+              const diffInDays = Math.floor(diffInMs / oneDay);
+              // console.log("Diff in Days: ", diffInDays);
+              const pastdue = diffInDays - 7;
+              // console.log("Past due: ", pastdue);
+              if (pastdue > 0 && item.requestor_status != "Completed") {
+                return `<span class="badge bg-danger">Delay ${pastdue} days</span>`;
+              } else {
+                // return `<span class="badge bg-success">---</span>`;
+                return ``;
+              }
+            };
+
             const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
@@ -212,6 +283,7 @@ $(document).ready(function () {
                                 <td>${item.item_unit}</td>
                                 <td>${item.requestor_section}</td>
                                 <td>${statusBadge}</td>
+                                <td>${$CalculateDaysDelay(item.created_at)}</td>
                                 <td>${item.requestor_name}</td>
                                 <td>${item.item_remarks}</td>
                                 <td>${item.created_at}</td>
@@ -272,12 +344,15 @@ $(document).ready(function () {
     }
   }
 
-  function deleteItem(itemId) {
+  function deleteItem(data) {
     // Ajax request to delete the item
     $.ajax({
       url: "././backend/Route/requestRouteAction.php",
       type: "POST",
-      data: { action: "delete_item", id: itemId },
+      data: {
+        action: "delete_item",
+        data: data,
+      },
       dataType: "json",
       success: function (response) {
         if (response.status === "success") {
@@ -324,6 +399,7 @@ $(document).ready(function () {
             text: response.message,
           }).then(() => {
             populateTable();
+            $("#edit_request")[0].reset();
           });
         } else {
           Swal.fire({
@@ -347,6 +423,21 @@ $(document).ready(function () {
   // Delete item button click event
   $("#requestTableBody").on("click", "#delete_btn", function () {
     const itemId = $(this).data("id");
+    const $row = $(this).closest("tr");
+    const control_number = $("#delete_btn").data("control_number");
+    const itemName = $row.find("td:eq(1)").text();
+    const itemDescription = $row.find("td:eq(2)").text();
+    const section = $(this).data("section");
+    const mainsection = $("#requestTableBody").data("section");
+
+    const data = {
+      itemId: itemId,
+      itemName: itemName,
+      itemDescription: itemDescription,
+      section: section,
+      control_number: control_number,
+    };
+
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -357,13 +448,14 @@ $(document).ready(function () {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteItem(itemId);
+        deleteItem(data);
       }
     });
   });
 
   $("#requestTableBody").on("click", "#edit_btn", function () {
     const itemId = $(this).data("id");
+    const control_number = $(this).data("control_number");
     const $row = $(this).closest("tr");
     const itemName = $row.find("td:eq(1)").text();
     const itemDescription = $row.find("td:eq(2)").text();
@@ -371,23 +463,26 @@ $(document).ready(function () {
     const itemQuantity = $row.find("td:eq(4)").text();
     const itemUnit = $row.find("td:eq(5)").text();
     console.log(itemId);
+    $("#control_number").val(control_number);
     $("#item_name").val(itemName);
     $("#item_description").val(itemDescription);
     $("#item_purpose").val(itemPurpose);
     $("#item_quantity").val(itemQuantity);
     $("#item_unit").val(itemUnit);
-
     $("#editRfqModal").data("itemId", itemId);
   });
 
   // Edit item form submission
   $("#edit_request").submit(function (e) {
     e.preventDefault();
+    const section = $(this).data("section");
 
     const itemId = $("#editRfqModal").data("itemId");
+    console.log(section);
     const formData = new FormData($("#edit_request")[0]);
     formData.append("action", "edit_request");
     formData.append("item_id", itemId);
+    formData.append("section", section);
 
     const attachmentInput = $('input[name="item_attachment"]');
     const attachment = attachmentInput.files; // get the first selected file
@@ -400,8 +495,6 @@ $(document).ready(function () {
       });
       return;
     }
-
-    debugFormData(formData);
 
     Swal.fire({
       title: "Are you sure?",
@@ -422,7 +515,7 @@ $(document).ready(function () {
   $("#requestTableBody").on("click", "#view_btn", function () {
     const itemId = $(this).data("id");
     const controlNumber = $(this).data("control_number");
-    console.log(itemId, controlNumber);
+
     $.ajax({
       url: "././backend/Route/requestRouteAction.php",
       type: "POST",
@@ -433,14 +526,11 @@ $(document).ready(function () {
       },
       dataType: "json",
       success: function (response) {
-        // console.log('Response from server:', response);
-
         if (response.status === "success") {
           const mimeType = response.data.file_type;
           const filePath = response.data.file_path;
           const fileName = response.data.file_name;
 
-          // Define image types
           const imageTypes = [
             "image/jpeg",
             "image/png",
@@ -450,15 +540,12 @@ $(document).ready(function () {
           ];
 
           if (imageTypes.includes(mimeType)) {
-            // Show image directly
+            // Show image
             $("#attachment_viewer").attr("src", filePath).show();
-
             $("#download_link").hide();
           } else {
-            // Hide image viewer
-            $("#attachment_viewer").hide();
-
             // Show download link
+            $("#attachment_viewer").hide();
             $("#download_link")
               .attr("href", filePath)
               .attr("download", fileName)

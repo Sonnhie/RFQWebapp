@@ -86,6 +86,7 @@ if (!empty($_POST['action']) && $_POST['action'] == 'create_user') {
     $data = [];
     $paths = $usermanagement->getUploadPaths($department);
 
+
     if (!$paths) {
         echo json_encode([
             'status' => 'success',
@@ -93,7 +94,8 @@ if (!empty($_POST['action']) && $_POST['action'] == 'create_user') {
         ]);
     }
 
-    $uploadDir = __DIR__ . $paths['upload_path'];
+    // $uploadDir = __DIR__ . $paths['upload_path'];
+    $uploadDir = 'D:/Uploads/Sign/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
@@ -115,7 +117,7 @@ if (!empty($_POST['action']) && $_POST['action'] == 'create_user') {
             'path' => $dbPath
         ];
 
-        $uploadedresult = $usermanagement->InsertSignature($data);
+        // $uploadedresult = $usermanagement->InsertSignature($data);
         $result = $usermanagement->InsertNewUserData($data);
 
         if ($result) {
@@ -181,35 +183,57 @@ if (!empty($_POST['action']) && $_POST['action'] == 'edit_user') {
                 'position'   => $position,
                 'path'       => $dbPath
             ];
-
-            $result = $usermanagement->UpdateUser($data);
             $oldEsign = $usermanagement->getEsign($data);
-            if ($result['success']) {
-                if ($oldEsign) {
-                    $absolutePath = $_SERVER['DOCUMENT_ROOT'] . '/RFQ/' . $oldEsign['signature_path'];
 
-                    if (!empty($path) && is_file($path)) {
-                        unlink($absolutePath);
-                    }
-
-                    $usermanagement->UpdateExistingEsign($data);
+            if (!empty($oldEsign['signature_path'])) {
+                $absolutePath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $oldEsign['signature_path'];
+                if (file_exists($absolutePath)) {
+                    unlink($absolutePath);
                 }
 
-                echo json_encode([
-                    'status'  => 'success',
-                    'message' => $result['message'],
-                    'path' => $absolutePath
-                ]);
+                // $updateEsign = $usermanagement->UpdateExistingEsign($data);
+                $result = $usermanagement->UpdateUser($data);
+                if ($updateEsign) {
+                    echo json_encode([
+                        'status'  => 'success',
+                        'message' => $result['message'],
+                        'path' => $absolutePath
+                    ]);
+                } else {
+                    echo json_encode([
+                        'status'  => 'error',
+                        'message' => 'Failed to updated.'
+                    ]);
+                }
             } else {
+                $result = $usermanagement->UpdateUser($data);
+
                 // DB failed → rollback new file
                 if (file_exists($filepath)) {
                     unlink($filepath);
                 }
+
+
                 echo json_encode([
                     'status'  => 'error',
-                    'message' => 'DB update failed: ' . $result['message']
+                    'message' => 'DB update failed: '
                 ]);
             }
+
+            // $result = 
+
+            // if ($result['success']) {
+            //     if ($oldEsign) {
+
+            //         // if (!empty($path) && is_file($path)) {
+            //         //     unlink($absolutePath);
+            //         // }
+
+
+            //     }
+
+
+            // } 
         } else {
             echo json_encode([
                 'status'  => 'error',
@@ -275,6 +299,133 @@ if (!empty($_POST['action']) && $_POST['action'] == 'logout') {
     $userid = $_SESSION['user']['id'] ?? null;
     $userstatus = 'Offline';
     $result = $usermanagement->logout($userid, $userstatus);
+
+    echo json_encode([
+        'status' => $result['success'] ? 'success' : 'error',
+        'message' => $result['message']
+    ]);
+}
+
+if (!empty($_POST['action']) && $_POST['action'] == 'get_email') {
+    header('Content-Type: application/json');
+
+    $searchInput = $_POST['searchinput'] ?? null;
+    $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
+    $perpage = 15;
+
+    $result = $usermanagement->GetEmailList($searchInput, $page, $perpage);
+    $resultcount = $usermanagement->GetEmailListCount($searchInput); // ✅ actual total count
+
+    $data = [];
+
+    if (!empty($result)) {
+        foreach ($result as $row) {
+            $data[] = [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'emailadd' => $row['emailadd'],
+                'department' => $row['department']
+            ];
+        }
+        echo json_encode([
+            'status' => 'success',
+            'data' => $data,
+            'total' => $resultcount, // ✅ dynamic count
+            'currentPage' => $page,
+            'perPage' => $perpage
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Failed to retrieve data.'
+        ]);
+    }
+}
+
+if (!empty($_POST['action'] && $_POST['action'] == 'create_email')) {
+
+    $name = $_POST['name'] ?? null;
+    $emailadd = $_POST['emailaddress'] ?? null;
+    $department = $_POST['department'] ?? null;
+
+    try {
+        $data = [
+            'name' => $name,
+            'emailadd' => $emailadd,
+            'department' => $department
+        ];
+
+        $result = $usermanagement->InsertNewEmail($data);
+
+        echo json_encode([
+            'status' => $result['success'] ? 'success' : 'error',
+            'message' => $result['message']
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Internal server error: ' . $e
+        ]);
+    }
+}
+
+if (!empty($_POST['action'] && $_POST['action'] == 'edit_email')) {
+
+    $id = $_POST['id'] ?? null;
+    $name = $_POST['editname'] ?? null;
+    $emailadd = $_POST['emailadd'] ?? null;
+    $department = $_POST['editdepartment'] ?? null;
+
+    try {
+        $data = [
+            'id' => $id,
+            'name' => $name,
+            'emailadd' => $emailadd,
+            'department' => $department
+        ];
+
+        $result = $usermanagement->UpdateEmail($data);
+
+        echo json_encode([
+            'status' => $result['success'] ? 'success' : 'error',
+            'message' => $result['message']
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Internal server error: ' . $e
+        ]);
+    }
+}
+
+if (!empty($_POST['action']) && $_POST['action'] == 'get_option') {
+    header('Content-Type: application/json');
+
+    $departmentresult = $usermanagement->GetDepartment();
+    $nameresult = $usermanagement->getNames();
+
+    if (!empty($departmentresult) && !empty($nameresult)) {
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Option successfully loaded.',
+            'data' => $departmentresult,
+            'access' => $nameresult
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Failed to retrieve data.'
+        ]);
+    }
+    exit;
+}
+
+if (!empty($_POST['action']) && $_POST['action'] == 'delete_email') {
+    header('Content-Type: application/json');
+
+    $id = $_POST['id'] ?? null;
+
+    $result = $usermanagement->DeleteEmail($id);
 
     echo json_encode([
         'status' => $result['success'] ? 'success' : 'error',

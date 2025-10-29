@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  let section = $(".table").data("section");
+  let section = $("#comparisonTable").data("section");
   let page = 1;
   let limit = 10;
   const $tbody = $("#comparisonTable");
@@ -42,7 +42,7 @@ $(document).ready(function () {
       data.forEach((item) => {
         const statusClasses = {
           Completed: "badge-approved",
-          Pending: "badge-pending",
+          "On-going": "badge-pending",
           Rejected: "badge-rejected",
           Hold: "badge-hold",
         };
@@ -57,36 +57,74 @@ $(document).ready(function () {
         let dissapproveButton = "";
         let downloadButton = "";
 
+        // if (
+        //   (item.item_remarks === "Comparison Approved by: Requestor" ||
+        //     item.item_remarks === "Comparison Verified by: Melanie Gancayco") &&
+        //   ($role === "Requestor" || $role === "Section-Approver")
+        // ) {
+        //   isDisabled = true;
+        // } else if (
+        //   (item.item_remarks ===
+        //     "Comparison Acknowledge by: Jocelyn Marcaida" ||
+        //     item.item_remarks === "Comparison Approved by: Requestor") &&
+        //   $role === "Manager"
+        // ) {
+        //   isDisabled = true;
+        // } else if (
+        //   (item.item_remarks ===
+        //     "Comparison Acknowledge by: Jocelyn Marcaida" ||
+        //     item.item_remarks === "Comparison Approved by: Requestor" ||
+        //     item.item_remarks === "Comparison Verified by: Melanie Gancayco") &&
+        //   $role === "Verifier-Approver"
+        // ) {
+        //   isDisabled = true;
+        // } else if (
+        //   (item.item_remarks === "Comparison created" ||
+        //     item.item_remarks === "Comparison Approved by: Requestor" ||
+        //     item.item_remarks === "Comparison Verified by: Melanie Gancayco" ||
+        //     item.item_remarks ===
+        //       "Comparison Acknowledge by: Jocelyn Marcaida") &&
+        //   $role === "Verifier"
+        // ) {
+        //   isDisabled = true;
+        // }
+        const remark = {
+          created: "created",
+          approve: "Approved by",
+          verified: "Verified by",
+          acknowledge: "Acknowledge by",
+          disapprove: "Disapproved by",
+        };
+
+        let remarks = item.item_remarks || "";
+        console.log(remarks);
         if (
-          (item.item_remarks === "Comparison Approved by: Requestor" ||
-            item.item_remarks === "Comparison Verified by: Melanie Gancayco") &&
-          ($role === "Requestor" || $role === "Section-Approver")
+          (remarks.includes(remark.approve) ||
+            remarks.includes(remark.verified)) &&
+          ($role == "Requestor" || $role == "Section-Approver")
         ) {
           isDisabled = true;
         } else if (
-          (item.item_remarks === "Comparison Acknowledge by: Wilfredo Arante" ||
-            item.item_remarks === "Comparison Approved by: Requestor") &&
-          $role === "Manager"
+          (remarks.includes(remark.acknowledge) ||
+            remarks.includes(remark.approve)) &&
+          $role == "Manager"
         ) {
           isDisabled = true;
         } else if (
-          (item.item_remarks === "Comparison Acknowledge by: Wilfredo Arante" ||
-            item.item_remarks === "Comparison Approved by: Requestor" ||
-            item.item_remarks === "Comparison Verified by: Melanie Gancayco") &&
+          (remarks.includes(remark.approve) ||
+            remarks.includes(remark.verified)) &&
           $role === "Verifier-Approver"
         ) {
           isDisabled = true;
         } else if (
-          (item.item_remarks === "Comparison created" ||
-            item.item_remarks === "Comparison Approved by: Requestor" ||
-            item.item_remarks === "Comparison Verified by: Melanie Gancayco" ||
-            item.item_remarks ===
-              "Comparison Acknowledge by: Wilfredo Arante") &&
+          (remarks.includes(remark.created) ||
+            remarks.includes(remark.approve) ||
+            remarks.includes(remark.verified) ||
+            remarks.includes(remark.acknowledge)) &&
           $role === "Verifier"
         ) {
           isDisabled = true;
         }
-
         // Build button once
         approveButton = `
                         <button class="btn btn-sm btn-success rounded-2 me-3" 
@@ -157,10 +195,15 @@ $(document).ready(function () {
 
         if ($role === "Verifier") {
           groupBtn.push(editButton);
+          groupBtn.push(downloadButton);
         }
 
         if ($role === "Requestor") {
           groupBtn.push(dissapproveButton);
+          groupBtn.push(downloadButton);
+        }
+
+        if ($role === "Section-Approver") {
           groupBtn.push(downloadButton);
         }
 
@@ -230,11 +273,15 @@ $(document).ready(function () {
       const FromdateRange = $("#fromDateFilter").val();
       const TodateRange = $("#toDateFilter").val();
       const searchQuery = $("#searchInput").val().toLowerCase();
+      const access = $("#comparisonTable").data("access");
+      const username = $("#comparisonTable").data("username");
       const $filter = {
         dateFrom: FromdateRange,
         dateTo: TodateRange,
         searchValue: searchQuery,
         role: $role,
+        access: access,
+        username: username,
       };
 
       $tbody.empty();
@@ -446,6 +493,9 @@ $(document).ready(function () {
               supplier.item_total
             ).toFixed(2)}" class="form-control" step="0.01" readonly />
                                 </td>
+                                <td>
+                                  <input type="file" id="upload_path" name="upload_path[]" data-index="${index}">
+                                </td>
                         </tr>`);
 
             setTimeout(() => {
@@ -564,7 +614,7 @@ $(document).ready(function () {
 
       if ($role == "Verifier-Approver") {
         remarks = "Comparison Verified by: " + $name;
-        status = "Pending";
+        status = "On-going";
       } else if ($role == "Manager") {
         remarks = "Comparison Acknowledge by: " + $name;
         status = "Completed";

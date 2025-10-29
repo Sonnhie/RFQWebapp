@@ -60,7 +60,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-title text-muted">PENDING</h6>
+                        <h6 class="card-title text-muted">On-going</h6>
                         <h2 class="mb-0" id="pending"></h2>
                     </div>
                     <i class="bi bi-hourglass-split fs-3 text-warning"></i>
@@ -114,7 +114,7 @@
                 ?>
             </select>
         </div>
-        <div class="chart-container" data-section="<?php echo $_SESSION['user']['department']; ?>" data-role="<?php echo $_SESSION['user']['access_level'] ?>">
+        <div class="chart-container" data-section="<?php echo $_SESSION['user']['department']; ?>" data-role="<?php echo $_SESSION['user']['access_level'] ?>" data-username="<?php echo $_SESSION['user']['username'] ?>">
             <canvas id="rfqChart" height="400" width="900"></canvas>
             <!-- <canvas id="rfqChart2" height="300"></canvas> -->
         </div>
@@ -185,16 +185,8 @@
                                 <input type="text" class="form-control" name="requestor_section" id="department" value="<?php echo $_SESSION['user']['department']; ?>" readonly>
                             </div>
                         </div>
-                        <!-- <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <label for="purpose" class="form-label">Purpose</label>
-                                    <input type="text" class="form-control" name="item_purpose" id="purpose" placeholder="Purchase purpose" required>
-                                </div>
-                            </div> -->
-
                         <div class="mb-3">
                             <label class="form-label">Items Requested</label>
-
                             <div class="table-responsive">
                                 <table class="table table-bordered">
                                     <thead>
@@ -224,7 +216,7 @@
                                                     <option value="Sack">Sack</option>
                                                 </select>
                                             </td>
-                                            <td><input class="form-control" type="file" id="attachment" accept=".jpg,.png,application/pdf" name="item-attachment[]" required></td>
+                                            <td><input class="form-control" type="file" id="attachment" accept=".jpg,.png,application/pdf,.zip,application/zip" name="item-attachment[]" required></td>
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-danger" id="removeItemButton" type="button">
                                                     <i class="bi bi-trash"></i>

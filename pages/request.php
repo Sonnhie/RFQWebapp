@@ -46,7 +46,7 @@ error_reporting(E_ALL);
                     <select class="form-select border-start-0" id="statusFilter">
                         <option value="" selected>All Statuses</option>
                         <option value="Pending" class="text-warning">Pending</option>
-                        <option value="Approved" class="text-success">Approved</option>
+                        <option value="Completed" class="text-success">Completed</option>
                         <option value="Rejected" class="text-danger">Rejected</option>
                         <option value="Hold" class="text-primary">Hold</option>
                     </select>
@@ -117,13 +117,14 @@ error_reporting(E_ALL);
                         <th>Unit</th>
                         <th>Section</th>
                         <th>Status</th>
+                        <th>Days Delay</th>
                         <th>Requestor</th>
                         <th>Remarks</th>
                         <th>Date Requested</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="requestTableBody" data-section="<?php echo $_SESSION['user']['department']; ?>">
+                <tbody id="requestTableBody" data-section="<?php echo $_SESSION['user']['department']; ?>" data-username="<?php echo $_SESSION['user']['username']; ?>" data-access="<?php echo $_SESSION['user']['access_level']; ?>">
                 </tbody>
             </table>
             <div>
@@ -202,7 +203,7 @@ error_reporting(E_ALL);
                                                 <option value="Sack">Sack</option>
                                             </select>
                                         </td>
-                                        <td><input class="form-control" type="file" id="attachment" accept=".jpg,.png,application/pdf" name="item-attachment[]" required></td>
+                                        <td><input class="form-control" type="file" id="attachment" accept=".jpg,.png,application/pdf,.zip,application/zip" name="item-attachment[]" required></td>
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-danger" id="removeItemButton" type="button">
                                                 <i class="bi bi-trash"></i>
@@ -236,9 +237,10 @@ error_reporting(E_ALL);
                 </h5>
                 <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="#" method="post" id="edit_request" enctype="multipart/form-data">
+            <form action="#" method="post" id="edit_request" enctype="multipart/form-data" data-section="<?php echo $_SESSION['user']['department'] ?>">
                 <div class="modal-body">
                     <div class="row mb-3">
+                        <input type="hidden" name="control_number" id="control_number">
                         <div class="col-md-6">
                             <label for="item_name" class="form-label">Item Name</label>
                             <input type="text" class="form-control" name="item_name" id="item_name" required>
@@ -275,7 +277,7 @@ error_reporting(E_ALL);
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label for="item_attachment" class="form-label">Attachment</label>
-                            <input class="form-control" type="file" id="item_attachment" name="item_attachment" required>
+                            <input class="form-control" type="file" id="item_attachment" accept=".jpg,.png,application/pdf,.zip,application/zip" name="item_attachment" required>
                             <small class="text-muted">Upload specifications, drawings, or other documents</small>
                         </div>
                     </div>

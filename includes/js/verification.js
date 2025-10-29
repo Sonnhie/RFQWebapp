@@ -26,9 +26,19 @@ $(document).ready(function () {
         $tbody.append($noDataRow);
         return;
       }
-
+      console.log(data);
+      $tbody.empty();
       data.forEach((item) => {
-        $tbody.empty();
+        // $tbody.empty();
+        const statusClasses = {
+          Approved: "badge-approved",
+          "On-going": "badge-pending",
+          Rejected: "badge-rejected",
+          Hold: "badge-hold",
+        };
+        const statusBadge = `<span class="status-badge ${
+          statusClasses[item.item_status] || ""
+        }">${item.item_status}</span>`;
 
         const emailButton = `<button class="btn btn-sm btn-primary rounded-2 me-3" data-bs-toggle="modal" data-bs-target="#emailsupplier" data-section="${item.item_section}" data-id="${item.control_number}" id="email_btn">
                                         <i class="bi bi-envelope"></i> Email Supplier
@@ -45,7 +55,7 @@ $(document).ready(function () {
         const $row = $(`
                     <tr>
                         <td>${item.control_number}</td>
-                        <td>${item.item_status}</td>
+                        <td>${statusBadge}</td>
                         <td>${item.item_remarks}</td>
                         <td>${item.item_section}</td>
                         <td>${item.created_at}</td>
@@ -63,39 +73,52 @@ $(document).ready(function () {
     const $pagination = $("#pagination");
     $pagination.empty();
 
-    const prevDisabled = currentPage === 1 ? "disabled" : "";
-    $pagination.append(`
-            <li class="page-item ${prevDisabled}">
-                <a class="page-link" href="#" aria-label="Previous" data-page="${
-                  currentPage - 1
-                }">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-        `);
-
     for (let i = 1; i <= totalPages; i++) {
-      const activeClass = i === currentPage ? "active" : "";
-      $pagination.append(`
-                <li class="page-item ${activeClass}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+      const $pageItem = $(`
+                <li class="page-item ${i === currentPage ? "active" : ""}">
+                    <a class="page-link" href="#">${i}</a>
                 </li>
             `);
-    }
 
-    const nextDisabled = currentPage === totalPages ? "disabled" : "";
-    $pagination.append(`
-            <li class="page-item ${nextDisabled}">
-                <a class="page-link" href="#" aria-label="Next" data-page="${
-                  currentPage + 1
-                }">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        `);
+      $pageItem.on("click", function (e) {
+        e.preventDefault();
+        populateTable(i);
+      });
+      $pagination.append($pageItem);
+      // const prevDisabled = currentPage === 1 ? "disabled" : "";
+      // $pagination.append(`
+      //         <li class="page-item ${prevDisabled}">
+      //             <a class="page-link" href="#" aria-label="Previous" data-page="${
+      //               currentPage - 1
+      //             }">
+      //                 <span aria-hidden="true">&laquo;</span>
+      //             </a>
+      //         </li>
+      //     `);
+
+      // for (let i = 1; i <= totalPages; i++) {
+      //   const activeClass = i === currentPage ? "active" : "";
+      //   $pagination.append(`
+      //             <li class="page-item ${activeClass}">
+      //                 <a class="page-link" href="#" data-page="${i}">${i}</a>
+      //             </li>
+      //         `);
+      // }
+
+      // const nextDisabled = currentPage === totalPages ? "disabled" : "";
+      // $pagination.append(`
+      //         <li class="page-item ${nextDisabled}">
+      //             <a class="page-link" href="#" aria-label="Next" data-page="${
+      //               currentPage + 1
+      //             }">
+      //                 <span aria-hidden="true">&raquo;</span>
+      //             </a>
+      //         </li>
+      //     `);
+    }
   };
 
-  const getData = () => {
+  const getData = (page = 1) => {
     const $filter = {
       dateFrom: $("#fromDateFilter").val(),
       dateTo: $("#toDateFilter").val(),
@@ -128,9 +151,12 @@ $(document).ready(function () {
       dataType: "json",
       success: function (response) {
         $tbody.empty();
-        const totalPage = Math.ceil(response.total / response.perPage);
-        renderTable(response.data || []);
-        renderPagination(page, totalPage);
+        if (response.status == "success") {
+          renderTable(response.data || []);
+          const totalPage = Math.ceil(response.total / response.perPage);
+          console.log(totalPage);
+          renderPagination(page, totalPage);
+        }
       },
       error: function (err) {
         console.log(err);
@@ -428,36 +454,10 @@ $(document).ready(function () {
                                                         <input type="number" class="form-control form-control-sm discount-input" name="item_discount[${idx}][]" placeholder="Discount" min="0" step="any">
                                                     </td>
                                                     <td>
-                                                        <label for="start_payment_terms" class="form-label small fw-bold text-muted mb-1">From</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="start_payment_terms" name="start_payment_terms[${idx}][]">
-                                                        </div>
-                                                        <label for="end_payment_terms" class="form-label small fw-bold text-muted mb-1">To</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="end_payment_terms" name="end_payment_terms[${idx}][]">
-                                                        </div>
+                                                        <input type="number" class="form-control form-control-sm" name="payment_terms[${idx}][]" placeholder="Days" min="0" step="any">
                                                     </td>
                                                      <td>
-                                                        <label for="start_delivery_lead" class="form-label small fw-bold text-muted mb-1">From</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="start_delivery_lead" name="start_delivery_lead[${idx}][]">
-                                                        </div>
-                                                        <label for="end_delivery_lead" class="form-label small fw-bold text-muted mb-1">To</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="end_delivery_lead" name="end_delivery_lead[${idx}][]">
-                                                        </div>
+                                                        <input type="number" class="form-control form-control-sm" name="delivery_terms[${idx}][]" placeholder="Days" min="0" step="any">
                                                     </td>
                                                     <td>
                                                         <input type="text" class="form-control form-control-sm total-input" name="item_total[${idx}][]" placeholder="Total" readonly tabindex="-1">
@@ -519,17 +519,28 @@ $(document).ready(function () {
     $("#section").text(`Section: ${section}`);
     populateComparisonTable(controlNumber);
     $("#comparisonModal").modal("show");
-    console.log(mainsection, section);
+    // console.log(mainsection, section);
   });
 
   $("#comparisonForm").on("submit", function (e) {
     e.preventDefault();
-    const controlNumber = $("#comparisonModal").data("id"); // Get control number from the modal
-    const requestorsection = $("#comparisonModal").data("section"); // Get section from the modal
-    const formData =
-      $(this).serialize() +
-      `&action=create_comparison&control_number=${controlNumber}&section=${requestorsection}&bccsection=${section}`;
-    console.log(formData);
+
+    const controlNumber = $("#comparisonModal").data("id");
+    const requestorsection = $("#comparisonModal").data("section");
+    const fileInput = $("#formFile")[0].files[0];
+
+    // Create FormData object
+    let formData = new FormData(this); // Automatically gets all inputs (including file)
+
+    // Append extra data not in form
+    formData.append("action", "create_comparison");
+    formData.append("control_number", controlNumber);
+    formData.append("section", requestorsection);
+    formData.append("bccsection", section);
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+
     Swal.fire({
       title: "Are you sure?",
       text: "You want to create comparison?",
@@ -541,28 +552,30 @@ $(document).ready(function () {
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
-            title: "Processing...",
-            text: "Please wait while we create the comparison.",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-              Swal.showLoading();
-            },
+          title: "Processing...",
+          text: "Please wait while we create the comparison.",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
         });
 
         $.ajax({
           url: "./backend/Route/requestRouteAction.php",
           type: "POST",
           data: formData,
+          processData: false, // IMPORTANT for FormData
+          contentType: false, // IMPORTANT for FormData
           dataType: "json",
           success: function (response) {
             Swal.close();
             if (response.status === "success") {
-                Swal.fire("Comparison Created!", response.message, "success");
-                getData();
-                $("#comparisonModal").modal("hide"); // Hide the modal
+              Swal.fire("Comparison Created!", response.message, "success");
+              getData();
+              $("#comparisonModal").modal("hide");
             } else {
-                Swal.fire("Error!", response.message, "error");
+              Swal.fire("Error!", response.message, "error");
             }
           },
           error: function (xhr, status, error) {

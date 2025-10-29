@@ -1,6 +1,7 @@
 $(document).ready(function () {
   const role = $(".chart-container").data("role");
   const section = $(".chart-container").data("section");
+  const username = $(".chart-container").data("username");
   const $tbody = $("#rfqTableBody");
   const now = new Date();
   const month = now.toLocaleString("default", { month: "long" });
@@ -11,9 +12,11 @@ $(document).ready(function () {
     const $data = {
       role: role,
       section: section,
+      username: username,
       year: year,
     };
 
+    // console.log("data: ", $data);
     if (rfqChartInstance != null) {
       rfqChartInstance.destroy();
     }
@@ -112,6 +115,7 @@ $(document).ready(function () {
     const $data = {
       role: role,
       section: section,
+      username: username,
       year: year,
     };
     $.ajax({
@@ -132,16 +136,16 @@ $(document).ready(function () {
             ? response.data.data[0]
             : {
                 Completed: 0,
-                Pending: 0,
+                "On-going": 0,
                 Hold: 0,
               };
 
         const Completed = parseInt(chartData.Completed) || 0;
-        const Pending = parseInt(chartData.Pending) || 0;
+        const Pending = parseInt(chartData["On-going"]) || 0;
         const Hold = parseInt(chartData.Hold) || 0;
 
         const TotalRFQs = Completed + Pending + Hold;
-        console.log(TotalRFQs);
+        // console.log(TotalRFQs);
         $("#totalrfq").text(TotalRFQs);
         $("#pending").text(Pending);
         $("#completed").text(Completed);
@@ -178,7 +182,7 @@ $(document).ready(function () {
       dataType: "json",
       success: function (response) {
         $tbody.empty();
-        console.log(response);
+        // console.log(response);
         if (response.status == "success") {
           response.data.forEach((item) => {
             const $row = $(`
@@ -231,7 +235,7 @@ $(document).ready(function () {
     const formData = new FormData($("#create_request")[0]);
     formData.append("action", "create_request");
     formData.append("remarks", "For Section head approval");
-    console.log(formData);
+    // console.log(formData);
 
     $.ajax({
       url: "././backend/Route/requestRouteAction.php",

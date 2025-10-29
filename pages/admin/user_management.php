@@ -1,28 +1,28 @@
 <?php
-    session_start();
-    file_put_contents('debug.log', "Reached file\n", FILE_APPEND);
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-    
+session_start();
+file_put_contents('debug.log', "Reached file\n", FILE_APPEND);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 ?>
 
 <div class="card shadow-sm border-0 mb-5">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Welcome, 
+        <h5 class="mb-0">Welcome,
             <?php
-                if ($_SESSION['user']['access_level'] == 'Admin') {
-                    echo 'Administrator';
-                } else {
-                    echo 'Client';
-                }
+            if ($_SESSION['user']['access_level'] == 'Admin') {
+                echo 'Administrator';
+            } else {
+                echo 'Client';
+            }
             ?>
         </h5>
         <div class="d-flex align-items-center">
             <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
             <span class="ms-2 fw-semibold">
                 <?php
-                    echo htmlspecialchars($_SESSION['user']['name']);
+                echo htmlspecialchars($_SESSION['user']['name']);
                 ?>
             </span>
         </div>
@@ -31,7 +31,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">Account List</h2>
-    <button class="btn btn-primary" data-bs-toggle = "modal" data-bs-target="#createusermodal">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createusermodal">
         <i class="bi bi-plus-circle me-2"></i> Add New User
     </button>
 </div>
@@ -81,165 +81,164 @@
 
 <!--Add user Modal-->
 <div class="modal fade" id="createusermodal" tabindex="-1" aria-labelledby="createusermodalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="createusermodalLabel">Create New Account</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-        <form action="#" id="createuserForm">
-            <div class="modal-body">
-                 <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" name="username" placeholder="username" aria-label="" aria-describedby="visible-addon">
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-key"></i></span>
-                        <input type="text" class="form-control" name="password" placeholder="Password" aria-describedby="visible-addon">
-                        </div>
-                    </div>
-                 </div>
-                 <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-buildings"></i></span>
-                            <select class="form-select" name="department" id="department">
-                               
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
-                            <select class="form-select" name="accesslevel" id="access">
-                                <option selected>Access Level</option>
-                            </select>
-                        </div>
-                    </div>
-                 </div>
-                  <div class="row">
-                    <div class="col-12 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
-                        <input type="text" class="form-control" name="name" placeholder="Employee Name" aria-describedby="visible-addon">
-                        </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                     <div class="col-6">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-paperclip"></i></span>
-                            <input type="file" class="form-control" name="signature" placeholder="">
-                        </div>                        
-                     </div>
-                     <div class="col-6">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                            <select class="form-select" name="position" id="position">
-                                <option selected>Select role</option>
-                                <option value="Staff">Staff</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Manager">Manager</option>
-                                <option value="GenManager">General Manager</option>
-                                <option value="DepGenManager">Deputy General Manager</option>
-                            </select>
-                        </div>                        
-                     </div>
-                  </div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="createusermodalLabel">Create New Account</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Create</button>
-            </div>
-        </form>
+            <form action="#" id="createuserForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" name="username" placeholder="username" aria-label="" aria-describedby="visible-addon">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input type="text" class="form-control" name="password" placeholder="Password" aria-describedby="visible-addon">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-buildings"></i></span>
+                                <select class="form-select" name="department" id="department">
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                                <select class="form-select" name="accesslevel" id="access">
+                                    <option selected>Access Level</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
+                                <input type="text" class="form-control" name="name" placeholder="Employee Name" aria-describedby="visible-addon">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-paperclip"></i></span>
+                                <input type="file" class="form-control" name="signature" placeholder="">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                <select class="form-select" name="position" id="position">
+                                    <option selected>Select role</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Supervisor">Supervisor</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="GenManager">General Manager</option>
+                                    <option value="DepGenManager">Deputy General Manager</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
 
 <!--Edit user Modal-->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="editUserModalLabel">Edit User Account</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-        <form action="#" id="edituserForm">
-            <div class="modal-body">
-                 <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" name="username" id="username_id" placeholder="username" aria-label="" aria-describedby="visible-addon">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editUserModalLabel">Edit User Account</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="#" id="edituserForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" name="username" id="username_id" placeholder="username" aria-label="" aria-describedby="visible-addon">
+                            </div>
                         </div>
-                    </div>
-                    <!-- <div class="col-md-6 mb-4">
+                        <!-- <div class="col-md-6 mb-4">
                         <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-key"></i></span>
                         <input type="text" class="form-control" name="password" placeholder="Password" aria-describedby="visible-addon">
                         </div>
                     </div> -->
-                 </div>
-                 <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-buildings"></i></span>
-                            <select class="form-select" name="department" id="editdepartment">
-                               
-                            </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-buildings"></i></span>
+                                <select class="form-select" name="department" id="editdepartment">
+
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                                <select class="form-select" name="accesslevel" id="editaccess">
+                                    <option selected>Access Level</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
-                            <select class="form-select" name="accesslevel" id="editaccess">
-                                <option selected>Access Level</option>
-                            </select>
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
+                                <input type="text" class="form-control" name="name" id="name" placeholder="Employee Name" aria-describedby="visible-addon">
+                            </div>
                         </div>
                     </div>
-                 </div>
-                  <div class="row">
-                    <div class="col-12 mb-4">
-                        <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
-                        <input type="text" class="form-control" name="name" id="name" placeholder="Employee Name" aria-describedby="visible-addon">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-paperclip"></i></span>
+                                <input type="file" class="form-control" name="signature" placeholder="">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                <select class="form-select" name="position" id="position">
+                                    <option selected>Select role</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Supervisor">Supervisor</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="GenManager">General Manager</option>
+                                    <option value="DepGenManager">Deputy General Manager</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                  </div>
-                  <div class="row">
-                     <div class="col-6">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-paperclip"></i></span>
-                            <input type="file" class="form-control" name="signature" placeholder="">
-                        </div>                        
-                     </div>
-                     <div class="col-6">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                            <select class="form-select" name="position" id="position">
-                                <option selected>Select role</option>
-                                <option value="Staff">Staff</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Manager">Manager</option>
-                                <option value="GenManager">General Manager</option>
-                                <option value="DepGenManager">Deputy General Manager</option>
-                            </select>
-                        </div>                        
-                     </div>
-                  </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Create</button>
-            </div>
-        </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
 
 <script src="./includes/js/usermanagement.js"></script>
-

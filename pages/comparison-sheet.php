@@ -1,27 +1,27 @@
 <?php
-    session_start();
-    file_put_contents('debug.log', "Reached file\n", FILE_APPEND);
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-    
+session_start();
+file_put_contents('debug.log', "Reached file\n", FILE_APPEND);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 ?>
 <div class="card shadow-sm border-0 mb-5">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Welcome, 
+        <h5 class="mb-0">Welcome,
             <?php
-                echo htmlspecialchars($_SESSION['user']['name']);
+            echo htmlspecialchars($_SESSION['user']['name']);
             ?>
         </h5>
         <div class="d-flex align-items-center">
             <img src="./assets/img/profile.png" alt="User Profile" class="rounded-circle" width="40" height="40">
             <span class="ms-2 fw-semibold">
                 <?php
-                   if ($_SESSION['user']['access_level'] == 'Admin') {
-                        echo 'Administrator';
-                    } else {
-                        echo 'Client';
-                    }
+                if ($_SESSION['user']['access_level'] == 'Admin') {
+                    echo 'Administrator';
+                } else {
+                    echo 'Client';
+                }
                 ?>
             </span>
         </div>
@@ -45,7 +45,7 @@
                     <select class="form-select border-start-0" id="statusFilter">
                         <option value="" selected>All Statuses</option>
                         <option value="Pending" class="text-warning">Pending</option>
-                        <option value="Approved" class="text-success">Approved</option>
+                        <option value="Completed" class="text-success">Completed</option>
                         <option value="Rejected" class="text-danger">Rejected</option>
                     </select>
                 </div>
@@ -79,7 +79,7 @@
                     </button>
                 </div>
             </div>
-        </div>       
+        </div>
         <!-- Action Buttons Row -->
         <div class="row mt-3">
             <div class="col-12 d-flex justify-content-end">
@@ -124,115 +124,115 @@
 </div>
 
 
-        <!-- Attachments Modal -->
-        <div class="modal fade rfq-modal" id="attachmentRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="attachmentRfqModall" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="attachmentRfqModal">
-                            <i class="bi bi-images me-2"></i> Attachment Viewer
-                        </h5>
-                        <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col-md-12">
+<!-- Attachments Modal -->
+<div class="modal fade rfq-modal" id="attachmentRfqModal" data-itemId="" tabindex="-1" aria-labelledby="attachmentRfqModall" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attachmentRfqModal">
+                    <i class="bi bi-images me-2"></i> Attachment Viewer
+                </h5>
+                <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-12">
                         <div class="d-flex justify-content-center align-items-center" style="height: 500px;">
                             <img id="attachment_viewer" src="" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
                         </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- items Modal -->
-        <div class="modal fade rfq-modal" id="itemsRfqModal" data-itemId=""  tabindex="-1" aria-labelledby="itemsRfqModal" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="itemsRfqModal">
-                            <i class="bi bi-card-checklist me-2"></i> Item List
-                        </h5>
-                        <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- items Modal -->
+<div class="modal fade rfq-modal" id="itemsRfqModal" data-itemId="" tabindex="-1" aria-labelledby="itemsRfqModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemsRfqModal">
+                    <i class="bi bi-card-checklist me-2"></i> Item List
+                </h5>
+                <button type="button" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="table-responsive">
+                        <table class="table rfq-table table-hover" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Description</th>
+                                    <th>Purpose</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                    <th>View Item</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsTableBody">
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="table-responsive">
-                                <table class="table rfq-table table-hover" id="itemsTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Item</th>
-                                            <th>Description</th>
-                                            <th>Purpose</th>
-                                            <th>Quantity</th>
-                                            <th>Unit</th>
-                                            <th>View Item</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="itemsTableBody">
-                                    </tbody>
-                                </table>
-                            </div>    
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
-                </div>     
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
+    </div>
+</div>
+</div>
 
 
 
-        <!--Comparison Table Modal -->
-        <div class="modal fade" id="comparisonTableModal" tabindex="-1" aria-labelledby="comparisonTableModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
+<!--Comparison Table Modal -->
+<div class="modal fade" id="comparisonTableModal" tabindex="-1" aria-labelledby="comparisonTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h5 class="modal-title" id="comparisonTableModalLabel">Comparison Table</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
+            </div>
+            <div class="modal-body">
                 <div class="table-responsive">
                     <table class="table rfq-table table-bordered table-hover" id="comparisonTable">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Supplier</th>
-                            <th>Price</th>
-                            <th>Discount</th>
-                            <th>Total Price</th>
-                            <th>Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody id="comparisonModalTableBody">
-                        <!-- Dynamic content will be inserted here -->
-                    </tbody>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Supplier</th>
+                                <th>Price</th>
+                                <th>Discount</th>
+                                <th>Total Price</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonModalTableBody">
+                            <!-- Dynamic content will be inserted here -->
+                        </tbody>
                     </table>
                 </div>
-                </div>
-                <div class="modal-footer">
+            </div>
+            <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="approvedbtn">Approve Comparison</button>
                 <button type="button" class="btn btn-danger" id="holdbtn">Decline Comparison</button>
-                
+
                 <!-- <button type="button" class="btn btn-danger" id="deletebtn">Delete Comparison</button>-->
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
             </div>
         </div>
+    </div>
+</div>
 
 
-        <script src="./includes/js/comparison.js"></script>
+<script src="./includes/js/comparison.js"></script>
 
-        <?php
-            // Include the footer
-            include_once '../components/footer.php';
-        ?>
+<?php
+// Include the footer
+include_once '../components/footer.php';
+?>

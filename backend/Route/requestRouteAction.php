@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $requestor_section = $_POST['requestor_section'] ?? null;
         $requestor_name = $_POST['requestor_name'] ?? null;
         $item_remarks = $_POST['remarks'] ?? null;
-        $requestor_status = 'Pending';
+        $requestor_status = 'On-going';
         $item_attachment = $_FILES['item-attachment'] ?? null;
 
         // Validate
@@ -81,7 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             exit;
         }
-        $uploadDir = __DIR__ . "/../../" . "/Uploads/Items"; // absolute path
+        // $uploadDir = __DIR__ . "/../../" . "/Uploads/Items"; // absolute path
+        $uploadDir = 'D:/Uploads/Attachments';
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
@@ -108,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (move_uploaded_file($tmpName, $filePath)) {
                     // store relative path for DB
-                    $filePaths[$key] = "/Uploads/Items/" . $uniqueName;
+                    $filePaths[$key] = $filePath;
                 }
             }
         }
@@ -150,6 +151,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $responses[] = $response['message'] ?? 'Unknown result';
         }
 
+        $emailData = [
+            'address_section' => $requestor_section,
+            'bcc_Section' => ''
+        ];
+
+        $status = $statusdata['requestor_status'] ?? 'On-going';
+
+        // Status badge styles
+        $statusStyles = [
+            "Completed"  => "background:#28a745; color:#fff;",   // Green
+            "On-going"   => "background:#f0ad4e; color:#fff;",   // Orange
+            "Cancelled" => "background:#d9534f; color:#fff;",   // Red
+            "Hold"      => "background:#ffc107; color:#212529;"
+        ];
+
+        $statusBadgeStyle = $statusStyles[$status] ?? "background:#6c757d; color:#fff;"; // Default gray
+
+        // Company logo (replace with your actual hosted logo path)
+        $companyLogo = __DIR__ . '/../../' . 'img/logo.png';
+        $subject = "Request for Quotation - {$control_number}";
+        // $subject = "tEST EMAI";
+        $message = "
+<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
+    <tr>
+        <td align='center'>
+            <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
+                
+                <!-- Header with Logo -->
+                <tr>
+                    <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
+                        <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                            <tr>
+                                <td align='left'>
+                                    <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
+                                </td>
+                                <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
+                                    New Request for Quotation Created
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
+                        <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
+
+                        <p>This is to inform you that a <strong>new Request for Quotation (RFQ)</strong> has been created by 
+                        <strong>{$requestor_name}</strong>. Below are the details of the new request:</p>
+
+                        <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
+                            Control Number: {$control_number}
+                        </div>
+
+                        <p>Current Status:</p>
+                        <p style='margin:15px 0;'>
+                            <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
+                                {$requestor_status}
+                            </span>
+                        </p>
+
+                        <p><strong>Remarks:</strong></p>
+                        <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
+                            {$item_remarks}
+                        </div>
+
+                        <p>Please review the request details in the RFQ System and take the appropriate next steps.</p>
+
+                        <p style='margin-top:25px;'>Best regards,<br>
+                        <strong>Nidec Instruments Philippines Corporation</strong></p>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
+                        This is an automated notification. Please do not reply directly.<br>
+                        &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
+                    </td>
+                </tr>
+
+                <!-- Confidentiality Notice -->
+                <tr>
+                    <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
+                        <strong>Confidentiality and Data Privacy Notice:</strong><br>
+                        This message, including any attachments, is intended solely for the addressee and may contain 
+                        confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
+                        If you received this message in error, please notify the sender immediately and permanently delete it. 
+                        NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
+                        Act of 2012 (RA 10173) and its Privacy Policy.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>";
+
+
         // Send back summary response
         if ($success_count > 0 && $error_count === 0) {
             // Create a new request log entry for the successful submission
@@ -177,6 +277,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $filter = $_POST['filters'] ?? null;
         $filters = [
             'section' => $_POST['section'] ?? null,
+            'access' => $_POST['access'] ?? null,
+            'username' => $_POST['username'] ?? null,
             'from' => $filter['from'] ?? null,
             'to' => $filter['to'] ?? null,
             'status' => $filter['status'] ?? null,
@@ -227,109 +329,316 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $id = isset($_POST['id']) ? $_POST['id'] : null;
         $control_number = isset($_POST['control_number']) ? $_POST['control_number'] : null;
-        $filePath = $request->getAttachment($id, $control_number); // this already returns the file path
+        $filePath = $request->getAttachment($id, $control_number); // this returns full file path (ex: D:/Uploads/Attachments/file.png)
 
-        if (empty($filePath)) {
+        if (empty($filePath) || !file_exists($filePath)) {
             echo json_encode([
                 'status' => 'error',
                 'message' => 'File not found.'
             ]);
             exit;
-        } else {
-            $filepaths = $filePath;
-            $url = __DIR__ . "/../../" . $filepaths;
-            $fileContents = file_get_contents($url);
-            $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $mimeType = $finfo->file($url);
-
-            $data = [
-                'file_type' => $mimeType,
-                'file_path' => './Uploads/Items/' . basename($filePath), // relative path for frontend
-                'file_name' => basename($filePath)
-            ];
-
-            echo json_encode(['status' => 'success', 'data' => $data]);
         }
 
-        // if (empty($filePath)) {
-        //     echo json_encode(['status' => 'error', 'message' => 'File not found']);
-        //     exit;
-        // } else {
-        //     $finfo = new finfo(FILEINFO_MIME_TYPE);
-        //     $mimeType = $finfo->buffer($filePath);
-        //     $encodedFile = base64_encode($filePath);
+        // ✅ Get the actual MIME type of the file
+        $mimeType = mime_content_type($filePath);
 
-        //     $data = [
-        //         'file_type' => $mimeType,
-        //         'file_content' => $encodedFile
-        //     ];
+        // ✅ Extract only the file name (no directory)
+        $fileName = basename($filePath);
 
-        //     echo json_encode(['status' => 'success', 'data' => $data]);
-        // }
+        // ✅ Build a valid URL for frontend (served through preview.php)
+        $previewUrl = "http://localhost/RFMSystem/preview.php?file=" . urlencode($fileName);
+
+        // ✅ Prepare response data
+        $data = [
+            'file_type' => $mimeType,
+            'file_path' => $previewUrl,
+            'file_name' => $fileName
+        ];
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $data
+        ]);
+        exit;
     }
 
     if (!empty($_POST['action']) && $_POST['action'] == 'edit_request') {
         header('Content-Type: application/json');
 
-        $id = isset($_POST['item_id']) ? $_POST['item_id'] : null;
-        $item_name = isset($_POST['item_name']) ? $_POST['item_name'] : null;
-        $item_description = isset($_POST['item_description']) ? $_POST['item_description'] : null;
-        $item_purpose = isset($_POST['item_purpose']) ? $_POST['item_purpose'] : null;
-        $item_quantity = isset($_POST['item_quantity']) ? $_POST['item_quantity'] : null;
-        $item_unit = isset($_POST['item_unit']) ? $_POST['item_unit'] : null;
-        $item_purpose = isset($_POST['item_purpose']) ? $_POST['item_purpose'] : null;
+        $id              = $_POST['item_id'] ?? null;
+        $control_number  = $_POST['control_number'] ?? null;
+        $item_name       = $_POST['item_name'] ?? null;
+        $item_description = $_POST['item_description'] ?? null;
+        $item_purpose    = $_POST['item_purpose'] ?? null;
+        $item_quantity   = $_POST['item_quantity'] ?? null;
+        $item_unit       = $_POST['item_unit'] ?? null;
+        $section         = $_POST['section'] ?? null;
 
-        $maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
-        $uploadDir = __DIR__ . "/../../" . "/Uploads/Items"; // absolute path
+        $filePath = $request->getAttachment($id, $control_number); // fixed here ✅
+        $uploadDir = 'D:/Uploads/Attachments';
+        $maxFileSize = 2 * 1024 * 1024; // 2MB
+
         if (isset($_FILES['item_attachment']) && $_FILES['item_attachment']['error'] === UPLOAD_ERR_OK) {
             if ($_FILES['item_attachment']['size'] > $maxFileSize) {
-                echo json_encode(['status' => 'error', 'message' => 'File size exceeds 40MB']);
+                echo json_encode(['status' => 'error', 'message' => 'File size exceeds 2MB']);
                 exit;
             }
 
-            if ($_FILES['item_attachment']['error'] === UPLOAD_ERR_OK) {
-                $tmpName = $_FILES['item_attachment']['tmp_name'];
-                $ext = pathinfo($_FILES['item_attachment']['name'], PATHINFO_EXTENSION);
-                $uniqueName = uniqid("file_") . "." . $ext;
-                $filePath = $uploadDir . "/" . $uniqueName;
+            $tmpName = $_FILES['item_attachment']['tmp_name'];
+            $ext = pathinfo($_FILES['item_attachment']['name'], PATHINFO_EXTENSION);
+            $uniqueName = uniqid("file_") . "." . $ext;
+            $newFilePath = $uploadDir . "/" . $uniqueName;
 
-                if (move_uploaded_file($tmpName, $filePath)) {
-                    // store relative path for DB
-                    $filePaths = "/Uploads/Items/" . $uniqueName;
+            if (move_uploaded_file($tmpName, $newFilePath)) {
+                // delete old file after successful upload
+                if (file_exists($filePath)) {
+                    unlink($filePath);
                 }
+                $filePaths = $newFilePath;
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to move uploaded file']);
+                exit;
             }
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'File upload error']);
-            exit;
+            // keep old file if no new one uploaded
+            $filePaths = $filePath;
         }
 
 
-        $data = [
-            'id' => $id,
-            'item_name' => $item_name,
-            'item_description' => $item_description,
-            'item_quantity' => $item_quantity,
-            'item_unit' => $item_unit,
-            'item_purpose' => $item_purpose,
-            'path_file'        => $filePaths ?? null
+        $emailData = [
+            'address_section' => 'Procurement',
+            'bcc_Section' => $section
         ];
 
-        $request->updateAttachment($data);
+        $data = [
+            'id'               => $id,
+            'item_name'        => $item_name,
+            'item_description' => $item_description,
+            'item_quantity'    => $item_quantity,
+            'item_unit'        => $item_unit,
+            'item_purpose'     => $item_purpose,
+            'path_file'        => $filePaths
+        ];
+
+        $statusdata = [
+            'control_number'   => $control_number,
+            'requestor_status' => 'On-going',
+            'item_remarks'     => 'For Procurement Verification',
+        ];
+
+        $attachment = $request->updateAttachment($data);
         $result = $request->editItems($data);
 
+        $status = $statusdata['requestor_status'] ?? 'On-going';
+
+        // Status badge styles
+        $statusStyles = [
+            "Completed"  => "background:#28a745; color:#fff;",   // Green
+            "On-going"   => "background:#f0ad4e; color:#fff;",   // Orange
+            "Cancelled" => "background:#d9534f; color:#fff;",   // Red
+            "Hold"      => "background:#ffc107; color:#212529;"
+        ];
+
+        $statusBadgeStyle = $statusStyles[$status] ?? "background:#6c757d; color:#fff;"; // Default gray
+
+        // Company logo (replace with your actual hosted logo path)
+        $companyLogo = __DIR__ . '/../../' . 'img/logo.png';
+        $subject = "Request for Quotation - {$control_number}";
+        // $subject = "tEST EMAI";
+        $message = "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
+                <tr>
+                    <td align='center'>
+                        <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
+                            
+                            <!-- Header with Logo -->
+                            <tr>
+                                <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
+                                    <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                        <tr>
+                                            <td align='left'>
+                                                <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
+                                            </td>
+                                            <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
+                                                Request for Quotation Update
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <!-- Body -->
+                            <tr>
+                                <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
+                                    <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
+
+                                    <p>This is to inform you that the request for the <strong>{$emailData['bcc_section']}</strong> department with control number:</p>
+                                    <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
+                                        {$control_number}
+                                    </div>
+
+                                    <p>Current Status:</p>
+                                    <p style='margin:15px 0;'>
+                                        <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
+                                            {$statusdata['requestor_status']}
+                                        </span>
+                                    </p>
+
+                                    <p><strong>Remarks:</strong></p>
+                                    <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
+                                        {$statusdata['item_remarks']}
+                                    </div>
+
+                                    <p>Please review the details and take the necessary actions if required.</p>
+                                    <p style='margin-top:25px;'>Best regards,<br>
+                                    <strong>Nidec Instruments Philippines Corporation</strong></p>
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
+                                    This is an automated notification. Please do not reply directly.<br>
+                                    &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
+                                </td>
+                            </tr>
+
+                        <!-- Confidentiality Notice -->
+                        <tr>
+                            <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
+                                <strong>Confidentiality and Data Privacy Notice:</strong><br>
+                                This message, including any attachments, is intended solely for the addressee and may contain 
+                                confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
+                                If you received this message in error, please notify the sender immediately and permanently delete it. 
+                                NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
+                                Act of 2012 (RA 10173) and its Privacy Policy.
+                            </td>
+                        </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>";
+
         if ($result) {
-            echo json_encode(['status' => 'success', 'message' => 'Request updated successfully']);
+            $update = $request->UpdateRequestStatus($statusdata);
+            if ($update) {
+                $emailnotif = $autoemail->SendEmailupdateStatus($emailData, $message, $subject);
+                echo json_encode(['status' => 'success', 'message' => 'Request updated successfully']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to update request status']);
+            }
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Failed to update request']);
         }
     }
 
+
     if (!empty($_POST['action']) && $_POST['action'] == 'delete_item') {
         header('Content-Type: application/json');
         $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $control_number = isset($_POST['control_number']) ? $_POST['control_number'] : null;
+        $item_name = isset($_POST['itemName']) ? $_POST['itemName'] : null;
+        $item_description = isset($_POST['itemDescription']) ? $_POST['itemDescription'] : null;
         $result = $request->deleteRequest($id);
         $deleteAttachment = $request->deleteAttachment($id);
+
+
+        //send email update
+        $emailData = [
+            'address_section' => 'Procurement',
+            'bcc_Section' => $section
+        ];
+        $status = $statusdata['requestor_status'] ?? 'On-going';
+
+        // Status badge styles
+        $statusStyles = [
+            "Completed"  => "background:#28a745; color:#fff;",   // Green
+            "On-going"   => "background:#f0ad4e; color:#fff;",   // Orange
+            "Cancelled" => "background:#d9534f; color:#fff;",   // Red
+            "Hold"      => "background:#ffc107; color:#212529;"
+        ];
+
+        $statusBadgeStyle = $statusStyles[$status] ?? "background:#6c757d; color:#fff;"; // Default gray
+
+        // Company logo (replace with your actual hosted logo path)
+        $companyLogo = __DIR__ . '/../../' . 'img/logo.png';
+        $subject = "Request for Quotation - {$control_number}";
+        // $subject = "tEST EMAI";
+        $message = "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
+    <tr>
+        <td align='center'>
+            <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
+                
+                <!-- Header with Logo -->
+                <tr>
+                    <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
+                        <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                            <tr>
+                                <td align='left'>
+                                    <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
+                                </td>
+                                <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
+                                    Request for Quotation Update
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
+                        <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
+
+                        <p>This is to inform you that an <strong>{$item_name} - {$item_description}  has been deleted</strong> from the Request for Quotation (RFQ) initiated by the <strong>{$emailData['bcc_section']}</strong> department with control number:</p>
+                        <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
+                            {$control_number}
+                        </div>
+
+                        <p><strong>Current Status:</strong></p>
+                        <p style='margin:15px 0;'>
+                            <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
+                                Cancelled
+                            </span>
+                        </p>
+
+                        <p><strong>Remarks:</strong></p>
+                        <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
+                            {$statusdata['item_remarks']}
+                        </div>
+
+                        <p>Please be advised that this update reflects the removal of one or more items from the RFQ. Kindly review the RFQ details and coordinate with the requestor if any clarification is needed.</p>
+
+                        <p style='margin-top:25px;'>Best regards,<br>
+                        <strong>Nidec Instruments Philippines Corporation</strong></p>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
+                        This is an automated notification. Please do not reply directly.<br>
+                        &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
+                    </td>
+                </tr>
+
+                <!-- Confidentiality Notice -->
+                <tr>
+                    <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
+                        <strong>Confidentiality and Data Privacy Notice:</strong><br>
+                        This message, including any attachments, is intended solely for the addressee and may contain 
+                        confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
+                        If you received this message in error, please notify the sender immediately and permanently delete it. 
+                        NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
+                        Act of 2012 (RA 10173) and its Privacy Policy.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>";
+
         if ($result) {
+            $emailnotif = $autoemail->SendEmailupdateStatus($emailData, $message, $subject);
             echo json_encode(['status' => 'success', 'message' => 'Request deleted successfully']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Failed to delete request']);
@@ -364,6 +673,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Optional: Fetch total count for pagination
             $totalResult = $request->countAllRequestsByControlNumber($filters);
             // $totalCount = count($result);
+        }
+
+        $data = [];
+
+        if ($result) {
+
+            foreach ($result as $row) {
+                $data[] = [
+                    'id' => $row['id'],
+                    'control_number' => $row['control_number'],
+                    'item_name' => $row['item_name'],
+                    'item_description' => $row['item_description'],
+                    'item_quantity' => $row['item_quantity'],
+                    'item_unit' => $row['item_uom'],
+                    'item_purpose' => $row['item_purpose'],
+                    'requestor_section' => $row['item_section'],
+                    'requestor_name' => $row['item_requestor'],
+                    'requestor_status' => $row['item_status'],
+                    'item_section' => $row['item_section'],
+                    'item_remarks' => $row['item_remarks'],
+                    'created_at' => $row['created_at']
+                ];
+            }
+
+            echo json_encode([
+                'status' => 'success',
+                'data' => $data,
+                'total' => $totalResult,
+                'currentPage' => $page,
+                'perPage' => $perPage
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No data found']);
+        }
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'get_historybycontrolnumber') {
+        header('Content-Type: application/json');
+
+        $section = $_POST['section'] ?? null;
+        $filter = $_POST['filters'] ?? null;
+        $page = isset($_POST['page']) ? (int)$_POST['page'] : 1;
+        $perPage = 10;
+
+        //Data Object
+        $filters = [
+            'section' => $section,
+            'access' => $_POST['access'] ?? null,
+            'username' => $_POST['username'] ?? null,
+            'from' => $filter['from'] ?? null,
+            'to' => $filter['to'] ?? null,
+            'status' => $filter['status'] ?? null,
+            'search' => $filter['search'] ?? null,
+            'remarks' => $filter['remarks'] ?? null
+        ];
+
+        if ($filters['remarks'] != 'For Section Head Approval') {
+            $result = $request->fetchHistoryByControlNumber($filters, $page, $perPage);
+            $totalResult = $request->countHistoryByControlNumber($filters, $page, $perPage);
         }
 
         $data = [];
@@ -499,7 +867,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
 
         $section = $_POST['section'] ?? null;
+        // $main = $_POST['main'] ?? null;
         $main = $_POST['main'] ?? null;
+        $emailData = [];
 
         $data = [
             'control_number'   => $_POST['control_number'] ?? null,
@@ -508,17 +878,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'section'          => $section
         ];
 
-        $emailData = [
-            'address_section' => $main,
-            'bcc_Section' => $section
-        ];
+        if ($main != "Procurement") {
+            $emailData = [
+                'address_section' => $main,
+                'bcc_Section' => "Procurement"
+            ];
+        } else {
+            $emailData = [
+                'address_section' => "Procurement",
+                'bcc_Section' => "Procurement"
+            ];
+        }
 
-        $status = $data['requestor_status'] ?? 'Pending';
+        $status = $data['requestor_status'] ?? 'On-going';
 
         // Status badge styles
         $statusStyles = [
             "Completed"  => "background:#28a745; color:#fff;",   // Green
-            "Pending"   => "background:#f0ad4e; color:#fff;",   // Orange
+            "On-going"   => "background:#f0ad4e; color:#fff;",   // Orange
             "Cancelled" => "background:#d9534f; color:#fff;",   // Red
             "Hold"      => "background:#ffc107; color:#212529;"
         ];
@@ -539,7 +916,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <table width='100%' cellpadding='0' cellspacing='0' border='0'>
                                         <tr>
                                             <td align='left'>
-                                                <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px;'>
+                                                <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
                                             </td>
                                             <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
                                                 Request for Quotation Update
@@ -552,9 +929,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <!-- Body -->
                             <tr>
                                 <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
-                                    <p>Dear <strong>{$main} Team</strong>,</p>
+                                    <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
 
-                                    <p>This is to inform you that the request for the <strong>{$main}</strong> department with control number:</p>
+                                    <p>This is to inform you that the request for the <strong>{$emailData['address_section']}</strong> department with control number:</p>
                                     <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
                                         {$data['control_number']}
                                     </div>
@@ -687,7 +1064,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </tbody>
         </table>";
 
-        $subject = "Request for Quotation";
+        $subject = "Request for Quotation: {$control_number}";
         $body = "
         <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
             <tr>
@@ -700,7 +1077,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <table width='100%' cellpadding='0' cellspacing='0' border='0'>
                                     <tr>
                                         <td align='left' style='vertical-align:middle;'>
-                                            <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' style='height:40px;'>
+                                            <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' style='height:40px; width:40px;'>
                                         </td>
                                         <td align='center' style='font-size:20px; font-weight:bold; letter-spacing:0.5px; color:#ffffff;'>
                                             Request for Quotation
@@ -818,10 +1195,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $quantities         = $_POST['item_quantity'] ?? [];
         $descriptions       = $_POST['item_description'] ?? [];
         $uom                = $_POST['item_unit'] ?? [];
-        $start_payment_terms = $_POST['start_payment_terms'] ?? [];
-        $end_payment_terms  = $_POST['end_payment_terms'] ?? [];
-        $start_delivery_lead = $_POST['start_delivery_lead'] ?? [];
-        $end_delivery_lead  = $_POST['end_delivery_lead'] ?? [];
+        $payment_terms      = $_POST['payment_terms'] ?? [];
+        $delivery_terms     = $_POST['delivery_terms'] ?? [];
         $supplier_names     = $_POST['supplier_name'] ?? [];
         $supplier_prices    = $_POST['item_price'] ?? [];
         $currency           = $_POST['currency'] ?? null;
@@ -835,81 +1210,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // ---------- Calculate Payment Days ----------
-        $payment_days = [];
-        foreach ($start_payment_terms as $itemIdx => $supplierDates) {
-            foreach ($supplierDates as $supplierIdx => $start_date) {
-                $end_date = $end_payment_terms[$itemIdx][$supplierIdx] ?? null;
-
-                if (!empty($start_date) && !empty($end_date)) {
-                    $start = new DateTime($start_date);
-                    $end   = new DateTime($end_date);
-
-                    $diff = $start->diff($end)->days;
-                    $payment_days[$itemIdx][$supplierIdx] = $diff;
-                } else {
-                    $payment_days[$itemIdx][$supplierIdx] = null;
-                }
-            }
+        $path = 'D:/Uploads/Quotation/';
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
         }
 
-        // ---------- Calculate Delivery Days ----------
-        $delivery_days = [];
-        foreach ($start_delivery_lead as $itemIdx => $supplierDates) {
-            foreach ($supplierDates as $supplierIdx => $start_date) {
-                $end_date = $end_delivery_lead[$itemIdx][$supplierIdx] ?? null;
+        if (!empty($_FILES['quotation']['name'])) {
+            $ext = pathinfo($_FILES['quotation']['name'], PATHINFO_EXTENSION);
+            $filename = uniqid("quote_") . "." . $ext;
+            $filepath = $path . $filename;
 
-                if (!empty($start_date) && !empty($end_date)) {
-                    $start = new DateTime($start_date);
-                    $end   = new DateTime($end_date);
+            if (move_uploaded_file($_FILES['quotation']['tmp_name'], $filepath)) {
+                // ---------- Save Each Item × Supplier ---------
 
-                    $diff = $start->diff($end)->days;
-                    $delivery_days[$itemIdx][$supplierIdx] = $diff;
-                } else {
-                    $delivery_days[$itemIdx][$supplierIdx] = null;
+                $dbpath = $path . $filename;
+
+                foreach ($item_names as $itemIdx => $item_name) {
+                    $quantity      = $quantities[$itemIdx] ?? null;
+                    $itemSuppliers = $supplier_names[$itemIdx] ?? [];
+                    $itemPrices    = $supplier_prices[$itemIdx] ?? [];
+                    $itemDiscounts = $supplier_discounts[$itemIdx] ?? [];
+                    $itemTotals    = $total_prices[$itemIdx] ?? [];
+
+
+                    foreach ($itemSuppliers as $supplierIdx => $supplier_name) {
+                        $data = [
+                            'control_number'    => $control_number,
+                            'item_name'         => $item_name,
+                            'supplier_name'     => $supplier_name ?? null,
+                            'item_quantity'     => $quantity,
+                            'item_description'  => $descriptions[$itemIdx] ?? null,
+                            'item_unit'         => $uom[$itemIdx] ?? null,
+                            'supplier_price'    => $itemPrices[$supplierIdx] ?? null,
+                            'supplier_discount' => $itemDiscounts[$supplierIdx] ?? null,
+                            'total_price'       => $itemTotals[$supplierIdx] ?? null,
+                            'currency'          => $currency ?? null,
+                            'payment_days'      => $payment_terms[$itemIdx][$supplierIdx] ?? null,
+                            'delivery_days'     => $delivery_terms[$itemIdx][$supplierIdx] ?? null,
+                            'path'              => $dbpath ?? null
+                        ];
+
+                        $response = $request->CreateComparison($data);
+
+                        if ($response) {
+                            $success_count++;
+                        } else {
+                            $error_count++;
+                        }
+                    }
                 }
             }
-        }
-
-        // ---------- Save Each Item × Supplier ----------
-        foreach ($item_names as $itemIdx => $item_name) {
-            $quantity      = $quantities[$itemIdx] ?? null;
-            $itemSuppliers = $supplier_names[$itemIdx] ?? [];
-            $itemPrices    = $supplier_prices[$itemIdx] ?? [];
-            $itemDiscounts = $supplier_discounts[$itemIdx] ?? [];
-            $itemTotals    = $total_prices[$itemIdx] ?? [];
-
-            foreach ($itemSuppliers as $supplierIdx => $supplier_name) {
-                $data = [
-                    'control_number'    => $control_number,
-                    'item_name'         => $item_name,
-                    'supplier_name'     => $supplier_name ?? null,
-                    'item_quantity'     => $quantity,
-                    'item_description'  => $descriptions[$itemIdx] ?? null,
-                    'item_unit'         => $uom[$itemIdx] ?? null,
-                    'supplier_price'    => $itemPrices[$supplierIdx] ?? null,
-                    'supplier_discount' => $itemDiscounts[$supplierIdx] ?? null,
-                    'total_price'       => $itemTotals[$supplierIdx] ?? null,
-                    'currency'          => $currency ?? null,
-                    'payment_days'      => $payment_days[$itemIdx][$supplierIdx] ?? null,
-                    'delivery_days'     => $delivery_days[$itemIdx][$supplierIdx] ?? null
-                ];
-
-                $response = $request->CreateComparison($data);
-
-                if ($response) {
-                    $success_count++;
-                } else {
-                    $error_count++;
-                }
-            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to create comparison: Error to execute']);
         }
 
         // ---------- Logs & Email ----------
         $data = [
             'control_number'   => $control_number,
             'item_remarks'     => 'Comparison created',
-            'requestor_status' => 'Pending'
+            'requestor_status' => 'On-going'
         ];
 
         $subject = "Request for Quotation - {$control_number}";
@@ -925,11 +1284,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'bcc_Section'     => $bcc
         ];
 
-        $result     = $request->UpdateRequestStatus($data);
+
         $resultLogs = $logs->CreateRequestLogs($data);
 
         if ($success_count > 0) {
+            $result     = $request->UpdateRequestStatus($data);
             $emailnotif = $autoemail->SendEmailupdateStatus($emailData, $body, $subject);
+
             echo json_encode(['status' => 'success', 'message' => 'Comparison created successfully']);
         } elseif ($error_count > 0) {
             echo json_encode(['status' => 'error', 'message' => 'Failed to create comparison: Duplicate entries or missing data']);
@@ -946,12 +1307,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $perPage = $_POST['limit'] ?? 10;
         $section = $_POST['section'] ?? null;
         $filters = $_POST['filters'] ?? null;
+        $access = $filters['access'] ?? null;
+        $username = $filters['username'] ?? null;
 
         $filterData = [
             'dateFrom' => $filters['dateFrom'] ?? null,
             'dateTo' => $filters['dateTo'] ?? null,
             'role' => $filters['role'] ?? null,
-            'searchValue' => $filters['searchValue'] ?? null
+            'searchValue' => $filters['searchValue'] ?? null,
+            'access' => $access,
+            'username' => $username
         ];
 
         //Count total request
@@ -1108,40 +1473,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
 
         $data = $_POST['data'] ?? null;
+
+        if (!is_array($data)) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid data format']);
+            exit;
+        }
+
         $year = $data['year'] ?? null;
-        $section = isset($data['section']) ? $data['section'] : 'Procurement'; // Default to 'Procurement' if not set
+        $section = $data['section'] ?? 'Procurement';
+        $username = $data['username'] ?? null;
+        $role = $data['role'] ?? null;
 
         $data = [
             'current_year' => $year,
             'section' => $section,
-            'role' => $data['role'] ?? null
+            'username' => $username,
+            'role' => $role
         ];
 
-        if (!empty($year)) {
-            $chartData = $dashboard_management->getChartData($data);
-            $dataChart = $chartData['data'];
 
+        if (!empty($year)) {
+
+            $chartData = $dashboard_management->getChartData($data);
+            $dataChart = $chartData['data'] ?? []; // ✅ Always default to empty array
+
+            // Debug output: send raw data to frontend for checking
+            if (empty($dataChart)) {
+                // Optional: comment this out in production
+                echo json_encode(['status' => 'error', 'message' => 'Raw chart data', 'data' => $dataChart]);
+                exit;
+            }
 
             // Initialize months with zeroes (1-based index)
             $approvedData = array_fill(1, 12, 0);
             $pendingData  = array_fill(1, 12, 0);
             $rejectedData = array_fill(1, 12, 0);
 
-            foreach ($dataChart as $row) {
-                $month = (int)$row['month'];
-
-                // ✅ Accumulate counts instead of overwriting
-                $approvedData[$month] += (int)$row['Completed'];
-                $pendingData[$month]  += (int)$row['Pending'];
-                $rejectedData[$month] += (int)$row['Hold'];
+            // ✅ Safe foreach
+            if (!empty($dataChart) && is_array($dataChart)) {
+                foreach ($dataChart as $row) {
+                    $month = (int)$row['month'];
+                    $approvedData[$month] += (int)($row['Completed'] ?? 0);
+                    $pendingData[$month]  += (int)($row['On-going'] ?? 0);
+                    $rejectedData[$month] += (int)($row['Hold'] ?? 0);
+                }
             }
 
-            // ✅ Output JSON only once after loop
+            // Output JSON only once after loop
             echo json_encode([
                 'status' => 'success',
                 'Completed' => array_values($approvedData),
-                'Pending'  => array_values($pendingData),
-                'Rejected' => array_values($rejectedData)
+                'Pending'   => array_values($pendingData),
+                'Rejected'  => array_values($rejectedData)
             ]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Year is required']);
@@ -1153,12 +1536,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $data = $_POST['data'] ?? null;
         $year = $data['year'] ?? null;
+        $username = $data['username'] ?? null;
+        $role = $data['role'] ?? null;
         $section = isset($data['section']) ? $data['section'] : 'Procurement'; // Default to 'Procurement' if not set
 
         $data = [
             'current_year' => $year,
             'section' => $section,
-            'role' => $data['role'] ?? null
+            'username' => $username,
+            'role' => $role
         ];
 
         if (!empty($year)) {
@@ -1268,7 +1654,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $items = $request->fetchComparisonByControlNumber($control_number);
         $esignpath = $request->getEsign($data);
 
-        $esign = __DIR__ . '/../../' . $esignpath['signature_path'];
+        if (!empty($esignpath['signature_path'])) {
+            $esign = __DIR__ . '/../../' . $esignpath['signature_path'];
+        }
+
         $itemNum = 1;
 
         // Load template
@@ -1312,27 +1701,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $signature3 = new Drawing();
             $signature3->setName('Signature4');
             $signature3->setDescription('Electronic Signature');
+            $name = $sign['name'] ?? null;
+            $position = $sign['position'] ?? null;
+            $signaturepath = $sign['signature_path'] ?? null;
 
-            if ($sign['role'] == 'Staff') {
-                $signature3->setPath($absolutepath);
-                $signature3->setHeight(200);
-                $signature3->setCoordinates($procurement_esign_cells[0]);
-                $signature3->setWorksheet($sheet);
-                $sheet->setCellValue($procurement_printedsign_cells[0], $sign['requestor_name']);
-            }
-            if ($sign['role'] == 'Supervisor') {
-                $signature3->setPath($absolutepath);
-                $signature3->setHeight(200);
-                $signature3->setCoordinates($procurement_esign_cells[1]);
-                $signature3->setWorksheet($sheet);
-                $sheet->setCellValue($procurement_printedsign_cells[1], $sign['requestor_name']);
-            }
-            if ($sign['role'] == 'Manager' || $sign['role'] == 'GenManager') {
-                $signature3->setPath($absolutepath);
-                $signature3->setHeight(200);
-                $signature3->setCoordinates($procurement_esign_cells[2]);
-                $signature3->setWorksheet($sheet);
-                $sheet->setCellValue($procurement_printedsign_cells[2], $sign['requestor_name']);
+            if (!empty($signaturepath)) {
+                if ($position == 'Staff') {
+                    $signature3->setPath($absolutepath);
+                    $signature3->setHeight(200);
+                    $signature3->setCoordinates($procurement_esign_cells[0]);
+                    $signature3->setWorksheet($sheet);
+                    $sheet->setCellValue($procurement_printedsign_cells[0], $name);
+                }
+                if ($position == 'Supervisor') {
+                    $signature3->setPath($absolutepath);
+                    $signature3->setHeight(200);
+                    $signature3->setCoordinates($procurement_esign_cells[1]);
+                    $signature3->setWorksheet($sheet);
+                    $sheet->setCellValue($procurement_printedsign_cells[1], $name);
+                }
+                if ($position == 'Manager' || $position == 'GenManager') {
+                    $signature3->setPath($absolutepath);
+                    $signature3->setHeight(200);
+                    $signature3->setCoordinates($procurement_esign_cells[2]);
+                    $signature3->setWorksheet($sheet);
+                    $sheet->setCellValue($procurement_printedsign_cells[2], $name);
+                }
             }
         }
 
@@ -1342,39 +1736,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $signature3 = new Drawing();
             $signature3->setName('Signature4');
             $signature3->setDescription('Electronic Signature');
+            $name = $sign['name'] ?? null;
+            $position = $sign['position'] ?? null;
 
-            if ($sign['role'] == 'Staff') {
-                $signaturestaff = new Drawing();
-                $signaturestaff->setName('Signaturestaff');
-                $signaturestaff->setDescription('Electronic Signature');
-                $signaturestaff->setPath($absolutepath);
-                $signaturestaff->setHeight(200);
-                $signaturestaff->setCoordinates($dept_esign_cells[0]);
-                // $signaturestaff->setOffsetX(10); 
-                $signaturestaff->setWorksheet($sheet);
+            if (!empty($signaturepath)) {
+                if ($position == 'Staff') {
+                    $signaturestaff = new Drawing();
+                    $signaturestaff->setName('Signaturestaff');
+                    $signaturestaff->setDescription('Electronic Signature');
+                    $signaturestaff->setPath($absolutepath);
+                    $signaturestaff->setHeight(200);
+                    $signaturestaff->setCoordinates($dept_esign_cells[0]);
+                    // $signaturestaff->setOffsetX(10); 
+                    $signaturestaff->setWorksheet($sheet);
 
-                $sheet->setCellValue($dept_printedsign_cells[0], $sign['requestor_name']);
-            }
-            if ($sign['role'] == 'Supervisor') {
-                $signaturesupervisor = new Drawing();
-                $signaturesupervisor->setName('Signaturesupervisor');
-                $signaturesupervisor->setDescription('Electronic Signature');
-                $signaturesupervisor->setPath($absolutepath);
-                $signaturesupervisor->setHeight(200);
-                $signaturesupervisor->setCoordinates($dept_esign_cells[2]);
-                //$signaturesupervisor->setOffsetX(100);  
-                $signaturesupervisor->setWorksheet($sheet);
-                $sheet->setCellValue($dept_printedsign_cells[2], $sign['requestor_name']);
-            }
-            if ($sign['role'] == 'Manager' || $sign['role'] == 'GenManager') {
-                $signatureManager = new Drawing();
-                $signatureManager->setName('Signaturesupervisor');
-                $signatureManager->setDescription('Electronic Signature');
-                $signatureManager->setPath($absolutepath);
-                $signatureManager->setHeight(200);
-                $signatureManager->setCoordinates($dept_esign_cells[1]);
-                $signatureManager->setWorksheet($sheet);
-                $sheet->setCellValue($dept_printedsign_cells[1], $sign['requestor_name']);
+                    $sheet->setCellValue($dept_printedsign_cells[0], $name);
+                }
+                if ($position == 'Supervisor') {
+                    $signaturesupervisor = new Drawing();
+                    $signaturesupervisor->setName('Signaturesupervisor');
+                    $signaturesupervisor->setDescription('Electronic Signature');
+                    $signaturesupervisor->setPath($absolutepath);
+                    $signaturesupervisor->setHeight(200);
+                    $signaturesupervisor->setCoordinates($dept_esign_cells[2]);
+                    //$signaturesupervisor->setOffsetX(100);  
+                    $signaturesupervisor->setWorksheet($sheet);
+                    $sheet->setCellValue($dept_printedsign_cells[2], $name);
+                }
+                if ($position == 'Manager' || $position == 'GenManager') {
+                    $signatureManager = new Drawing();
+                    $signatureManager->setName('Signaturesupervisor');
+                    $signatureManager->setDescription('Electronic Signature');
+                    $signatureManager->setPath($absolutepath);
+                    $signatureManager->setHeight(200);
+                    $signatureManager->setCoordinates($dept_esign_cells[1]);
+                    $signatureManager->setWorksheet($sheet);
+                    $sheet->setCellValue($dept_printedsign_cells[1], $name);
+                }
             }
         }
 
@@ -1468,6 +1866,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($groupedData as  $item) {
                 foreach ($suppliers as $supplier) {
                     $details  = $item['suppliers'][$supplier] ?? null;
+                    // var_dump($details['payment_days']);
+                    // var_dump($details['delivery_days']);
                     $sheet->setCellValue($supplierColumns[$supplier]['priceCol'] . $rowheader + 1, $details['payment_days'] . ' ' . 'Days');
                     $sheet->setCellValue($supplierColumns[$supplier]['priceCol'] . $rowheader + 2, $details['delivery_days'] . ' ' . 'Days');
                 }

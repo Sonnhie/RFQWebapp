@@ -14,6 +14,7 @@ class user_management
 {
     private $user_table = 'user_table';
     private $role_table = 'role_table';
+    private $email_table = 'email_table';
     private $department_table = 'department_table';
     private $conn;
 
@@ -262,8 +263,8 @@ class user_management
     //insert user data
     public function InsertNewUserData($data)
     {
-        $query = "INSERT INTO {$this->user_table} (username,password,name,department,role, position) 
-                      VALUES (:username, :password, :name, :department, :role, :position)";
+        $query = "INSERT INTO {$this->user_table} (username,password,name,department,role, position, signature_path) 
+                      VALUES (:username, :password, :name, :department, :role, :position, :signature_path)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':username', $data['username']);
         $stmt->bindParam(':password', $data['password']);
@@ -271,6 +272,7 @@ class user_management
         $stmt->bindParam(':department', $data['department']);
         $stmt->bindParam(':role', $data['role']);
         $stmt->bindParam(':position', $data['position']);
+        $stmt->bindParam(':signature_path', $data['path']);
         $result = $stmt->execute();
 
         if ($result) {
@@ -292,7 +294,7 @@ class user_management
 
         try {
             $query = "UPDATE {$this->user_table} 
-                    SET username = :username, department = :department, role = :role, name = :name, position = :position
+                    SET username = :username, department = :department, role = :role, name = :name, position = :position, signature_path = :signature_path
                     WHERE id = :id";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':username', $data['username']);
@@ -300,8 +302,8 @@ class user_management
             $stmt->bindParam(':role', $data['role']);
             $stmt->bindParam(':name', $data['name']);
             $stmt->bindParam(':id', $data['id'], \PDO::PARAM_INT);
-            $stmt->bindParam(':position', $data['position']); 
-
+            $stmt->bindParam(':position', $data['position']);
+            $stmt->bindParam(':signatur_path', $data['path']);
             if ($stmt->execute()) {
                 return [
                     'success' => true,
@@ -428,13 +430,13 @@ class user_management
 
     public function getUploadPaths($department)
     {
-        try{
+        try {
             $query = QueryBuilder::GetUploadPath();
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':department', $department);
 
-            if(!$stmt->execute()){
-                return[
+            if (!$stmt->execute()) {
+                return [
                     'success' => false,
                     'message' => throw new Exception . 'Query failed.'
                 ];
@@ -443,7 +445,7 @@ class user_management
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             return $result;
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Internal server error: ' . $e
@@ -453,7 +455,7 @@ class user_management
 
     public function InsertSignature($data)
     {
-        try{
+        try {
             $query = QueryBuilder::InsertSignature();
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':requestor_name', $data['name']);
@@ -461,42 +463,19 @@ class user_management
             $stmt->bindValue(':signature_path', $data['path']);
             $stmt->bindValue(':printed_name', $data['name']);
             $stmt->bindValue(':role', $data['position']);
-        
+
             if (!$stmt->execute()) {
-                return[
+                return [
                     'success' => false,
                     'message' => 'E-Signature failed to upload.'
                 ];
             }
 
-            return[
+            return [
                 'success' => true,
                 'message' => 'E-Signature successfully uploaded'
             ];
-        }catch(\Exception $e){
-                return[
-                    'success' => false,
-                    'message' => 'Internal server error: ' .$e
-                ];
-        }
-    }
-
-    public function getEsign($data){
-        try{
-            $query = QueryBuilder::GetUserESign();
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindValue(':requestor_name', $data['name']);
-            $stmt->bindValue(':section', $data['department']);
-            
-            if(!$stmt->execute()){
-                return[
-                    'message' => throw new \Exception . 'Faile to execute query.'
-                ];
-            }
-
-            $row = $stmt->Fetch(\PDO::FETCH_ASSOC);
-            return $row;
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Internal server error: ' . $e
@@ -504,30 +483,211 @@ class user_management
         }
     }
 
-    public function UpdateExistingEsign($data){
-        try{
+    public function getEsign($data)
+    {
+        try {
+            $query = QueryBuilder::GetUserESign();
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(':id', $data['id']);
+            // $stmt->bindValue(':section', $data['department']);
+
+            if (!$stmt->execute()) {
+                return [
+                    'message' => throw new \Exception . 'Faile to execute query.'
+                ];
+            }
+
+            $row = $stmt->Fetch(\PDO::FETCH_ASSOC);
+            return $row;
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Internal server error: ' . $e
+            ];
+        }
+    }
+
+    public function UpdateExistingEsign($data)
+    {
+        try {
             $query = QueryBuilder::UpdateEsign();
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':requestor_name', $data['name']);
             $stmt->bindValue(':section', $data['department']);
             $stmt->bindValue(':signature_path', $data['path']);
-            
+
             $result = $stmt->execute();
-            if($result){
-                return[
+            if ($result) {
+                return [
                     'success' => true,
                     'message' => 'E-sign succefully updated.'
                 ];
-            }else{
-                return[
+            } else {
+                return [
                     'success' => false,
                     'message' => 'Failed to update e-sign.'
                 ];
             }
-        }catch(\Exception $e){
-            return[
+        } catch (\Exception $e) {
+            return [
                 'success' => false,
                 'message' => 'Internal server error: ' . $e
+            ];
+        }
+    }
+
+    public function GetEmailList($searchquery, $page = null, $perpage = null)
+    {
+        $query = "SELECT * from " . $this->email_table;
+
+        $params = [];
+
+        if (!empty($searchquery)) {
+            $query .= " where name LIKE :searchQuery OR emailadd LIKE :searchQuery OR department LIKE :searchQuery";
+            $params[':searchQuery'] = '%' . $searchquery . '%';
+        }
+
+        // Order by newest first
+        $query .= " ORDER BY id DESC";
+
+        // Pagination using LIMIT and OFFSET
+        $offset = ($page - 1) * $perpage;
+        $query .= " LIMIT :limit OFFSET :offset";
+
+        // Prepare and bind
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        //Bind LIMIT and OFFSET (must be integers)
+        $stmt->bindValue(':limit', (int)$perpage, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    //Get user list count
+    public function GetEmailListCount($searchquery = null)
+    {
+        $query = "SELECT COUNT(*) AS total
+                    FROM {$this->email_table}";
+
+        $conditions = [];
+        $params = [];
+
+        if (!empty($searchquery)) {
+            $query .= " where name LIKE :searchQuery OR emailadd LIKE :searchQuery OR department LIKE :searchQuery";
+            $params[':searchQuery'] = '%' . $searchquery . '%';
+        }
+
+        if (!empty($conditions)) {
+            $query .= " WHERE " . implode(' AND ', $conditions);
+        }
+
+        $stmt = $this->conn->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
+
+    public function InsertNewEmail($data)
+    {
+        try {
+            $query = QueryBuilder::InsertEmail();
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(":name", $data['name']);
+            $stmt->bindValue(":email", $data['emailadd']);
+            $stmt->bindValue(":department", $data['department']);
+            $result = $stmt->execute();
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'New email successfully registered.'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Faile to register new email.'
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Exception: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function UpdateEmail($data)
+    {
+        try {
+            $query = QueryBuilder::UpdateEmail();
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(":id", $data['id']);
+            $stmt->bindValue(":name", $data['name']);
+            $stmt->bindValue(":email", $data['emailadd']);
+            $stmt->bindValue(":department", $data['department']);
+            $result = $stmt->execute();
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Updated email successfully registered.'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Faile to register new email.'
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Exception: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function getNames()
+    {
+        $query = QueryBuilder::GetRegisteredNames();
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        if ($data) {
+            return $data;
+        } else {
+            return [];
+        }
+    }
+
+    public function DeleteEmail($id)
+    {
+        try {
+            $query = QueryBuilder::DeleteEmail();
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(":id", $id);
+            $result = $stmt->execute();
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Deleted successfully.'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to delete.'
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => "Execption: " . $e->getMessage()
             ];
         }
     }

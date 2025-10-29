@@ -61,7 +61,7 @@ $(document).ready(function () {
           response.data.forEach((item) => {
             const statusClasses = {
               Approved: "badge-approved",
-              Pending: "badge-pending",
+              "On-going": "badge-pending",
               Rejected: "badge-rejected",
               Hold: "badge-hold",
             };
@@ -239,7 +239,6 @@ $(document).ready(function () {
           const filePath = response.data.file_path;
           const fileName = response.data.file_name;
 
-          // Define image types
           const imageTypes = [
             "image/jpeg",
             "image/png",
@@ -249,14 +248,12 @@ $(document).ready(function () {
           ];
 
           if (imageTypes.includes(mimeType)) {
-            // Show image directly
+            // Show image
             $("#attachment_viewer").attr("src", filePath).show();
             $("#download_link").hide();
           } else {
-            // Hide image viewer
-            $("#attachment_viewer").hide();
-
             // Show download link
+            $("#attachment_viewer").hide();
             $("#download_link")
               .attr("href", filePath)
               .attr("download", fileName)
@@ -310,7 +307,7 @@ $(document).ready(function () {
   $("#requestTableBody").on("click", "#approve_btn", function () {
     const controlNumber = $(this).data("id");
     const remarks = "For Procurement Verification";
-    const status = "Pending";
+    const status = "On-going";
     const section = $("#requestTableBody").data("section");
     const mainaddress = $(this).data("sectionrequest");
     console.log("sender: ", section, "receiver: ", mainaddress);

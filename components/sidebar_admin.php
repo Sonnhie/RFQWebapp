@@ -27,6 +27,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="#" data-page="admin/email_management">
+                    <i class="bi bi-envelope sidebar-icon"></i>
+                    <span>Email Accounts</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="#" data-page="admin/Activity_logs">
                     <i class="bi bi-list-columns-reverse sidebar-icon"></i>
                     <span>Activity Logs</span>

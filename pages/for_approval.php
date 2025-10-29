@@ -27,7 +27,7 @@ error_reporting(E_ALL);
     </div>
 </div>
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">RFQ Management</h2>
+    <h2 class="mb-0">Verification Management</h2>
 </div>
 
 <div class="card shadow-sm mb-4 border-0">
@@ -44,7 +44,7 @@ error_reporting(E_ALL);
                     <select class="form-select border-start-0" id="statusFilter">
                         <option value="" selected>All Statuses</option>
                         <option value="Pending" class="text-warning">Pending</option>
-                        <option value="Approved" class="text-success">Approved</option>
+                        <option value="Completed" class="text-success">Completed</option>
                         <option value="Rejected" class="text-danger">Rejected</option>
                         <option value="Hold" class="text-primary">Hold</option>
                     </select>
