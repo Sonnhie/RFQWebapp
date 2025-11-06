@@ -44,52 +44,153 @@ $(document).ready(function () {
         const chartHold = response.Rejected;
         const ctx = document.getElementById("rfqChart").getContext("2d");
 
+        // 🎨 Gradient backgrounds
+        const gradientCompleted = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientCompleted.addColorStop(0, "rgba(59,130,246,0.9)");
+        gradientCompleted.addColorStop(1, "rgba(96,165,250,0.4)");
+
+        const gradientPending = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientPending.addColorStop(0, "rgba(251,191,36,0.9)");
+        gradientPending.addColorStop(1, "rgba(253,224,71,0.4)");
+
+        const gradientHold = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientHold.addColorStop(0, "rgba(239,68,68,0.9)");
+        gradientHold.addColorStop(1, "rgba(252,165,165,0.4)");
+
         rfqChartInstance = new Chart(ctx, {
-          type: "bar", // Area chart in Chart.js is basically a line chart with fill
+          type: "bar",
           data: {
-            labels: chartLabels, // e.g. ["January", "February", "March", ...]
+            labels: chartLabels,
             datasets: [
               {
                 label: "Completed",
                 data: chartCompleted,
-                backgroundColor: "#3c47e9b6",
-                borderColor: "#422ff0ff",
-                fill: true,
-                tension: 0.4,
+                backgroundColor: gradientCompleted,
+                borderColor: "rgba(37, 99, 235, 1)",
+                borderWidth: 1.5,
+                borderRadius: 6,
+                barPercentage: 0.7,
               },
               {
-                label: "Pending",
+                label: "On-going",
                 data: chartPending,
-                backgroundColor: "#18d618ff",
-                borderColor: "#13e41eff",
-                fill: true,
-                tension: 0.4,
+                backgroundColor: gradientPending,
+                borderColor: "rgba(217, 119, 6, 1)",
+                borderWidth: 1.5,
+                borderRadius: 6,
+                barPercentage: 0.7,
               },
               {
                 label: "Hold",
                 data: chartHold,
-                backgroundColor: "#f51c1cef",
-                borderColor: "rgba(240, 11, 11, 1)",
-                fill: true,
-                tension: 0.4,
+                backgroundColor: gradientHold,
+                borderColor: "rgba(220, 38, 38, 1)",
+                borderWidth: 1.5,
+                borderRadius: 6,
+                barPercentage: 0.7,
               },
             ],
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
+
+            // 🌟 Animation Section
+            animation: {
+              duration: 1500, // 1.5s
+              easing: "easeOutBounce", // smooth bounce effect
+              delay: (context) => {
+                let delay = 0;
+                if (
+                  context.type === "data" &&
+                  context.mode === "default" &&
+                  context.dataIndex !== undefined
+                ) {
+                  delay = context.dataIndex * 100; // staggered delay
+                }
+                return delay;
+              },
+            },
+
             plugins: {
-              legend: { position: "top" },
+              legend: {
+                position: "top",
+                labels: {
+                  color: "#1F2937",
+                  font: {
+                    size: 13,
+                    weight: "600",
+                    family: "'Poppins', 'Inter', 'Segoe UI', sans-serif",
+                  },
+                  usePointStyle: true,
+                  padding: 16,
+                },
+              },
               title: {
                 display: true,
                 text: "Status Trend for the Year",
+                color: "#111827",
+                font: {
+                  size: 18,
+                  weight: "700",
+                  family: "'Poppins', 'Inter', 'Segoe UI', sans-serif",
+                },
+                padding: { top: 10, bottom: 20 },
+              },
+              tooltip: {
+                backgroundColor: "rgba(255,255,255,0.95)",
+                titleColor: "#111827",
+                bodyColor: "#1F2937",
+                borderColor: "rgba(0,0,0,0.1)",
+                borderWidth: 1,
+                boxPadding: 6,
+                usePointStyle: true,
+                cornerRadius: 10,
+                titleFont: { size: 14, weight: "600" },
+                bodyFont: { size: 12 },
+                callbacks: {
+                  label: (context) =>
+                    `${context.dataset.label}: ${context.formattedValue}`,
+                },
               },
             },
+
             scales: {
               x: {
                 stacked: true,
+                ticks: {
+                  color: "#4B5563",
+                  font: { size: 12 },
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
               },
               y: {
                 stacked: true,
+                ticks: {
+                  color: "#4B5563",
+                  font: { size: 12 },
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+              },
+            },
+
+            interaction: {
+              mode: "index",
+              intersect: false,
+            },
+
+            // 🎯 Hover Effect (slight scale-up)
+            hover: {
+              mode: "nearest",
+              intersect: true,
+              onHover: (event, chartElement) => {
+                event.native.target.style.cursor = chartElement.length
+                  ? "pointer"
+                  : "default";
               },
             },
           },
@@ -185,12 +286,26 @@ $(document).ready(function () {
         // console.log(response);
         if (response.status == "success") {
           response.data.forEach((item) => {
+            const statusClasses = {
+              Completed: "badge-approved",
+              "On-going": "badge-pending",
+              Rejected: "badge-rejected",
+              Hold: "badge-hold",
+            };
+
+            const statusBadge = `
+                  <span class="status-badge ${
+                    statusClasses[item.requestor_status] || ""
+                  }">
+                    ${item.requestor_status}
+                  </span>`;
+
             const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
                                 <td>${item.item_name}</td>
                                 <td>${item.item_description}</td>
-                                <td>${item.requestor_status}</td>
+                                <td>${statusBadge}</td>
                                 <td>${item.created_at}</td>
                             </tr>
                         `);

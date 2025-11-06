@@ -56,38 +56,8 @@ $(document).ready(function () {
         let approveButton = "";
         let dissapproveButton = "";
         let downloadButton = "";
+        let quotationButton = "";
 
-        // if (
-        //   (item.item_remarks === "Comparison Approved by: Requestor" ||
-        //     item.item_remarks === "Comparison Verified by: Melanie Gancayco") &&
-        //   ($role === "Requestor" || $role === "Section-Approver")
-        // ) {
-        //   isDisabled = true;
-        // } else if (
-        //   (item.item_remarks ===
-        //     "Comparison Acknowledge by: Jocelyn Marcaida" ||
-        //     item.item_remarks === "Comparison Approved by: Requestor") &&
-        //   $role === "Manager"
-        // ) {
-        //   isDisabled = true;
-        // } else if (
-        //   (item.item_remarks ===
-        //     "Comparison Acknowledge by: Jocelyn Marcaida" ||
-        //     item.item_remarks === "Comparison Approved by: Requestor" ||
-        //     item.item_remarks === "Comparison Verified by: Melanie Gancayco") &&
-        //   $role === "Verifier-Approver"
-        // ) {
-        //   isDisabled = true;
-        // } else if (
-        //   (item.item_remarks === "Comparison created" ||
-        //     item.item_remarks === "Comparison Approved by: Requestor" ||
-        //     item.item_remarks === "Comparison Verified by: Melanie Gancayco" ||
-        //     item.item_remarks ===
-        //       "Comparison Acknowledge by: Jocelyn Marcaida") &&
-        //   $role === "Verifier"
-        // ) {
-        //   isDisabled = true;
-        // }
         const remark = {
           created: "created",
           approve: "Approved by",
@@ -153,7 +123,7 @@ $(document).ready(function () {
                                             data-requestor="${item.item_requestor}"
                                             data-description="${item.item_description}"
                                             id="download_btn">
-                                            <i class="bi bi-download"></i> Download PDF
+                                            <i class="bi bi-download"></i> Comparison Sheet
                                         </button>`;
 
         const viewButton = `<button class="btn btn-sm rounded-2 btn-secondary me-3" 
@@ -164,6 +134,15 @@ $(document).ready(function () {
                                             id="view_comparison_btn" >
                                             <i class="bi bi-eye"></i> View
                                         </button>`;
+
+        const QuotationButton = `
+                                  <a class="btn btn-sm rounded-2 btn-success me-3"
+                                    id="quotation_btn"
+                                    data-section="${item.item_section}"
+                                    data-id="${item.control_number}">
+                                    <i class="bi bi-download"></i> Download Quotation
+                                  </a>
+                                `;
 
         const editButton = `<button class="btn btn-sm btn-primary rounded-2 me-3" 
                                             data-bs-toggle="modal" 
@@ -196,15 +175,18 @@ $(document).ready(function () {
         if ($role === "Verifier") {
           groupBtn.push(editButton);
           groupBtn.push(downloadButton);
+          groupBtn.push(QuotationButton);
         }
 
         if ($role === "Requestor") {
           groupBtn.push(dissapproveButton);
           groupBtn.push(downloadButton);
+          groupBtn.push(QuotationButton);
         }
 
         if ($role === "Section-Approver") {
           groupBtn.push(downloadButton);
+          groupBtn.push(QuotationButton);
         }
 
         // Now groupBtn contains the HTML for the allowed buttons
@@ -367,35 +349,28 @@ $(document).ready(function () {
         const supplierRows = item.suppliers
           .map((supplier, index) => {
             return `
-                                <tr>
-                                    ${
-                                      index === 0
-                                        ? `<td rowspan="${item.suppliers.length}">${item.item_name}</td>`
-                                        : ""
-                                    }
-                                    <td>${supplier.supplier_name}</td>
-                                    <td>${
-                                      item.currency === "USD" ? "$" : "₱"
-                                    } ${parseFloat(supplier.item_price).toFixed(
-              2
-            )}</td>
-                                    <td>${
-                                      item.currency === "USD" ? "$" : "₱"
-                                    } ${parseFloat(
+                    <tr>
+                        ${
+                          index === 0
+                            ? `<td rowspan="${item.suppliers.length}">${item.item_name}</td>`
+                            : ""
+                        }
+                        <td>${supplier.supplier_name}</td>
+                        <td>${item.currency === "USD" ? "$" : "₱"} ${parseFloat(
+              supplier.item_price
+            ).toFixed(2)}</td>
+                        <td>${item.currency === "USD" ? "$" : "₱"} ${parseFloat(
               supplier.item_discount
             ).toFixed(2)}</td>
-                                    <td>${
-                                      item.currency === "USD" ? "$" : "₱"
-                                    } ${parseFloat(supplier.item_total).toFixed(
-              2
-            )}</td>
-                                     ${
-                                       index === 0
-                                         ? `<td rowspan="${item.suppliers.length}">${item.item_remarks}</td>`
-                                         : ""
-                                     }
-                                </tr>
-                            `;
+                        <td>${item.currency === "USD" ? "$" : "₱"} ${parseFloat(
+              supplier.item_total
+            ).toFixed(2)}</td>
+                        ${
+                          index === 0
+                            ? `<td rowspan="${item.suppliers.length}">${item.item_remarks}</td>`
+                            : ""
+                        }
+                    </tr>`;
           })
           .join("");
 
@@ -846,6 +821,66 @@ $(document).ready(function () {
     InitializeComparisonTable(id);
   });
 
+  $tbody.on("click", "#quotation_btn", function (e) {
+    e.preventDefault(); // prevent opening "#"
+    const control_number = $(this).data("id");
+    const button = $(this);
+
+    $.ajax({
+      url: "././backend/Route/requestRouteAction.php",
+      type: "POST",
+      data: {
+        action: "getQuotation",
+        control_number: control_number,
+      },
+      dataType: "json",
+      beforeSend: function () {
+        Swal.fire({
+          title: "Please wait...",
+          text: "Fetching quotation file...",
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          willOpen: () => Swal.showLoading(),
+        });
+      },
+      success: function (response) {
+        Swal.close();
+        if (response.status === "success") {
+          const fileName = response.data.file_name;
+
+          // Route file through your secure download endpoint
+          const downloadUrl = `download.php?file=${encodeURIComponent(
+            fileName
+          )}`;
+
+          // Update button link dynamically
+          button
+            .attr("href", downloadUrl)
+            .attr("download", fileName)
+            .attr("target", "_blank");
+
+          // Automatically start the download
+          window.open(downloadUrl, "_blank");
+        } else {
+          Swal.fire({
+            icon: "warning",
+            title: "Not Found",
+            text: response.message,
+          });
+        }
+      },
+      error: function (xhr, status, error) {
+        Swal.close();
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "An error occurred while fetching attachment.",
+        });
+        console.error("AJAX error:", status, error);
+      },
+    });
+  });
+
   $tbody.on("click", "#edit_comparison_btn", function () {
     const id = $(this).data("id");
     console.log(id);
@@ -872,6 +907,7 @@ $(document).ready(function () {
     console.log(control_number);
     DownloadPDF(control_number);
   });
+
   $editForm.submit(function (e) {
     e.preventDefault();
     const id = $(this).data("id");

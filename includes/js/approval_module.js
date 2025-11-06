@@ -82,6 +82,15 @@ $(document).ready(function () {
                                                     <i class="bi bi-slash-circle"></i> Hold
                                                 </button>`;
 
+            const repeatQuotation = `
+  <button class="btn btn-sm btn-warning rounded-4 me-3 repeat-btn"
+          data-id="${item.control_number}"
+          data-section="${item.item_section}"
+          id="repeat_btn">
+    <i class="bi bi-arrow-repeat"></i> Repeat Item
+  </button>
+`;
+
             const deleteButton = `<button class="btn btn-sm btn-danger rounded-4 me-3" data-id="${item.control_number}" data-reqsection="${item.item_section}" id="delete_btn">
                                                     <i class="bi bi-trash3"></i> Delete
                                                 </button>`;
@@ -91,6 +100,7 @@ $(document).ready(function () {
                             ${approvedButton}
                             ${declinedButton}
                             ${deleteButton}
+                            ${repeatQuotation}
                         `;
 
             const $row = $(`
@@ -314,6 +324,78 @@ $(document).ready(function () {
     const controlNumber = $(this).data("id");
     populateItems(controlNumber);
     console.log("this is clicked");
+  });
+
+  $("#requestTableBody").on("click", "#repeat_btn", function () {
+    const control_number = $(this).data("id");
+    const section = $(this).data("section");
+    // const isChecked = $(this).is(":checked");
+
+    Swal.fire({
+      title: "Repeat Quotation Request",
+      text: "Complete this request",
+      icon: "warning",
+      input: "textarea",
+      inputLabel: "Remarks",
+      inputPlaceholder: "Enter remarks here...",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, hold it!",
+      preConfirm: (remarks) => {
+        if (!remarks) {
+          Swal.ValidationMessage("Remarks Required");
+          return false;
+        }
+        return remarks;
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Processing...",
+          text: "Please wait while we create the comparison.",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+      } else {
+        return;
+      }
+      const remarksinput = result.value;
+
+      $.ajax({
+        url: "././backend/Route/requestRouteAction.php",
+        type: "POST",
+        data: {
+          action: "update_request",
+          control_number: control_number,
+          remarks: remarksinput,
+          section: section,
+          status: "Completed",
+        },
+        dataType: "json",
+        success: function (response) {
+          if (response.status == "success") {
+            if (response.status === "success") {
+              Swal.fire("Completed!", response.message, "success");
+              populateTable();
+            } else {
+              Swal.fire("Error!", response.message, "error");
+            }
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("AJAX error:", status, error);
+          Swal.fire(
+            "Error!",
+            "An error occurred while declining the request.",
+            "error"
+          );
+        },
+      });
+    });
   });
 
   $("#itemsTableBody").on("click", "#view_btn", function () {

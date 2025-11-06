@@ -153,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $emailData = [
             'address_section' => $requestor_section,
-            'bcc_Section' => ''
+            'bcc_Section' => 'Procurement'
         ];
 
         $status = $statusdata['requestor_status'] ?? 'On-going';
@@ -173,91 +173,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $subject = "Request for Quotation - {$control_number}";
         // $subject = "tEST EMAI";
         $message = "
-<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
-    <tr>
-        <td align='center'>
-            <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
-                
-                <!-- Header with Logo -->
-                <tr>
-                    <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
-                        <table width='100%' cellpadding='0' cellspacing='0' border='0'>
-                            <tr>
-                                <td align='left'>
-                                    <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
-                                </td>
-                                <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
-                                    New Request for Quotation Created
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+        <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
+            <tr>
+                <td align='center'>
+                    <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
+                        
+                        <!-- Header with Logo -->
+                        <tr>
+                            <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
+                                <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                    <tr>
+                                        <td align='left'>
+                                            <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
+                                        </td>
+                                        <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
+                                            New Request for Quotation Created
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
 
-                <!-- Body -->
-                <tr>
-                    <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
-                        <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
+                        <!-- Body -->
+                        <tr>
+                            <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
+                                <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
 
-                        <p>This is to inform you that a <strong>new Request for Quotation (RFQ)</strong> has been created by 
-                        <strong>{$requestor_name}</strong>. Below are the details of the new request:</p>
+                                <p>This is to inform you that a <strong>new Request for Quotation (RFQ)</strong> has been created by 
+                                <strong>{$requestor_name}</strong>. Below are the details of the new request:</p>
 
-                        <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
-                            Control Number: {$control_number}
-                        </div>
+                                <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
+                                    Control Number: {$control_number}
+                                </div>
 
-                        <p>Current Status:</p>
-                        <p style='margin:15px 0;'>
-                            <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
-                                {$requestor_status}
-                            </span>
-                        </p>
+                                <p>Current Status:</p>
+                                <p style='margin:15px 0;'>
+                                    <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
+                                        {$requestor_status}
+                                    </span>
+                                </p>
 
-                        <p><strong>Remarks:</strong></p>
-                        <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
-                            {$item_remarks}
-                        </div>
+                                <p><strong>Remarks:</strong></p>
+                                <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
+                                    {$item_remarks}
+                                </div>
 
-                        <p>Please review the request details in the RFQ System and take the appropriate next steps.</p>
+                                <p>Please review the request details in the RFQ System and take the appropriate next steps.</p>
 
-                        <p style='margin-top:25px;'>Best regards,<br>
-                        <strong>Nidec Instruments Philippines Corporation</strong></p>
-                    </td>
-                </tr>
+                                <p style='margin-top:25px;'>Best regards,<br>
+                                <strong>Nidec Instruments Philippines Corporation</strong></p>
+                            </td>
+                        </tr>
 
-                <!-- Footer -->
-                <tr>
-                    <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
-                        This is an automated notification. Please do not reply directly.<br>
-                        &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
-                    </td>
-                </tr>
+                        <!-- Footer -->
+                        <tr>
+                            <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
+                                This is an automated notification. Please do not reply directly.<br>
+                                &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
+                            </td>
+                        </tr>
 
-                <!-- Confidentiality Notice -->
-                <tr>
-                    <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
-                        <strong>Confidentiality and Data Privacy Notice:</strong><br>
-                        This message, including any attachments, is intended solely for the addressee and may contain 
-                        confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
-                        If you received this message in error, please notify the sender immediately and permanently delete it. 
-                        NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
-                        Act of 2012 (RA 10173) and its Privacy Policy.
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>";
+                        <!-- Confidentiality Notice -->
+                        <tr>
+                            <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
+                                <strong>Confidentiality and Data Privacy Notice:</strong><br>
+                                This message, including any attachments, is intended solely for the addressee and may contain 
+                                confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
+                                If you received this message in error, please notify the sender immediately and permanently delete it. 
+                                NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
+                                Act of 2012 (RA 10173) and its Privacy Policy.
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>";
 
 
         // Send back summary response
         if ($success_count > 0 && $error_count === 0) {
             // Create a new request log entry for the successful submission
-            $notification = [
-                'control_number' => $control_number,
-                'message' => "New request created by " . $requestor_section . " with Control Number: " . $control_number,
-                'section' => $requestor_section,
-            ];
+            // $notification = [
+            //     'control_number' => $control_number,
+            //     'message' => "New request created by " . $requestor_section . " with Control Number: " . $control_number,
+            //     'section' => $requestor_section,
+            // ];
+
+            $emailnotif = $autoemail->SendEmailupdateStatus($emailData, $message, $subject);
             echo json_encode(['status' => 'success', 'message' => "All $success_count items submitted successfully."]);
         } elseif ($success_count > 0 && $error_count > 0) {
             echo json_encode(['status' => 'partial', 'message' => "$success_count succeeded, $error_count failed.", 'details' => $responses]);
@@ -295,7 +297,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = [];
 
         if ($result) {
+
             foreach ($result as $row) {
+
                 $data[] = [
                     'id' => $row['id'],
                     'control_number' => $row['control_number'],
@@ -309,9 +313,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'requestor_status' => $row['item_status'],
                     'item_remarks' => $row['item_remarks'],
                     'created_at' => $row['created_at'],
-                    'updated_at' => $row['updated_at']
+                    'updated_at' => $row['updated_at'],
+                    'updateLogs' => $updatedDate = $request->Getlogs($row['control_number'])
                 ];
             }
+
+
             echo json_encode([
                 'status' => 'success',
                 'data' => $data,
@@ -345,8 +352,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ✅ Extract only the file name (no directory)
         $fileName = basename($filePath);
 
+
         // ✅ Build a valid URL for frontend (served through preview.php)
-        $previewUrl = "http://localhost/RFMSystem/preview.php?file=" . urlencode($fileName);
+        $previewUrl = "http://192.168.101.49/RFMSystem/preview.php?file=" . urlencode($fileName);
+
+        $headers = @get_headers($previewUrl);
+
+        if ($headers) {
+            if (strpos($headers[0], '200') !== false) {
+                echo "✅ File exists and is accessible.";
+            } elseif (strpos($headers[0], '403') !== false) {
+                echo "⚠️ Unauthorized access.";
+            } elseif (strpos($headers[0], '404') !== false) {
+                echo "❌ File not found.";
+            } else {
+                echo "⚠️ Other error: " . $headers[0];
+            }
+        } else {
+            $previewUrl = "http://localhost/RFMSystem/preview.php?file=" . urlencode($fileName);
+
+            $headersLocal = @get_headers($previewUrl);
+
+            if ($headersLocal && strpos($headersLocal[0], '200') !== false) {
+                echo "✅ Localhost fallback accessible.";
+            } else {
+                echo "❌ Cannot access file from both remote and localhost.";
+            }
+        }
+
 
         // ✅ Prepare response data
         $data = [
@@ -531,7 +564,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-
     if (!empty($_POST['action']) && $_POST['action'] == 'delete_item') {
         header('Content-Type: application/json');
         $id = isset($_POST['id']) ? $_POST['id'] : null;
@@ -564,78 +596,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $subject = "Request for Quotation - {$control_number}";
         // $subject = "tEST EMAI";
         $message = "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
-    <tr>
-        <td align='center'>
-            <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
-                
-                <!-- Header with Logo -->
-                <tr>
-                    <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
-                        <table width='100%' cellpadding='0' cellspacing='0' border='0'>
-                            <tr>
-                                <td align='left'>
-                                    <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
-                                </td>
-                                <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
-                                    Request for Quotation Update
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+            <tr>
+                <td align='center'>
+                    <table width='600' cellpadding='0' cellspacing='0' border='0' style='background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);'>
+                        
+                        <!-- Header with Logo -->
+                        <tr>
+                            <td style='background:#003366; color:#ffffff; padding:20px 30px;'>
+                                <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                    <tr>
+                                        <td align='left'>
+                                            <img src='https://logovectorseek.com/wp-content/uploads/2019/11/nidec-corporation-logo-vector.png' alt='Company Logo' style='height:40px; width:40px;'>
+                                        </td>
+                                        <td align='right' style='color:#ffffff; font-size:18px; font-weight:bold;'>
+                                            Request for Quotation Update
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
 
-                <!-- Body -->
-                <tr>
-                    <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
-                        <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
+                        <!-- Body -->
+                        <tr>
+                            <td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>
+                                <p>Dear <strong>{$emailData['address_section']} Team</strong>,</p>
 
-                        <p>This is to inform you that an <strong>{$item_name} - {$item_description}  has been deleted</strong> from the Request for Quotation (RFQ) initiated by the <strong>{$emailData['bcc_section']}</strong> department with control number:</p>
-                        <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
-                            {$control_number}
-                        </div>
+                                <p>This is to inform you that an <strong>{$item_name} - {$item_description}  has been deleted</strong> from the Request for Quotation (RFQ) initiated by the <strong>{$emailData['bcc_section']}</strong> department with control number:</p>
+                                <div style='background:#f1f5f9; border-left:4px solid #003366; padding:12px 18px; margin:18px 0; font-size:15px; font-weight:bold; color:#1a1a1a;'>
+                                    {$control_number}
+                                </div>
 
-                        <p><strong>Current Status:</strong></p>
-                        <p style='margin:15px 0;'>
-                            <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
-                                Cancelled
-                            </span>
-                        </p>
+                                <p><strong>Current Status:</strong></p>
+                                <p style='margin:15px 0;'>
+                                    <span style='display:inline-block; {$statusBadgeStyle} padding:8px 16px; border-radius:4px; font-weight:bold; font-size:14px;'>
+                                        Cancelled
+                                    </span>
+                                </p>
 
-                        <p><strong>Remarks:</strong></p>
-                        <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
-                            {$statusdata['item_remarks']}
-                        </div>
+                                <p><strong>Remarks:</strong></p>
+                                <div style='margin:18px 0; padding:15px; background:#fafafa; border:1px solid #e0e0e0; border-radius:4px; color:#555;'>
+                                    {$statusdata['item_remarks']}
+                                </div>
 
-                        <p>Please be advised that this update reflects the removal of one or more items from the RFQ. Kindly review the RFQ details and coordinate with the requestor if any clarification is needed.</p>
+                                <p>Please be advised that this update reflects the removal of one or more items from the RFQ. Kindly review the RFQ details and coordinate with the requestor if any clarification is needed.</p>
 
-                        <p style='margin-top:25px;'>Best regards,<br>
-                        <strong>Nidec Instruments Philippines Corporation</strong></p>
-                    </td>
-                </tr>
+                                <p style='margin-top:25px;'>Best regards,<br>
+                                <strong>Nidec Instruments Philippines Corporation</strong></p>
+                            </td>
+                        </tr>
 
-                <!-- Footer -->
-                <tr>
-                    <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
-                        This is an automated notification. Please do not reply directly.<br>
-                        &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
-                    </td>
-                </tr>
+                        <!-- Footer -->
+                        <tr>
+                            <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#777; border-top:1px solid #e0e0e0;'>
+                                This is an automated notification. Please do not reply directly.<br>
+                                &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
+                            </td>
+                        </tr>
 
-                <!-- Confidentiality Notice -->
-                <tr>
-                    <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
-                        <strong>Confidentiality and Data Privacy Notice:</strong><br>
-                        This message, including any attachments, is intended solely for the addressee and may contain 
-                        confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
-                        If you received this message in error, please notify the sender immediately and permanently delete it. 
-                        NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
-                        Act of 2012 (RA 10173) and its Privacy Policy.
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>";
+                        <!-- Confidentiality Notice -->
+                        <tr>
+                            <td style='background:#ffffff; padding:20px; font-size:11px; color:#777; line-height:1.5; text-align:justify; border-top:1px solid #eee;'>
+                                <strong>Confidentiality and Data Privacy Notice:</strong><br>
+                                This message, including any attachments, is intended solely for the addressee and may contain 
+                                confidential or personal information. Unauthorized use, disclosure, or distribution is prohibited. 
+                                If you received this message in error, please notify the sender immediately and permanently delete it. 
+                                NIDEC INSTRUMENTS (PHILIPPINES) CORPORATION processes personal data in accordance with the Data Privacy 
+                                Act of 2012 (RA 10173) and its Privacy Policy.
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>";
 
         if ($result) {
             $emailnotif = $autoemail->SendEmailupdateStatus($emailData, $message, $subject);
@@ -899,6 +931,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "Cancelled" => "background:#d9534f; color:#fff;",   // Red
             "Hold"      => "background:#ffc107; color:#212529;"
         ];
+
         $statusBadgeStyle = $statusStyles[$status] ?? "background:#6c757d; color:#fff;"; // Default gray
 
         // Company logo (replace with your actual hosted logo path)
@@ -1064,7 +1097,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </tbody>
         </table>";
 
-        $subject = "Request for Quotation: {$control_number}";
+        $subject = "Request for Quotation: {$controlNumber}";
         $body = "
         <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9; padding:20px; font-family: Arial, sans-serif;'>
             <tr>
@@ -1118,7 +1151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <tr>
                             <td style='background:#f8f9fa; text-align:center; padding:15px; font-size:12px; color:#555; border-top:1px solid #e0e0e0;'>
                                 <strong>Note:</strong> This is an auto-generated email. Please do not reply directly.<br>
-                                Send your response to <a href='mailto:regine.guellena@nidec.com' style='color:#003366; font-weight:bold;'>regine.guellena@nidec.com</a>.<br><br>
+                                Send this email thread and your response to <a href='mailto:regine.guellena@nidec.com' style='color:#003366; font-weight:bold;'>regine.guellena@nidec.com</a>.<br><br>
                                 &copy; " . date('Y') . " Nidec Instruments Philippines Corporation
                             </td>
                         </tr>
@@ -1357,7 +1390,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $result = $request->fetchComparisonByControlNumber($control_number);
-
+        $filePath = $result['upload_path'];
         $groupedData = [];
         if ($result) {
             foreach ($result as $row) {
@@ -1385,7 +1418,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             echo json_encode([
                 'status' => 'success',
-                'data' => array_values($groupedData) // Reset keys to make JSON array
+                'data' => array_values($groupedData), // Reset keys to make JSON array
+
             ]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'No comparison data found']);
@@ -2089,5 +2123,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'message' => 'System error: ' . $e->getMessage()
             ]);
         }
+    }
+
+    if (!empty($_POST['action']) && $_POST['action'] == 'getQuotation') {
+        header('Content-Type: application/json');
+
+        $control_number = $_POST['control_number'] ? $_POST['control_number'] : null;
+        $filePath = $request->getQuotationAttachment($control_number);
+
+        // ✅ Get the actual MIME type of the file
+        $mimeType = mime_content_type($filePath);
+
+        // ✅ Extract only the file name (no directory)
+        $fileName = basename($filePath);
+
+        // ✅ Build a valid URL for frontend (served through preview.php)
+        $previewUrl = "http://192.168.101.49/RFMSystem/download.php?file=" . urlencode($fileName);
+
+        // ✅ Prepare response data
+        $data = [
+            'file_type' => $mimeType,
+            'file_path' => $previewUrl,
+            'file_name' => $fileName
+        ];
+
+        echo json_encode([
+            'status' => 'success',
+            'data' => $data
+        ]);
+
+        exit;
     }
 }

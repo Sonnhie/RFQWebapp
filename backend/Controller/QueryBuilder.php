@@ -985,4 +985,11 @@ class QueryBuilder
     {
         return "DELETE FROM " . self::$email_table . " WHERE id = :id";
     }
+
+
+    public static function getQuotation()
+    {
+        return "SELECT upload_path FROM " . self::$comparison_table . " 
+                    WHERE control_number = :control_number";
+    }
 }

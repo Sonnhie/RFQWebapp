@@ -144,7 +144,8 @@ class emailnotification_management
         $mail = new PHPMailer(true);
         try {
             //Server settings
-            $mail->SMTPDebug = 0;                                       // Enable verbose debug output
+            $mail->SMTPDebug = 0;
+            // $mail->SMTPDebug = 3;                                           // Enable verbose debug output
             $mail->isSMTP();                                            // Send using SMTP
             $mail->Host       = $_ENV['SMTP_HOST'];                     // Set the SMTP server to send through
             $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
@@ -158,37 +159,44 @@ class emailnotification_management
 
             // Add BCC if needed
             foreach ($recipients as $email) {
+
                 if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $mail->addBCC($email); // Add BCC recipient
                 } else {
                     // Handle invalid email address
                     return false;
                 }
-            }
 
-            $attachments = $this->getAttachments($control_number);
-
-            foreach ($attachments as $filePath) {
-                if (empty($filePath)) {
-                    continue;
+                foreach ($cc as $emails) {
+                    if (filter_var($emails, FILTER_VALIDATE_EMAIL)) {
+                        $mail->addCC($emails); // Add BCC recipient
+                    } else {
+                        // Handle invalid email address
+                        return false;
+                    }
                 }
 
-                $absolutePath = __DIR__ . "/../../" . ltrim($filePath, '/');
+                $attachments = $this->getAttachments($control_number);
 
-                if (!file_exists($absolutePath)) {
-                    continue; // Skip missing files
+                foreach ($attachments as $filePath) {
+                    if (empty($filePath)) {
+                        continue;
+                    }
+
+                    $absolutePath = $filePath;
+
+                    if (!file_exists($absolutePath)) {
+                        continue; // Skip missing files
+                    }
+
+                    $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($absolutePath);
+
+                    $filename = basename($filePath);
+
+                    $mail->addAttachment($absolutePath, $filename, 'base64', $mimeType);
                 }
-
-                $finfo = new \finfo(FILEINFO_MIME_TYPE);
-                $mimeType = $finfo->file($absolutePath);
-
-                $filename = basename($filePath);
-
-                $mail->addAttachment($absolutePath, $filename, 'base64', $mimeType);
             }
-
-
-
             //Content
             $mail->isHTML(true);                                  // Set email format to HTML
             $mail->Subject = $subject;
@@ -209,5 +217,4 @@ class emailnotification_management
             ];
         }
     }
-
 }

@@ -165,7 +165,7 @@ class request
     }
 
     //Get attachment
-    public function getAttachment($id, $control_number)
+    public function getAttachment($id, $control_number = null)
     {
         $query = QueryBuilder::getAttachment($id);
         $stmt = $this->conn->prepare($query);
@@ -703,6 +703,41 @@ class request
         }
     }
 
+    public function Getlogs($control_number)
+    {
+        $params = [];
+
+        if (empty($control_number)) {
+            return [
+                'success' => false,
+                'message' => 'Empty or null control number'
+            ];
+            exit;
+        }
+
+        try {
+            $builder = QueryBuilder::getTimeline($control_number);
+            $query = $builder['query'];
+            $params = $builder['params'];
+            $stmt = $this->conn->prepare($query);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value);
+            }
+            if (!$stmt->execute()) {
+                throw new \Exception('Failed to execute query.');
+            }
+
+            $logs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            return $logs;
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Internal server error: ' . $e->getMessage()
+            ];
+        }
+    }
+
     public function FetchControlNumber($input)
     {
         $params = [];
@@ -861,5 +896,16 @@ class request
                 'message' => 'Internal server error: ' . $e
             ];
         }
+    }
+
+    public function getQuotationAttachment($control_number)
+    {
+        $query = QueryBuilder::getQuotation();
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':control_number', $control_number, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result && isset($result['upload_path']) ? $result['upload_path'] : null;
     }
 }

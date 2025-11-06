@@ -85,36 +85,6 @@ $(document).ready(function () {
         populateTable(i);
       });
       $pagination.append($pageItem);
-      // const prevDisabled = currentPage === 1 ? "disabled" : "";
-      // $pagination.append(`
-      //         <li class="page-item ${prevDisabled}">
-      //             <a class="page-link" href="#" aria-label="Previous" data-page="${
-      //               currentPage - 1
-      //             }">
-      //                 <span aria-hidden="true">&laquo;</span>
-      //             </a>
-      //         </li>
-      //     `);
-
-      // for (let i = 1; i <= totalPages; i++) {
-      //   const activeClass = i === currentPage ? "active" : "";
-      //   $pagination.append(`
-      //             <li class="page-item ${activeClass}">
-      //                 <a class="page-link" href="#" data-page="${i}">${i}</a>
-      //             </li>
-      //         `);
-      // }
-
-      // const nextDisabled = currentPage === totalPages ? "disabled" : "";
-      // $pagination.append(`
-      //         <li class="page-item ${nextDisabled}">
-      //             <a class="page-link" href="#" aria-label="Next" data-page="${
-      //               currentPage + 1
-      //             }">
-      //                 <span aria-hidden="true">&raquo;</span>
-      //             </a>
-      //         </li>
-      //     `);
     }
   };
 

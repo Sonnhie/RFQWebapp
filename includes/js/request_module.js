@@ -273,6 +273,17 @@ $(document).ready(function () {
               }
             };
 
+            let delayDays = "";
+
+            item.updateLogs.forEach((items) => {
+              // console.log(items);
+              if (items.remarks == "For Procurement Verification") {
+                // console.log(items.date);
+                delayDays = $CalculateDaysDelay(items.date);
+              }
+              // console.log(delayDays);
+            });
+
             const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
@@ -283,7 +294,7 @@ $(document).ready(function () {
                                 <td>${item.item_unit}</td>
                                 <td>${item.requestor_section}</td>
                                 <td>${statusBadge}</td>
-                                <td>${$CalculateDaysDelay(item.created_at)}</td>
+                                <td>${delayDays}</td>
                                 <td>${item.requestor_name}</td>
                                 <td>${item.item_remarks}</td>
                                 <td>${item.created_at}</td>

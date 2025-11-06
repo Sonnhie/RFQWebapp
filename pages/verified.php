@@ -150,7 +150,7 @@ error_reporting(E_ALL);
                     </div>
 
                     <!-- BCCs -->
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <label class="form-label">BCC Emails</label>
                         <div id="bccs-group">
                             <div class="input-group mb-2">
@@ -159,7 +159,7 @@ error_reporting(E_ALL);
                             </div>
                         </div>
                         <button class="btn btn-sm btn-success" id="add-bcc" type="button">+ Add BCC</button>
-                    </div>
+                    </div> -->
 
                 </div>
                 <div class="modal-footer">
