@@ -172,7 +172,7 @@ $(document).ready(function () {
           groupBtn.push(approveButton);
         }
 
-        if ($role === "Verifier") {
+        if ($role === "Verifier" || $role == "Verifier-Approver") {
           groupBtn.push(editButton);
           groupBtn.push(downloadButton);
           groupBtn.push(QuotationButton);
@@ -734,6 +734,7 @@ $(document).ready(function () {
       const item_section = $("#download_btn").data("section");
       const item_description = $("#download_btn").data("description");
       const requestor = $("#download_btn").data("requestor");
+      console.log(item_section, action);
       Swal.fire({
         title: "Processing...",
         text: "Please wait while we rendering your comparison.",
@@ -904,6 +905,7 @@ $(document).ready(function () {
 
   $tbody.on("click", "#download_btn", function () {
     const control_number = $(this).data("id");
+
     console.log(control_number);
     DownloadPDF(control_number);
   });

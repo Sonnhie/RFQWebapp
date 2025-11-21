@@ -303,7 +303,7 @@ class user_management
             $stmt->bindParam(':name', $data['name']);
             $stmt->bindParam(':id', $data['id'], \PDO::PARAM_INT);
             $stmt->bindParam(':position', $data['position']);
-            $stmt->bindParam(':signatur_path', $data['path']);
+            $stmt->bindParam(':signature_path', $data['path']);
             if ($stmt->execute()) {
                 return [
                     'success' => true,

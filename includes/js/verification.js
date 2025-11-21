@@ -278,36 +278,10 @@ $(document).ready(function () {
                             <input type="number" class="form-control form-control-sm discount-input" name="item_discount[${itemIdx}][]" placeholder="Discount" min="0" step="any">
                         </td>
                                                     <td>
-                                                        <label for="start_payment_terms" class="form-label small fw-bold text-muted mb-1">From</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="start_payment_terms" name="start_payment_terms[${itemIdx}][]">
-                                                        </div>
-                                                        <label for="end_payment_terms" class="form-label small fw-bold text-muted mb-1">To</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="end_payment_terms" name="end_payment_terms[${itemIdx}][]">
-                                                        </div>
+                                                        <input type="number" class="form-control form-control-sm" name="payment_terms[${itemIdx}][]" placeholder="Days" min="0" step="any">
                                                     </td>
                                                      <td>
-                                                        <label for="start_delivery_lead" class="form-label small fw-bold text-muted mb-1">From</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="start_delivery_lead" name="start_delivery_lead[${itemIdx}][]">
-                                                        </div>
-                                                        <label for="end_delivery_lead" class="form-label small fw-bold text-muted mb-1">To</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white border-end-0">
-                                                                <i class="bi bi-calendar3 text-primary"></i>
-                                                            </span>
-                                                            <input type="date" class="form-control" id="end_delivery_lead" name="end_delivery_lead[${itemIdx}][]">
-                                                        </div>
+                                                        <input type="number" class="form-control form-control-sm" name="delivery_terms[${itemIdx}][]" placeholder="Days" min="0" step="any">
                                                     </td>
                         <td>
                             <input type="text" class="form-control form-control-sm total-input" name="item_total[${itemIdx}][]" placeholder="Total" readonly tabindex="-1">

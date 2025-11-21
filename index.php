@@ -17,39 +17,48 @@
     <title>Procurement RFM System</title>
     <link rel="icon" type="image/x-icon" href="./assets/img/upward.png">
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="./includes/css/common.css">
+   <!-- Bootstrap 5 CSS (Cloudflare CDN - reliable) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css">
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
-    <!--JQuery-->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Custom CSS -->
+<link rel="stylesheet" href="./includes/css/common.css">
 
-    <!-- Custom JS -->
-    <script src="./includes/js/common.js"></script>
+<!-- Bootstrap Icons (Cloudflare CDN) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+
+<!--Bootstrap local resources-->
+<link rel="stylesheet" href="./assets/bootstrap/css/bootstrap.min.css">
+<script src="./assets/bootstrap/sweetalert/sweetalert2.min.js"></script>
+<script src="./assets/bootstrap/jquery/jquery.min.js"></script>
+
+ <!-- SweetAlert2 for Alerts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- jQuery (Google CDN) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+<!-- Custom JS -->
+<script src="./includes/js/common.js"></script>
 
-    <!-- <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script> -->
-    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 
-    <!-- Chart.js for Charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- DataTables CSS & JS (Cloudflare CDN) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.5/jquery.dataTables.min.css">
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.5/jquery.dataTables.min.js"></script> -->
 
-    <!-- SweetAlert2 for Alerts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
-    <!-- Moment.js (required for daterangepicker) -->
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
 
-    <!-- Daterangepicker -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<!-- Moment.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+
+<!-- Daterangepicker -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.1/daterangepicker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.1/daterangepicker.min.js"></script>
 
 </head>
 <body>
@@ -99,7 +108,7 @@
     <main class="main-content" id="mainContent"></main>
   
     <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./assets/bootstrap/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JS for Sidebar--> 
     <script src="./includes/js/sidebar.js"></script>

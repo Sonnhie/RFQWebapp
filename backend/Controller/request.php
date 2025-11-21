@@ -22,32 +22,52 @@ class request
         $this->conn = $db;
     }
 
-    //Function to create control number
     public function createRFQNumber()
     {
-
-        $date = date('Ym');
+        $date = date('Ym'); // 202501
         $currentMonth = date('Ym');
 
+        // Step 1: get latest control number for this month
         $query = QueryBuilder::getLatestControlNumber();
-        $lastId = 0;
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':current_month', $currentMonth, \PDO::PARAM_STR);
+        $stmt->bindParam(':current_month', $currentMonth);
         $stmt->execute();
-        $rowcount = $stmt->rowCount();
 
-        if ($rowcount > 0) {
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
-            $max_rfq_number = $result['control_number'];
-            $lastId = isset($max_rfq_number) ?
-                intval(substr($max_rfq_number, -4)) : 0;
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $maxNumber = $result['control_number'];
+            $lastId = intval(substr($maxNumber, -4));
             $newID = $lastId + 1;
-            $controlID = "RFQ-" . $date . "-" . str_pad($newID, 4, "0", STR_PAD_LEFT);
         } else {
-            $controlID = "RFQ-" . $date . "-0001";
+            $newID = 1;
         }
+
+        // Generate the control ID
+        $controlID = "RFQ-" . $date . "-" . str_pad($newID, 4, "0", STR_PAD_LEFT);
+
+        // Step 2: check for duplicate
+        $checkQuery = QueryBuilder::CheckControlNumber();
+        $stmt = $this->conn->prepare($checkQuery);
+        $stmt->bindParam(':control_number', $controlID);
+        $stmt->execute();
+
+        $count = $stmt->fetchColumn();
+
+        // If duplicate → regenerate until unique
+        while ($count > 0) {
+            $newID++;
+            $controlID = "RFQ-" . $date . "-" . str_pad($newID, 4, "0", STR_PAD_LEFT);
+
+            $stmt = $this->conn->prepare($checkQuery);
+            $stmt->bindParam(':control_number', $controlID);
+            $stmt->execute();
+            $count = $stmt->fetchColumn();
+        }
+
         return $controlID;
     }
+
 
     // Function to create a new request
     public function CreateNewRequest($data)
@@ -608,15 +628,21 @@ class request
 
     public function fetchComparisonByControlNumber($control_number)
     {
-        // Build SELECT query
         $query = QueryBuilder::getComparisonResponse();
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':control_number', $control_number, \PDO::PARAM_STR);
         $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            return null;  // No data found
+        }
+
+        return $result;
     }
+
 
     public function UpdateComparison($data)
     {

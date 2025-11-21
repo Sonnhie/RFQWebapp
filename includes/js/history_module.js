@@ -63,6 +63,9 @@ $(document).ready(function () {
               Hold: "badge-hold",
             };
 
+            let remarks = item.item_remarks || "";
+            let status = item.requestor_status || "";
+            console.log(remarks);
             const statusBadge = `<span class="status-badge ${
               statusClasses[item.requestor_status] || ""
             }">${item.requestor_status}</span>`;
@@ -93,13 +96,24 @@ $(document).ready(function () {
               }
             };
 
+            let delayDays = "";
+
+            item.updateLogs.forEach((items) => {
+              // console.log(items);
+              if (items.remarks == "For Procurement Verification") {
+                // console.log(items.date);
+                delayDays = $CalculateDaysDelay(items.date);
+              }
+              // console.log(delayDays);
+            });
+
             const $row = $(`
                             <tr>
                                 <td>${item.control_number}</td>
                                 <td>${item.requestor_name}</td>
                                 <td>${item.requestor_section}</td>
                                 <td>${statusBadge}</td>
-                                <td>${$CalculateDaysDelay(item.created_at)}</td>
+                                <td>${delayDays}</td>
                                 <td>${item.item_remarks}</td>
                                 <td>${item.created_at}</td>
                                 <td>

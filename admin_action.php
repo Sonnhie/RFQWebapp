@@ -95,7 +95,7 @@ if (!empty($_POST['action']) && $_POST['action'] == 'create_user') {
     }
 
     // $uploadDir = __DIR__ . $paths['upload_path'];
-    $uploadDir = 'D:/Uploads/Sign/';
+    $uploadDir = "D:/Uploads" . $paths['upload_path'];
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
@@ -160,7 +160,7 @@ if (!empty($_POST['action']) && $_POST['action'] == 'edit_user') {
         exit;
     }
 
-    $uploadDir = __DIR__ . $paths['upload_path'];
+    $uploadDir = "D:/Uploads" . $paths['upload_path'];
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
@@ -183,63 +183,33 @@ if (!empty($_POST['action']) && $_POST['action'] == 'edit_user') {
                 'position'   => $position,
                 'path'       => $dbPath
             ];
-            $oldEsign = $usermanagement->getEsign($data);
 
+            $oldEsign = $usermanagement->getEsign($data);
+            
             if (!empty($oldEsign['signature_path'])) {
-                $absolutePath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $oldEsign['signature_path'];
-                if (file_exists($absolutePath)) {
+                $absolutePath = "D:/Uploads" . $oldEsign['signature_path'];
+                $filename = basename($oldEsign['signature_path']);
+                if (file_exists($absolutePath, $filename)) {
                     unlink($absolutePath);
                 }
-
-                // $updateEsign = $usermanagement->UpdateExistingEsign($data);
-                $result = $usermanagement->UpdateUser($data);
-                if ($updateEsign) {
-                    echo json_encode([
-                        'status'  => 'success',
-                        'message' => $result['message'],
-                        'path' => $absolutePath
-                    ]);
-                } else {
-                    echo json_encode([
-                        'status'  => 'error',
-                        'message' => 'Failed to updated.'
-                    ]);
-                }
-            } else {
-                $result = $usermanagement->UpdateUser($data);
-
-                // DB failed → rollback new file
-                if (file_exists($filepath)) {
-                    unlink($filepath);
-                }
-
-
-                echo json_encode([
-                    'status'  => 'error',
-                    'message' => 'DB update failed: '
-                ]);
             }
 
-            // $result = 
 
-            // if ($result['success']) {
-            //     if ($oldEsign) {
-
-            //         // if (!empty($path) && is_file($path)) {
-            //         //     unlink($absolutePath);
-            //         // }
-
-
-            //     }
-
-
-            // } 
-        } else {
-            echo json_encode([
-                'status'  => 'error',
-                'message' => 'Uploading of signature failed.'
-            ]);
+            $result = $usermanagement->UpdateUser($data);
+            if ($result['success']) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => $result['message'],
+                    'path' => $data['path']
+                ]);
+            }else{
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Invalid Query: ' . $result['message']
+                ]);
+            }
         }
+
     } else {
         echo json_encode([
             'status'  => 'error',

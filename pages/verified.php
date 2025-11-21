@@ -19,7 +19,7 @@ error_reporting(E_ALL);
                 if ($_SESSION['user']['access_level'] == 'Admin') {
                     echo 'Administrator';
                 } else {
-                    echo 'Client';
+                    echo 'Client'; 
                 }
                 ?>
             </span>
@@ -192,12 +192,13 @@ error_reporting(E_ALL);
                     </div>
                     <div class="row mb-3">
                         <div class="mb-3" id="itemDiv"></div>
-
                     </div>
                     <div class="row ">
                         <div class="mt-3">
                             <label for="formFile" class="form-label">Quotation</label>
-                            <input type="file" class="form-control" id="formFile" name="quotation">
+                            <input type="file" class="form-control" id="formFile" name="quotation" 
+                            accept=".jpg,.jpeg,.png,.gif,.pdf,.zip,application/pdf,application/zip,image/*">
+
                         </div>
                     </div>
                 </div>

@@ -27,6 +27,11 @@ class QueryBuilder
                         VALUES (:control_number, :item_name, :item_description, :item_purpose, :item_quantity, :item_uom, :item_status, :item_remarks, :item_requestor, :item_section)";
     }
 
+    public static function CheckControlNumber()
+    {
+        return "SELECT COUNT(*) from  " . self::$request_table . " where control_number = :control_number";
+    }
+
     public static function getLatestControlNumber()
     {
         return "select control_number, created_at 

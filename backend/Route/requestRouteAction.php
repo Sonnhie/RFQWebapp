@@ -336,7 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $id = isset($_POST['id']) ? $_POST['id'] : null;
         $control_number = isset($_POST['control_number']) ? $_POST['control_number'] : null;
-        $filePath = $request->getAttachment($id, $control_number); // this returns full file path (ex: D:/Uploads/Attachments/file.png)
+        $filePath = $request->getAttachment($id, $control_number = null); // this returns full file path (ex: D:/Uploads/Attachments/file.png)
 
         if (empty($filePath) || !file_exists($filePath)) {
             echo json_encode([
@@ -356,29 +356,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ✅ Build a valid URL for frontend (served through preview.php)
         $previewUrl = "http://192.168.101.49/RFMSystem/preview.php?file=" . urlencode($fileName);
 
-        $headers = @get_headers($previewUrl);
+        // $headers = @get_headers($previewUrl);
 
-        if ($headers) {
-            if (strpos($headers[0], '200') !== false) {
-                echo "✅ File exists and is accessible.";
-            } elseif (strpos($headers[0], '403') !== false) {
-                echo "⚠️ Unauthorized access.";
-            } elseif (strpos($headers[0], '404') !== false) {
-                echo "❌ File not found.";
-            } else {
-                echo "⚠️ Other error: " . $headers[0];
-            }
-        } else {
-            $previewUrl = "http://localhost/RFMSystem/preview.php?file=" . urlencode($fileName);
+        // if ($headers) {
+        //     if (strpos($headers[0], '200') !== false) {
+        //         echo "✅ File exists and is accessible.";
+        //     } elseif (strpos($headers[0], '403') !== false) {
+        //         echo "⚠️ Unauthorized access.";
+        //     } elseif (strpos($headers[0], '404') !== false) {
+        //         echo "❌ File not found.";
+        //     } else {
+        //         echo "⚠️ Other error: " . $headers[0];
+        //     }
+        // } else {
+        //     $previewUrl = "http://localhost/RFMSystem/preview.php?file=" . urlencode($fileName);
 
-            $headersLocal = @get_headers($previewUrl);
+        //     $headersLocal = @get_headers($previewUrl);
 
-            if ($headersLocal && strpos($headersLocal[0], '200') !== false) {
-                echo "✅ Localhost fallback accessible.";
-            } else {
-                echo "❌ Cannot access file from both remote and localhost.";
-            }
-        }
+        //     if ($headersLocal && strpos($headersLocal[0], '200') !== false) {
+        //         echo "✅ Localhost fallback accessible.";
+        //     } else {
+        //         echo "❌ Cannot access file from both remote and localhost.";
+        //     }
+        // }
 
 
         // ✅ Prepare response data
@@ -784,7 +784,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'requestor_status' => $row['item_status'],
                     'item_section' => $row['item_section'],
                     'item_remarks' => $row['item_remarks'],
-                    'created_at' => $row['created_at']
+                    'created_at' => $row['created_at'],
+                    'updateLogs' => $updatedDate = $request->Getlogs($row['control_number'])
                 ];
             }
 
@@ -1184,10 +1185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $control_number = $_POST['control_number'] ?? null;
 
-
         // Fetch paginated result
         $result = $request->fetchRequestById($control_number);
-
 
         $data = [];
 
@@ -1301,7 +1300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = [
             'control_number'   => $control_number,
             'item_remarks'     => 'Comparison created',
-            'requestor_status' => 'On-going'
+            'requestor_status' => 'Completed'
         ];
 
         $subject = "Request for Quotation - {$control_number}";
@@ -1390,7 +1389,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $result = $request->fetchComparisonByControlNumber($control_number);
-        $filePath = $result['upload_path'];
+        // $filePath = $result['upload_path'];
         $groupedData = [];
         if ($result) {
             foreach ($result as $row) {
@@ -1687,7 +1686,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $items = $request->fetchComparisonByControlNumber($control_number);
         $esignpath = $request->getEsign($data);
-
+        $route = "D:/Uploads/Sign/";
         if (!empty($esignpath['signature_path'])) {
             $esign = __DIR__ . '/../../' . $esignpath['signature_path'];
         }
@@ -1729,86 +1728,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sheet->setCellValue('C11', $requestor);
 
 
-        foreach ($procurement_sign as $sign) {
+        // foreach ($procurement_sign as $sign) {
 
-            $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $sign['signature_path'];
-            $signature3 = new Drawing();
-            $signature3->setName('Signature4');
-            $signature3->setDescription('Electronic Signature');
-            $name = $sign['name'] ?? null;
-            $position = $sign['position'] ?? null;
-            $signaturepath = $sign['signature_path'] ?? null;
+        //     $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $sign['signature_path'];
+        //     $signature3 = new Drawing();
+        //     $signature3->setName('Signature4');
+        //     $signature3->setDescription('Electronic Signature');
+        //     $name = $sign['name'] ?? null;
+        //     $position = $sign['position'] ?? null;
+        //     $signaturepath = $sign['signature_path'] ?? null;
 
-            if (!empty($signaturepath)) {
-                if ($position == 'Staff') {
-                    $signature3->setPath($absolutepath);
-                    $signature3->setHeight(200);
-                    $signature3->setCoordinates($procurement_esign_cells[0]);
-                    $signature3->setWorksheet($sheet);
-                    $sheet->setCellValue($procurement_printedsign_cells[0], $name);
-                }
-                if ($position == 'Supervisor') {
-                    $signature3->setPath($absolutepath);
-                    $signature3->setHeight(200);
-                    $signature3->setCoordinates($procurement_esign_cells[1]);
-                    $signature3->setWorksheet($sheet);
-                    $sheet->setCellValue($procurement_printedsign_cells[1], $name);
-                }
-                if ($position == 'Manager' || $position == 'GenManager') {
-                    $signature3->setPath($absolutepath);
-                    $signature3->setHeight(200);
-                    $signature3->setCoordinates($procurement_esign_cells[2]);
-                    $signature3->setWorksheet($sheet);
-                    $sheet->setCellValue($procurement_printedsign_cells[2], $name);
-                }
-            }
-        }
+        //     if (!empty($signaturepath)) {
+        //         if ($position == 'Staff') {
+        //             $signature3->setPath($absolutepath);
+        //             $signature3->setHeight(200);
+        //             $signature3->setCoordinates($procurement_esign_cells[0]);
+        //             $signature3->setWorksheet($sheet);
+        //             $sheet->setCellValue($procurement_printedsign_cells[0], $name);
+        //         }
+        //         if ($position == 'Supervisor') {
+        //             $signature3->setPath($absolutepath);
+        //             $signature3->setHeight(200);
+        //             $signature3->setCoordinates($procurement_esign_cells[1]);
+        //             $signature3->setWorksheet($sheet);
+        //             $sheet->setCellValue($procurement_printedsign_cells[1], $name);
+        //         }
+        //         if ($position == 'Manager' || $position == 'GenManager') {
+        //             $signature3->setPath($absolutepath);
+        //             $signature3->setHeight(200);
+        //             $signature3->setCoordinates($procurement_esign_cells[2]);
+        //             $signature3->setWorksheet($sheet);
+        //             $sheet->setCellValue($procurement_printedsign_cells[2], $name);
+        //         }
+        //     }
+        // }
 
-        foreach ($deptesign as $sign) {
+        // foreach ($deptesign as $sign) {
 
-            $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $sign['signature_path'];
-            $signature3 = new Drawing();
-            $signature3->setName('Signature4');
-            $signature3->setDescription('Electronic Signature');
-            $name = $sign['name'] ?? null;
-            $position = $sign['position'] ?? null;
+        //     $absolutepath = $_SERVER['DOCUMENT_ROOT'] . '/RFMSystem/' . $sign['signature_path'];
+        //     $signature3 = new Drawing();
+        //     $signature3->setName('Signature4');
+        //     $signature3->setDescription('Electronic Signature');
+        //     $name = $sign['name'] ?? null;
+        //     $position = $sign['position'] ?? null;
 
-            if (!empty($signaturepath)) {
-                if ($position == 'Staff') {
-                    $signaturestaff = new Drawing();
-                    $signaturestaff->setName('Signaturestaff');
-                    $signaturestaff->setDescription('Electronic Signature');
-                    $signaturestaff->setPath($absolutepath);
-                    $signaturestaff->setHeight(200);
-                    $signaturestaff->setCoordinates($dept_esign_cells[0]);
-                    // $signaturestaff->setOffsetX(10); 
-                    $signaturestaff->setWorksheet($sheet);
+        //     if (!empty($signaturepath)) {
+        //         if ($position == 'Staff') {
+        //             $signaturestaff = new Drawing();
+        //             $signaturestaff->setName('Signaturestaff'); 
+        //             $signaturestaff->setDescription('Electronic Signature');
+        //             $signaturestaff->setPath($absolutepath);
+        //             $signaturestaff->setHeight(200);
+        //             $signaturestaff->setCoordinates($dept_esign_cells[0]);
+        //             // $signaturestaff->setOffsetX(10); 
+        //             $signaturestaff->setWorksheet($sheet);
 
-                    $sheet->setCellValue($dept_printedsign_cells[0], $name);
-                }
-                if ($position == 'Supervisor') {
-                    $signaturesupervisor = new Drawing();
-                    $signaturesupervisor->setName('Signaturesupervisor');
-                    $signaturesupervisor->setDescription('Electronic Signature');
-                    $signaturesupervisor->setPath($absolutepath);
-                    $signaturesupervisor->setHeight(200);
-                    $signaturesupervisor->setCoordinates($dept_esign_cells[2]);
-                    //$signaturesupervisor->setOffsetX(100);  
-                    $signaturesupervisor->setWorksheet($sheet);
-                    $sheet->setCellValue($dept_printedsign_cells[2], $name);
-                }
-                if ($position == 'Manager' || $position == 'GenManager') {
-                    $signatureManager = new Drawing();
-                    $signatureManager->setName('Signaturesupervisor');
-                    $signatureManager->setDescription('Electronic Signature');
-                    $signatureManager->setPath($absolutepath);
-                    $signatureManager->setHeight(200);
-                    $signatureManager->setCoordinates($dept_esign_cells[1]);
-                    $signatureManager->setWorksheet($sheet);
-                    $sheet->setCellValue($dept_printedsign_cells[1], $name);
-                }
-            }
-        }
+        //             $sheet->setCellValue($dept_printedsign_cells[0], $name);
+        //         }
+        //         if ($position == 'Supervisor') {
+        //             $signaturesupervisor = new Drawing();
+        //             $signaturesupervisor->setName('Signaturesupervisor');
+        //             $signaturesupervisor->setDescription('Electronic Signature');
+        //             $signaturesupervisor->setPath($absolutepath);
+        //             $signaturesupervisor->setHeight(200);
+        //             $signaturesupervisor->setCoordinates($dept_esign_cells[2]);
+        //             //$signaturesupervisor->setOffsetX(100);  
+        //             $signaturesupervisor->setWorksheet($sheet);
+        //             $sheet->setCellValue($dept_printedsign_cells[2], $name);
+        //         }
+        //         if ($position == 'Manager' || $position == 'GenManager') {
+        //             $signatureManager = new Drawing();
+        //             $signatureManager->setName('Signaturesupervisor');
+        //             $signatureManager->setDescription('Electronic Signature');
+        //             $signatureManager->setPath($absolutepath);
+        //             $signatureManager->setHeight(200);
+        //             $signatureManager->setCoordinates($dept_esign_cells[1]);
+        //             $signatureManager->setWorksheet($sheet);
+        //             $sheet->setCellValue($dept_printedsign_cells[1], $name);
+        //         }
+        //     }
+        // }
 
         $rowIndex = 19; // Starting row for items
         $rowDiscount = 33;
@@ -2138,7 +2137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileName = basename($filePath);
 
         // ✅ Build a valid URL for frontend (served through preview.php)
-        $previewUrl = "http://192.168.101.49/RFMSystem/download.php?file=" . urlencode($fileName);
+        $previewUrl = "http://localhost/RFMSystem/download.php?file=" . urlencode($fileName);
 
         // ✅ Prepare response data
         $data = [
