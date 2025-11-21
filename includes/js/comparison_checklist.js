@@ -589,7 +589,7 @@ $(document).ready(function () {
 
       if ($role == "Verifier-Approver") {
         remarks = "Comparison Verified by: " + $name;
-        status = "On-going";
+        status = "Completed";
       } else if ($role == "Manager") {
         remarks = "Comparison Acknowledge by: " + $name;
         status = "Completed";

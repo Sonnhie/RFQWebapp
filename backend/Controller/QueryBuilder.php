@@ -685,7 +685,7 @@ class QueryBuilder
         }
 
         if ($filters["role"] == "Requestor" || $filters["role"] == "Section-Approver") {
-            $query .= " AND ( item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%') AND item_section = :section";
+            $query .= " AND (item_remarks = 'Comparison Verified by: Melanie Gancayco' OR item_remarks = 'Comparison Acknowledge by: Jocelyn Marcaida' OR item_remarks LIKE '%Disapproved by:%' OR item_remarks LIKE '%Comparison Approved by:%') AND item_section = :section";
             $params[":section"] = $section;
         }
 

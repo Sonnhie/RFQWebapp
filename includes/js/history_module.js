@@ -281,7 +281,7 @@ $(document).ready(function () {
             $("#download_link").hide();
           } else {
             // Show download link
-            $("#attachment_viewer").hide();
+            $("#attachment_viewer").modal("hide");
             $("#download_link")
               .attr("href", filePath)
               .attr("download", fileName)

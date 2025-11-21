@@ -17,48 +17,94 @@
     <title>Procurement RFM System</title>
     <link rel="icon" type="image/x-icon" href="./assets/img/upward.png">
 
-   <!-- Bootstrap 5 CSS (Cloudflare CDN - reliable) -->
+<!-- ============================= -->
+<!--  GLOBAL CDN + LOCAL FALLBACK  -->
+<!-- ============================= -->
+
+<!-- Bootstrap 5 CSS (CDN) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css">
+<script>
+if (!document.querySelector('link[href*="bootstrap.min.css"]')) {
+    document.write('<link rel="stylesheet" href="./assets/bootstrap/css/bootstrap.min.css">');
+}
+</script>
 
-<!-- Custom CSS -->
-<link rel="stylesheet" href="./includes/css/common.css">
-
-<!-- Bootstrap Icons (Cloudflare CDN) -->
+<!-- Bootstrap Icons (CDN) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+<script>
+if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+    document.write('<link rel="stylesheet" href="./assets/bootstrap/icons/bootstrap-icons.css">');
+}
+</script>
 
-<!--Bootstrap local resources-->
-<link rel="stylesheet" href="./assets/bootstrap/css/bootstrap.min.css">
-<script src="./assets/bootstrap/sweetalert/sweetalert2.min.js"></script>
-<script src="./assets/bootstrap/jquery/jquery.min.js"></script>
-
- <!-- SweetAlert2 for Alerts -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- jQuery (Google CDN) -->
+<!-- jQuery (CDN) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+if (typeof jQuery === 'undefined') {
+    document.write('<script src="./assets/bootstrap/jquery/jquery.min.js"><\/script>');
+}
+</script>
 
+<!-- SweetAlert2 (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+if (typeof Swal === "undefined") {
+    document.write('<script src="./assets/bootstrap/sweetalert/sweetalert2.min.js"><\/script>');
+}
+</script>
 
-<!-- Custom JS -->
+<!-- DataTables CSS (CDN) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.5/jquery.dataTables.min.css">
+<script>
+if (!document.querySelector('link[href*="jquery.dataTables"]')) {
+    document.write('<link rel="stylesheet" href="./assets/datatables/datatables.min.css">');
+}
+</script>
+
+<!-- DataTables JS (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.5/jquery.dataTables.min.js"></script>
+<script>
+if (typeof $.fn.DataTable === 'undefined') {
+    document.write('<script src="./assets/datatables/datatables.min.js"><\/script>');
+}
+</script>
+
+<!-- Chart.js (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+if (typeof Chart === "undefined") {
+    document.write('<script src="./assets/chartjs/chart.umd.min.js"><\/script>');
+}
+</script>
+
+<!-- Moment.js (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script>
+if (typeof moment === "undefined") {
+    document.write('<script src="./assets/moment/moment.min.js"><\/script>');
+}
+</script>
+
+<!-- Daterangepicker CSS (CDN) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.1/daterangepicker.min.css">
+<script>
+if (!document.querySelector('link[href*="daterangepicker"]')) {
+    document.write('<link rel="stylesheet" href="./assets/daterangepicker/daterangepicker.css">');
+}
+</script>
+
+<!-- Daterangepicker JS (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.1/daterangepicker.min.js"></script>
+<script>
+if (typeof $.fn.daterangepicker === "undefined") {
+    document.write('<script src="./assets/daterangepicker/daterangepicker.min.js"><\/script>');
+}
+</script>
+
+<!-- Custom CSS & JS -->
+<link rel="stylesheet" href="./includes/css/common.css">
 <script src="./includes/js/common.js"></script>
 
-
-<!-- DataTables CSS & JS (Cloudflare CDN) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.5/jquery.dataTables.min.css">
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.5/jquery.dataTables.min.js"></script> -->
-
-<!-- Chart.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-
-<!-- SweetAlert2 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
-
-<!-- Moment.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-
-
-<!-- Daterangepicker -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.1/daterangepicker.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.1/daterangepicker.min.js"></script>
 
 </head>
 <body>
